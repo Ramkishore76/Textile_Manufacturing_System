@@ -66,7 +66,7 @@ export const AppLayout: React.FC = () => {
 
   const navItems = [
     { to: '/app/dashboard', label: 'Factory Dashboard', icon: LayoutDashboard },
-    { to: '/app/orders', label: 'Buyer Orders', icon: ShoppingBag },
+    { to: '/app/orders', label: 'Order List', icon: ShoppingBag },
     { to: '/app/inventory', label: 'Yarn & BOM Inventory', icon: Boxes },
     { to: '/app/purchases', label: 'Suppliers & Purchases', icon: Truck },
     { to: '/app/production', label: 'Production & Machines', icon: Cpu },

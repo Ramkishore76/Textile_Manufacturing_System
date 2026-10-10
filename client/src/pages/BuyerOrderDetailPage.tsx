@@ -176,11 +176,14 @@ export const BuyerOrderDetailPage: React.FC = () => {
               <div key={i} className="bg-zinc-50 p-4 rounded-xl border border-zinc-200/80 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-bold text-zinc-900 text-sm">{item.fabricProduct?.name}</h4>
-                    <p className="text-xs text-zinc-500">Fabric Type: {item.fabricProduct?.fabricType}</p>
+                    <h4 className="font-bold text-zinc-900 text-sm">
+                      {item.fabricProduct?.name || item.specifications?.split('|')?.[0] || 'Fabric Product'}
+                    </h4>
+                    <p className="text-xs text-zinc-500">Fabric Type: {item.fabricProduct?.fabricType || 'Export Grade Woven'}</p>
+                    <p className="text-[11px] text-zinc-400 font-mono mt-0.5">₹{item.unitPrice || item.fabricProduct?.unitPricePerMeter || 150} / meter • Subtotal: ₹{(item.totalPrice || ((item.requiredQuantity || 0) * (item.unitPrice || 150)))?.toLocaleString()}</p>
                   </div>
                   <span className="font-mono font-bold text-zinc-900 text-sm">
-                    {item.requiredQuantity} meters
+                    {item.requiredQuantity?.toLocaleString()} meters
                   </span>
                 </div>
 

@@ -285,7 +285,7 @@ export const ProductionPage: React.FC = () => {
             <thead>
               <tr className="bg-zinc-50/40 border-b border-zinc-200/80 text-zinc-500 font-semibold text-[11px] uppercase tracking-wider">
                 <th className="py-3 px-4">Job #</th>
-                <th className="py-3 px-4">Order / Buyer</th>
+                <th className="py-3 px-4">Order #</th>
                 <th className="py-3 px-4">Stage</th>
                 <th className="py-3 px-4">Machine Assigned</th>
                 <th className="py-3 px-4">Planned vs Actual</th>
@@ -300,7 +300,6 @@ export const ProductionPage: React.FC = () => {
                   <td className="py-3.5 px-4 font-bold text-zinc-900">{job.jobNumber}</td>
                   <td className="py-3.5 px-4">
                     <span className="font-semibold text-zinc-800 block">{job.order?.orderNumber}</span>
-                    <span className="text-[10px] text-zinc-400 block">{job.order?.buyer?.companyName}</span>
                   </td>
                   <td className="py-3.5 px-4">
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-zinc-100 text-zinc-700 border border-zinc-200/80">
@@ -409,7 +408,7 @@ export const ProductionPage: React.FC = () => {
                 >
                   {orders.map((o) => (
                     <option key={o.id} value={o.id}>
-                      {o.orderNumber} - {o.buyer?.companyName} ({o.status})
+                      {o.orderNumber} ({o.status})
                     </option>
                   ))}
                 </select>

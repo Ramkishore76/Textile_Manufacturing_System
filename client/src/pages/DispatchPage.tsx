@@ -212,7 +212,7 @@ export const DispatchPage: React.FC = () => {
             {/* Order Selection */}
             <div>
               <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-                Select Buyer Order *
+                Select Order *
               </label>
               <select
                 value={selectedOrderId}
@@ -225,7 +225,7 @@ export const DispatchPage: React.FC = () => {
                   .filter((o) => !['DISPATCHED', 'DELIVERED', 'CANCELLED'].includes(o.status))
                   .map((o) => (
                     <option key={o.id} value={o.id}>
-                      {o.orderNumber} - {o.buyer?.companyName} ({o.status})
+                      {o.orderNumber} ({o.status})
                     </option>
                   ))}
               </select>
@@ -438,7 +438,7 @@ export const DispatchPage: React.FC = () => {
                   <th className="py-3 px-4">Dispatch #</th>
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Order #</th>
-                  <th className="py-3 px-4">Buyer Company</th>
+                  <th className="py-3 px-4">Client Reference</th>
                   <th className="py-3 px-4">Carrier & Tracking</th>
                   <th className="py-3 px-4">Total Rolls & Meters</th>
                   <th className="py-3 px-4">Status</th>
@@ -457,8 +457,8 @@ export const DispatchPage: React.FC = () => {
                     <td className="py-3.5 px-4 font-semibold text-zinc-900">
                       {disp.order?.orderNumber}
                     </td>
-                    <td className="py-3.5 px-4 text-zinc-700">
-                      {disp.buyer?.companyName}
+                    <td className="py-3.5 px-4 text-zinc-500 font-mono text-[11px]">
+                      Client Confidential
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-semibold text-zinc-900">{disp.carrierName}</div>

@@ -20,7 +20,27 @@ router.get(
         },
         orderBy: { issueDate: 'desc' },
       });
-      res.json(invoices);
+      const isOwner = req.user?.role === 'ADMIN';
+      const sanitizedInvoices = invoices.map((inv) => {
+        if (!isOwner) {
+          return {
+            ...inv,
+            buyer: inv.buyer
+              ? {
+                  id: inv.buyer.id,
+                  companyName: 'Client Confidential',
+                  name: 'Authorized Purchaser',
+                  email: 'confidential@client.internal',
+                  phone: '***',
+                  address: 'Direct Factory Consignment',
+                  taxNumber: '***',
+                }
+              : null,
+          };
+        }
+        return inv;
+      });
+      res.json(sanitizedInvoices);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch invoices', details: err.message });
     }

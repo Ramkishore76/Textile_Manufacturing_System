@@ -16,11 +16,11 @@ const buyerSchema = z.object({
   creditLimit: z.number().optional().default(1000000),
 });
 
-// GET all buyers (Internal staff only)
+// GET all buyers (Plant Owner only)
 router.get(
   '/',
   authenticateToken,
-  requireRole(['ADMIN', 'SALES', 'DISPATCH', 'ACCOUNTS']),
+  requireRole(['ADMIN']),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const buyers = await prisma.buyer.findMany({
@@ -43,11 +43,11 @@ router.get(
   }
 );
 
-// GET single buyer
+// GET single buyer (Plant Owner only)
 router.get(
   '/:id',
   authenticateToken,
-  requireRole(['ADMIN', 'SALES', 'DISPATCH', 'ACCOUNTS']),
+  requireRole(['ADMIN']),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const buyer = await prisma.buyer.findUnique({
@@ -71,11 +71,11 @@ router.get(
   }
 );
 
-// CREATE buyer
+// CREATE buyer (Plant Owner only)
 router.post(
   '/',
   authenticateToken,
-  requireRole(['ADMIN', 'SALES']),
+  requireRole(['ADMIN']),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const parsed = buyerSchema.safeParse(req.body);

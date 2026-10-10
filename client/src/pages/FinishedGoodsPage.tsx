@@ -62,7 +62,6 @@ export const FinishedGoodsPage: React.FC = () => {
     const matchesSearch =
       r.rollId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.order?.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.order?.buyer?.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.location?.bin?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGrade = gradeFilter === 'ALL' || r.qualityGrade === gradeFilter;
     return matchesSearch && matchesGrade;
@@ -134,7 +133,7 @@ export const FinishedGoodsPage: React.FC = () => {
           <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="Search by Roll ID, Order #, Buyer, Bin..."
+            placeholder="Search by Roll ID, Order #, Bin..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-zinc-200 text-xs text-zinc-900 bg-zinc-50/50 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
@@ -175,7 +174,7 @@ export const FinishedGoodsPage: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">Roll ID</th>
                   <th className="py-3 px-4">Associated Order</th>
-                  <th className="py-3 px-4">Buyer Company</th>
+                  <th className="py-3 px-4">Fabric Product</th>
                   <th className="py-3 px-4">Length</th>
                   <th className="py-3 px-4">Weight</th>
                   <th className="py-3 px-4">Quality Grade</th>
@@ -197,7 +196,7 @@ export const FinishedGoodsPage: React.FC = () => {
                       {roll.order?.orderNumber}
                     </td>
                     <td className="py-3.5 px-4 text-zinc-700">
-                      {roll.order?.buyer?.companyName}
+                      {roll.orderItem?.fabricProduct?.name || 'Cotton Fabric'}
                     </td>
                     <td className="py-3.5 px-4 font-bold text-zinc-900">
                       {roll.lengthMeters} m
@@ -292,16 +291,16 @@ export const FinishedGoodsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Order & Buyer Trace */}
+              {/* Order & Specification Trace */}
               <div className="border border-zinc-200/80 p-4 rounded-xl">
                 <h4 className="text-xs font-semibold text-zinc-900 mb-2.5 flex items-center space-x-1.5">
                   <FileText className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Buyer & Order Association</span>
+                  <span>Order Specification & Trace</span>
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <span className="text-zinc-500 block">Buyer Company:</span>
-                    <span className="font-semibold text-zinc-900">{selectedRoll.order?.buyer?.companyName}</span>
+                    <span className="text-zinc-500 block">Order Status:</span>
+                    <span className="font-semibold text-zinc-900">{selectedRoll.order?.status || 'IN_PROGRESS'}</span>
                   </div>
                   <div>
                     <span className="text-zinc-500 block">Order Number:</span>

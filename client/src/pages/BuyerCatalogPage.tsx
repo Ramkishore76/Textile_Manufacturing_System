@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Tag,
   PackagePlus,
+  Trash2,
 } from 'lucide-react';
 
 interface FabricProduct {
@@ -82,10 +83,15 @@ export const BuyerCatalogPage: React.FC = () => {
   const [yarnsList, setYarnsList] = useState<any[]>([]);
   const [submittingCreate, setSubmittingCreate] = useState<boolean>(false);
 
-  // Order Placement Modal State (for Actual Buyer & Order Placing Flow)
-  const [orderingProduct, setOrderingProduct] = useState<FabricProduct | null>(null);
-  const [orderQuantity, setOrderQuantity] = useState<number>(1000);
-  const [orderColor, setOrderColor] = useState<string>('Pure White');
+  // Multi-Product Order Placement State (Supports selecting multiple products in single order)
+  interface OrderItemEntry {
+    id: string;
+    fabricProductId: string;
+    quantityMeters: number;
+    color: string;
+  }
+  const [orderItems, setOrderItems] = useState<OrderItemEntry[]>([]);
+  const [showOrderModal, setShowOrderModal] = useState<boolean>(false);
   const [orderDeliveryDate, setOrderDeliveryDate] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() + 21); // 3 weeks standard lead time
@@ -265,35 +271,80 @@ export const BuyerCatalogPage: React.FC = () => {
     }
   };
 
-  const openOrderModal = (p: FabricProduct) => {
-    setOrderingProduct(p);
-    setOrderQuantity(1000);
-    setOrderColor('Pure White');
-    setOrderPriority('NORMAL');
-    setOrderNotes('');
+  const handleAddProductToOrder = (p: FabricProduct) => {
+    setOrderItems((prev) => {
+      const exists = prev.some((it) => it.fabricProductId === p.id);
+      if (exists) return prev;
+      return [
+        ...prev,
+        {
+          id: Math.random().toString(36).substring(2, 9),
+          fabricProductId: p.id,
+          quantityMeters: 1000,
+          color: 'Pure White',
+        },
+      ];
+    });
+    setShowOrderModal(true);
+  };
+
+  const handleUpdateItemQuantity = (id: string, qty: number) => {
+    setOrderItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, quantityMeters: Math.max(1, qty) } : it))
+    );
+  };
+
+  const handleUpdateItemColor = (id: string, color: string) => {
+    setOrderItems((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, color } : it))
+    );
+  };
+
+  const handleRemoveOrderItem = (id: string) => {
+    setOrderItems((prev) => prev.filter((it) => it.id !== id));
+  };
+
+  const handleAddExtraProductToOrder = (fabricProductId: string) => {
+    if (!fabricProductId) return;
+    setOrderItems((prev) => {
+      if (prev.some((it) => it.fabricProductId === fabricProductId)) return prev;
+      return [
+        ...prev,
+        {
+          id: Math.random().toString(36).substring(2, 9),
+          fabricProductId,
+          quantityMeters: 1000,
+          color: 'Pure White',
+        },
+      ];
+    });
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orderingProduct) return;
-    if (orderQuantity < 1) {
-      toast.error('Please enter a valid quantity of at least 1 meter.');
+    if (orderItems.length === 0) {
+      toast.error('Please select at least one fabric product for your order.');
       return;
     }
 
     setSubmittingOrder(true);
     try {
       const res = await api.post<any>('/buyer-portal/orders', {
-        fabricProductId: orderingProduct.id,
-        requiredQuantity: Number(orderQuantity),
-        color: orderColor,
+        items: orderItems.map((it) => ({
+          fabricProductId: it.fabricProductId,
+          requiredQuantity: it.quantityMeters,
+          color: it.color,
+        })),
         requiredDeliveryDate: orderDeliveryDate,
         priority: orderPriority,
         notes: orderNotes,
       });
 
-      toast.success(`Purchase Order #${res.orderNumber} successfully booked! Total: ₹${res.totalAmount?.toLocaleString()}`);
-      setOrderingProduct(null);
+      toast.success(
+        `Purchase Order #${res.orderNumber} successfully booked (${res.itemsCount} products)! Total: ₹${res.totalAmount?.toLocaleString()}`
+      );
+      setOrderItems([]);
+      setShowOrderModal(false);
       navigate(`/buyer/orders/${res.orderId}`);
     } catch (err: any) {
       toast.error('Failed to book purchase order: ' + err.message);
@@ -301,6 +352,15 @@ export const BuyerCatalogPage: React.FC = () => {
       setSubmittingOrder(false);
     }
   };
+
+  // Live order calculations across all products in current single order
+  const totalOrderMeters = orderItems.reduce((acc, it) => acc + (it.quantityMeters || 0), 0);
+  const totalOrderSubtotal = orderItems.reduce((acc, it) => {
+    const p = products.find((prod) => prod.id === it.fabricProductId);
+    return acc + (it.quantityMeters || 0) * (p?.unitPricePerMeter || 0);
+  }, 0);
+  const totalOrderTax = totalOrderSubtotal * 0.05;
+  const totalOrderGrand = totalOrderSubtotal + totalOrderTax;
 
   // Color Swatches
   const colorPresets = [
@@ -544,11 +604,19 @@ export const BuyerCatalogPage: React.FC = () => {
                   ) : (
                     /* Actual Buyer Order Placing Button */
                     <button
-                      onClick={() => openOrderModal(p)}
-                      className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+                      onClick={() => handleAddProductToOrder(p)}
+                      className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition cursor-pointer ${
+                        orderItems.some((it) => it.fabricProductId === p.id)
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      }`}
                     >
                       <ShoppingCart className="w-3.5 h-3.5" />
-                      <span>Place Order</span>
+                      <span>
+                        {orderItems.some((it) => it.fabricProductId === p.id)
+                          ? '✓ In Order Sheet'
+                          : '+ Add to Order'}
+                      </span>
                     </button>
                   )}
                 </div>
@@ -741,15 +809,15 @@ export const BuyerCatalogPage: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL 2: Actual Buyer Purchase Order Placement */}
-      {orderingProduct && (
+      {/* MODAL 2: Actual Buyer Purchase Order Placement (Multi-Product Order Support) */}
+      {showOrderModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
           onClick={(e) => {
-            if (e.target === e.currentTarget) setOrderingProduct(null);
+            if (e.target === e.currentTarget) setShowOrderModal(false);
           }}
         >
-          <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-7 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-7 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-4 border-b border-zinc-100 mb-5">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
@@ -757,108 +825,190 @@ export const BuyerCatalogPage: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-zinc-900">
-                    Place Purchase Order
+                    Book Purchase Order
                   </h3>
                   <p className="text-xs text-zinc-500 font-medium">
-                    {orderingProduct.name} ({orderingProduct.code})
+                    {orderItems.length} Fabric Product{orderItems.length !== 1 ? 's' : ''} in this single order • Total: {totalOrderMeters.toLocaleString()}m
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setOrderingProduct(null)}
+                onClick={() => setShowOrderModal(false)}
                 className="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handlePlaceOrder} className="space-y-4 text-xs">
-              {/* Fabric Specs Summary */}
-              <div className="p-3.5 bg-zinc-50 rounded-xl border border-zinc-200/80 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-zinc-900">{orderingProduct.name}</p>
-                  <p className="text-[11px] text-zinc-500">
-                    {orderingProduct.gsm} GSM • {orderingProduct.widthInches}" Width • {orderingProduct.weaveType}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-zinc-400 block font-medium">Rate per Meter</span>
-                  <span className="text-base font-extrabold text-indigo-600">
-                    ₹{orderingProduct.unitPricePerMeter.toFixed(2)}
+            <form onSubmit={handlePlaceOrder} className="space-y-5 text-xs">
+              {/* Product items in this order */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-zinc-800 text-xs">
+                    Selected Fabric Products ({orderItems.length})
+                  </label>
+                  <span className="text-[11px] text-zinc-400">
+                    Add custom meters and dye shades for each item
                   </span>
                 </div>
-              </div>
 
-              {/* Quantity in Meters */}
-              <div>
-                <label className="block font-semibold text-zinc-700 mb-1">
-                  Required Quantity (Meters) *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={orderQuantity}
-                  onChange={(e) => setOrderQuantity(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs"
-                  required
-                />
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className="text-[11px] text-zinc-400 mr-1 font-medium">Quick Select:</span>
-                  {[500, 1000, 2500, 5000].map((q) => (
-                    <button
-                      key={q}
-                      type="button"
-                      onClick={() => setOrderQuantity(q)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition ${
-                        orderQuantity === q
-                          ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                          : 'bg-zinc-100/70 hover:bg-zinc-200/70 text-zinc-700 border-zinc-200/60'
-                      }`}
-                    >
-                      {q.toLocaleString()}m
-                    </button>
-                  ))}
-                </div>
-              </div>
+                {orderItems.length === 0 ? (
+                  <div className="p-8 text-center bg-zinc-50 rounded-2xl border border-dashed border-zinc-300">
+                    <p className="text-xs text-zinc-500 font-medium">No fabric products added yet.</p>
+                    <p className="text-[11px] text-zinc-400 mt-1">Select an available fabric below to start your order.</p>
+                  </div>
+                ) : (
+                  orderItems.map((item, idx) => {
+                    const prod = products.find((p) => p.id === item.fabricProductId);
+                    const unitPrice = prod?.unitPricePerMeter || 0;
+                    const lineTotal = item.quantityMeters * unitPrice;
 
-              {/* Color Shade Selection */}
-              <div>
-                <label className="block font-semibold text-zinc-700 mb-1">
-                  Dye Color / Shade Specification *
-                </label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {colorPresets.map((c) => (
-                    <button
-                      key={c.name}
-                      type="button"
-                      onClick={() => setOrderColor(c.name)}
-                      className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-medium transition ${
-                        orderColor === c.name
-                          ? 'bg-indigo-50 border-indigo-500 text-indigo-900 font-bold ring-2 ring-indigo-500/20'
-                          : 'bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-700'
-                      }`}
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-4 rounded-xl border border-zinc-200 bg-zinc-50/70 space-y-3"
+                      >
+                        {/* Item Header */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">
+                                {idx + 1}
+                              </span>
+                              <h4 className="font-bold text-zinc-900 text-sm">
+                                {prod?.name || 'Fabric Product'}
+                              </h4>
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-white border border-zinc-200 text-zinc-600">
+                                {prod?.code}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-zinc-500 mt-0.5 ml-7">
+                              {prod?.gsm} GSM • {prod?.widthInches}" Width • {prod?.weaveType}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center space-x-2 text-right">
+                            <div>
+                              <span className="text-[11px] text-zinc-400 block">Line Total</span>
+                              <span className="font-extrabold text-indigo-700 text-xs sm:text-sm">
+                                ₹{lineTotal.toLocaleString()}
+                              </span>
+                            </div>
+                            {orderItems.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveOrderItem(item.id)}
+                                className="p-1 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition ml-2 cursor-pointer"
+                                title="Remove product"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Quantity and Color inputs */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-zinc-200/70">
+                          {/* Quantity */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                              Ordered Meters (₹{unitPrice}/m) *
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={item.quantityMeters}
+                              onChange={(e) =>
+                                handleUpdateItemQuantity(item.id, Number(e.target.value))
+                              }
+                              className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-xs font-bold text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                              required
+                            />
+                            <div className="flex items-center gap-1 mt-1.5">
+                              {[500, 1000, 2500, 5000].map((q) => (
+                                <button
+                                  key={q}
+                                  type="button"
+                                  onClick={() => handleUpdateItemQuantity(item.id, q)}
+                                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border transition cursor-pointer ${
+                                    item.quantityMeters === q
+                                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                      : 'bg-white hover:bg-zinc-100 text-zinc-600 border-zinc-200'
+                                  }`}
+                                >
+                                  {q.toLocaleString()}m
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Color */}
+                          <div>
+                            <label className="block text-[11px] font-semibold text-zinc-700 mb-1">
+                              Color / Shade Specification *
+                            </label>
+                            <input
+                              type="text"
+                              value={item.color}
+                              onChange={(e) => handleUpdateItemColor(item.id, e.target.value)}
+                              placeholder="e.g. Pure White, Royal Navy, Pantone 19-4052"
+                              className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-xs font-semibold text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                              required
+                            />
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {colorPresets.slice(0, 4).map((c) => (
+                                <button
+                                  key={c.name}
+                                  type="button"
+                                  onClick={() => handleUpdateItemColor(item.id, c.name)}
+                                  className={`px-2 py-0.5 rounded text-[10px] font-medium border transition cursor-pointer ${
+                                    item.color === c.name
+                                      ? 'bg-indigo-50 border-indigo-300 text-indigo-800 font-bold'
+                                      : 'bg-white text-zinc-600 border-zinc-200'
+                                  }`}
+                                >
+                                  {c.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+
+                {/* Add Another Product Selector */}
+                {products.some((p) => !orderItems.some((it) => it.fabricProductId === p.id)) && (
+                  <div className="p-3 bg-indigo-50/60 rounded-xl border border-dashed border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <span className="text-xs font-semibold text-indigo-950">
+                        Add Another Fabric Product to this Order:
+                      </span>
+                    </div>
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        handleAddExtraProductToOrder(e.target.value);
+                      }}
+                      className="px-3 py-1.5 rounded-lg border border-indigo-200 text-xs font-semibold text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
                     >
-                      <span
-                        className="w-3.5 h-3.5 rounded-full border shrink-0"
-                        style={{ backgroundColor: c.bg, borderColor: c.border }}
-                      ></span>
-                      <span>{c.name}</span>
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  value={orderColor}
-                  onChange={(e) => setOrderColor(e.target.value)}
-                  placeholder="Or enter custom color name / Pantone code..."
-                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 bg-zinc-50/50 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  required
-                />
+                      <option value="">+ Select Additional Fabric...</option>
+                      {products
+                        .filter((p) => !orderItems.some((it) => it.fabricProductId === p.id))
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name} ({p.code}) — ₹{p.unitPricePerMeter}/m
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* Delivery Date & Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-zinc-100">
                 <div>
                   <label className="block font-semibold text-zinc-700 mb-1">
                     Target Delivery Date *
@@ -894,53 +1044,83 @@ export const BuyerCatalogPage: React.FC = () => {
                   rows={2}
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
-                  placeholder="e.g. Export grade shrink wrap, maximum 100m roll continuous length..."
+                  placeholder="e.g. Export grade shrink wrap, maximum 100m roll continuous length, pallet shipment..."
                   className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 bg-zinc-50/50 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 />
               </div>
 
-              {/* Live Quotation Summary Card */}
-              {(() => {
-                const subtotal = orderQuantity * orderingProduct.unitPricePerMeter;
-                const gst = subtotal * 0.05;
-                const total = subtotal + gst;
-                return (
-                  <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200/80 space-y-1.5">
-                    <div className="flex justify-between text-zinc-600 font-medium">
-                      <span>Order Subtotal ({orderQuantity.toLocaleString()} meters @ ₹{orderingProduct.unitPricePerMeter}/m):</span>
-                      <span className="font-semibold text-zinc-900">₹{subtotal.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-zinc-600 font-medium">
-                      <span>Goods & Services Tax (5% GST):</span>
-                      <span className="font-semibold text-zinc-900">₹{gst.toLocaleString()}</span>
-                    </div>
-                    <div className="pt-2 border-t border-indigo-200 flex justify-between items-baseline">
-                      <span className="font-bold text-zinc-900 text-xs">Total Order Value:</span>
-                      <span className="text-lg font-extrabold text-indigo-700">
-                        ₹{total.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })()}
+              {/* Combined Financial Summary Card */}
+              <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200/80 space-y-1.5">
+                <div className="flex justify-between text-zinc-600 font-medium">
+                  <span>
+                    Combined Subtotal ({totalOrderMeters.toLocaleString()} total meters across {orderItems.length} products):
+                  </span>
+                  <span className="font-semibold text-zinc-900">₹{totalOrderSubtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-zinc-600 font-medium">
+                  <span>Goods & Services Tax (5% GST):</span>
+                  <span className="font-semibold text-zinc-900">₹{totalOrderTax.toLocaleString()}</span>
+                </div>
+                <div className="pt-2 border-t border-indigo-200 flex justify-between items-baseline">
+                  <span className="font-bold text-zinc-900 text-xs">Total Single Order Value:</span>
+                  <span className="text-xl font-extrabold text-indigo-700">
+                    ₹{totalOrderGrand.toLocaleString()}
+                  </span>
+                </div>
+              </div>
 
               <div className="flex items-center justify-end space-x-3 pt-3 border-t border-zinc-100">
                 <button
                   type="button"
-                  onClick={() => setOrderingProduct(null)}
-                  className="px-4 py-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium text-xs transition"
+                  onClick={() => setShowOrderModal(false)}
+                  className="px-4 py-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium text-xs transition cursor-pointer"
                 >
-                  Cancel
+                  Continue Browsing
                 </button>
                 <button
                   type="submit"
-                  disabled={submittingOrder}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition"
+                  disabled={submittingOrder || orderItems.length === 0}
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer"
                 >
-                  {submittingOrder ? 'Submitting Order...' : 'Confirm & Place Purchase Order'}
+                  {submittingOrder ? 'Submitting Purchase Order...' : `Confirm & Place Order (${orderItems.length} Products)`}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Bottom Order Bar (Active when products are selected and modal is minimized) */}
+      {orderItems.length > 0 && !showOrderModal && (
+        <div className="fixed bottom-6 inset-x-0 z-40 flex justify-center px-4 pointer-events-none animate-in slide-in-from-bottom-4">
+          <div className="bg-slate-900/95 backdrop-blur-md text-white rounded-2xl p-4 shadow-2xl border border-slate-700 flex items-center justify-between gap-6 pointer-events-auto max-w-2xl w-full">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-sm shadow-xs">
+                {orderItems.length}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white">
+                  {orderItems.length} Fabric Product{orderItems.length > 1 ? 's' : ''} in Current Order
+                </p>
+                <p className="text-[11px] text-slate-300">
+                  {totalOrderMeters.toLocaleString()} total meters • Total Value: ₹{totalOrderGrand.toLocaleString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setOrderItems([])}
+                className="px-3 py-2 text-xs text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition cursor-pointer"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => setShowOrderModal(true)}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer"
+              >
+                Review & Place Order →
+              </button>
+            </div>
           </div>
         </div>
       )}

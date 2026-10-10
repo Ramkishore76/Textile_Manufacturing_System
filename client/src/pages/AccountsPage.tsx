@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import {
   TrendingUp,
   Plus,
@@ -15,6 +16,8 @@ import { printInvoicePdf } from '../utils/invoicePdf';
 import { OwnerFinancialAnalytics } from '../components/OwnerFinancialAnalytics';
 
 export const AccountsPage: React.FC = () => {
+  const { user } = useAuth();
+  const isOwner = user?.role === 'ADMIN';
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = (searchParams.get('tab') as any) || 'invoices';
   const [activeTab, setActiveTab] = useState<'invoices' | 'payments' | 'expenses' | 'profitability' | 'analytics'>(
@@ -577,7 +580,7 @@ export const AccountsPage: React.FC = () => {
               >
                 {orders.map((o) => (
                   <option key={o.id} value={o.id}>
-                    {o.orderNumber} - {o.buyer?.companyName}
+                    {o.orderNumber}{isOwner && o.buyer?.companyName ? ` - ${o.buyer.companyName}` : ''}
                   </option>
                 ))}
               </select>
@@ -913,7 +916,7 @@ export const AccountsPage: React.FC = () => {
                   <option value="">-- General Factory Overhead --</option>
                   {orders.map((o) => (
                     <option key={o.id} value={o.id}>
-                      {o.orderNumber} - {o.buyer?.companyName}
+                      {o.orderNumber}{isOwner && o.buyer?.companyName ? ` - ${o.buyer.companyName}` : ''}
                     </option>
                   ))}
                 </select>

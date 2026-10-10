@@ -29,7 +29,11 @@ router.get(
         orderBy: { createdAt: 'desc' },
       });
 
-      res.json(rolls);
+      const isOwner = req.user?.role === 'ADMIN';
+      const sanitized = rolls.map((r) =>
+        !isOwner && r.order ? { ...r, order: { ...r.order, buyer: null } } : r
+      );
+      res.json(sanitized);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rolls', details: err.message });
     }
@@ -56,7 +60,11 @@ router.get(
         orderBy: { createdAt: 'asc' },
       });
 
-      res.json(rolls);
+      const isOwner = req.user?.role === 'ADMIN';
+      const sanitized = rolls.map((r) =>
+        !isOwner && r.order ? { ...r, order: { ...r.order, buyer: null } } : r
+      );
+      res.json(sanitized);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch finished stock', details: err.message });
     }
@@ -111,6 +119,11 @@ router.get(
       if (!roll) {
         res.status(404).json({ error: 'Roll not found' });
         return;
+      }
+
+      const isOwner = req.user?.role === 'ADMIN';
+      if (!isOwner && roll.order) {
+        (roll.order as any).buyer = null;
       }
 
       res.json(roll);

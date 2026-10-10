@@ -36,7 +36,26 @@ router.get(
         orderBy: { orderDate: 'desc' },
       });
 
-      res.json(orders);
+      const isOwner = req.user?.role === 'ADMIN';
+      const sanitizedOrders = orders.map((o) => {
+        if (!isOwner) {
+          return {
+            ...o,
+            buyer: {
+              id: o.buyerId,
+              companyName: 'Client Confidential',
+              name: 'Authorized Purchaser',
+              email: 'confidential@client.internal',
+              phone: '***-***-****',
+              address: 'Direct Factory Consignment',
+              taxNumber: '***',
+            },
+          };
+        }
+        return o;
+      });
+
+      res.json(sanitizedOrders);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch orders', details: err.message });
     }
@@ -101,6 +120,19 @@ router.get(
       if (!order) {
         res.status(404).json({ error: 'Order not found' });
         return;
+      }
+
+      const isOwner = req.user?.role === 'ADMIN';
+      if (!isOwner && order.buyer) {
+        order.buyer = {
+          id: order.buyerId,
+          companyName: 'Client Confidential',
+          name: 'Authorized Purchaser',
+          email: 'confidential@client.internal',
+          phone: '***-***-****',
+          address: 'Direct Factory Consignment',
+          taxNumber: '***',
+        } as any;
       }
 
       res.json(order);

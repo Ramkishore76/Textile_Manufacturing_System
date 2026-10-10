@@ -24,7 +24,28 @@ router.get(
         },
         orderBy: { paymentDate: 'desc' },
       });
-      res.json(payments);
+      const isOwner = req.user?.role === 'ADMIN';
+      const sanitizedPayments = payments.map((p) => {
+        if (!isOwner && p.invoice?.buyer) {
+          return {
+            ...p,
+            invoice: {
+              ...p.invoice,
+              buyer: {
+                id: p.invoice.buyer.id,
+                companyName: 'Client Confidential',
+                name: 'Authorized Purchaser',
+                email: 'confidential@client.internal',
+                phone: '***',
+                address: 'Direct Factory Consignment',
+                taxNumber: '***',
+              },
+            },
+          };
+        }
+        return p;
+      });
+      res.json(sanitizedPayments);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch payments', details: err.message });
     }

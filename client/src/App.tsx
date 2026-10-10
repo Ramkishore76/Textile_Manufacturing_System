@@ -28,6 +28,7 @@ import { BuyerOrderDetailPage } from './pages/BuyerOrderDetailPage';
 import { BuyerDispatchPage } from './pages/BuyerDispatchPage';
 import { BuyerInvoicesPage } from './pages/BuyerInvoicesPage';
 import { BuyerPaymentsPage } from './pages/BuyerPaymentsPage';
+import { BuyerEnrollPage } from './pages/BuyerEnrollPage';
 
 
 // Root redirect handler
@@ -65,8 +66,10 @@ function App() {
       <ToastProvider>
         <BrowserRouter>
           <Routes>
-          {/* Public Login Route */}
+          {/* Public Login & Buyer Enrollment Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/buyer/enroll" element={<BuyerEnrollPage />} />
+          <Route path="/enroll" element={<BuyerEnrollPage />} />
 
           {/* Root Redirect */}
           <Route path="/" element={<RootRedirect />} />

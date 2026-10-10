@@ -1,12 +1,121 @@
 import { Router, Response } from 'express';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../db/prisma';
 import { authenticateToken, requireBuyerOrStaff, AuthRequest } from '../middleware/auth';
 import { logAudit } from '../services/auditService';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'agt-super-secret-jwt-key-2026';
+
 const router = Router();
 
-// Apply authentication and buyer/staff access to all routes in this router
+// PUBLIC: Buyer Enrollment (Direct Registration for B2B Buyer Clients)
+router.post('/enroll', async (req, res): Promise<void> => {
+  try {
+    const { companyName, name, email, password, phone, address, taxNumber } = req.body;
+
+    if (!companyName || !name || !email || !password) {
+      res.status(400).json({
+        error: 'Company Name, Contact Person Name, Email Address, and Password are all required.',
+      });
+      return;
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+
+    // Check if account already exists
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (existing) {
+      res.status(409).json({
+        error: 'An account with this email address already exists. Please sign in instead.',
+      });
+      return;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    // Create Buyer, BuyerAccount, and User transactionally
+    const enrolled = await prisma.$transaction(async (tx) => {
+      const buyer = await tx.buyer.create({
+        data: {
+          companyName: String(companyName).trim(),
+          name: String(name).trim(),
+          email: normalizedEmail,
+          phone: phone ? String(phone).trim() : '+91 98000 00000',
+          address: address ? String(address).trim() : 'B2B Client Delivery Address',
+          taxNumber: taxNumber ? String(taxNumber).trim() : null,
+          creditLimit: 1500000,
+        },
+      });
+
+      const buyerAccount = await tx.buyerAccount.create({
+        data: {
+          buyerId: buyer.id,
+          status: 'ACTIVE',
+        },
+      });
+
+      const user = await tx.user.create({
+        data: {
+          name: String(name).trim(),
+          email: normalizedEmail,
+          password: passwordHash,
+          role: 'BUYER',
+          phone: phone ? String(phone).trim() : null,
+          isActive: true,
+          buyerAccountId: buyerAccount.id,
+        },
+      });
+
+      // Factory welcome notification
+      await tx.notification.create({
+        data: {
+          title: `New Buyer Enrolled: ${buyer.companyName}`,
+          message: `${buyer.companyName} (${buyer.name}) has registered as an active B2B purchasing client.`,
+          type: 'SUCCESS',
+          link: '/app/orders',
+        },
+      });
+
+      return { buyer, user };
+    });
+
+    const token = jwt.sign(
+      {
+        id: enrolled.user.id,
+        email: enrolled.user.email,
+        role: 'BUYER',
+        buyerId: enrolled.buyer.id,
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(201).json({
+      message: 'Buyer account successfully enrolled! Welcome to AGT Mills.',
+      token,
+      redirectUrl: '/buyer/catalog',
+      user: {
+        id: enrolled.user.id,
+        name: enrolled.user.name,
+        email: enrolled.user.email,
+        role: 'BUYER',
+        buyerId: enrolled.buyer.id,
+        buyerCompany: enrolled.buyer.companyName,
+      },
+    });
+  } catch (err: any) {
+    console.error('Buyer enrollment error:', err);
+    res.status(500).json({ error: 'Failed to enroll buyer: ' + err.message });
+  }
+});
+
+// Apply authentication and buyer/staff access to all remaining routes in this router
 router.use(authenticateToken);
 router.use(requireBuyerOrStaff);
 
@@ -260,74 +369,80 @@ router.put('/products/:id', async (req: AuthRequest, res: Response): Promise<voi
   }
 });
 
-// PLACE NEW PURCHASE ORDER via Buyer Portal
+// PLACE NEW PURCHASE ORDER via Buyer Portal (Supports Multiple Products in a Single Order)
 router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const buyerId = req.user!.buyerId;
+    let buyerId = req.user?.buyerId;
+    if (!buyerId && req.user?.email) {
+      const b = await prisma.buyer.findFirst({ where: { email: req.user.email } });
+      buyerId = b?.id || null;
+    }
+    if (!buyerId && ['ADMIN', 'STORE'].includes(req.user?.role || '')) {
+      const firstBuyer = await prisma.buyer.findFirst();
+      buyerId = firstBuyer?.id || null;
+    }
+
     if (!buyerId) {
-      res.status(400).json({ error: 'No active buyer profile associated with this account' });
+      res.status(400).json({ error: 'No active buyer profile associated with this account. Please enroll as a buyer.' });
       return;
     }
 
-    // Normalize payload to handle either single item payload or { items: [...] } format
-    let fabricProductId = req.body.fabricProductId;
-    let requiredQuantity = req.body.requiredQuantity;
-    let color = req.body.color;
-    let requiredDeliveryDate = req.body.requiredDeliveryDate || req.body.deliveryDate;
-    let priority = req.body.priority || 'NORMAL';
-    let notes = req.body.notes;
+    // Normalize payload to handle either multiple items array or legacy single item
+    let itemsToProcess: Array<{
+      fabricProductId: string;
+      requiredQuantity: number;
+      color: string;
+      notes?: string;
+    }> = [];
 
     if (Array.isArray(req.body.items) && req.body.items.length > 0) {
-      const firstItem = req.body.items[0];
-      fabricProductId = firstItem.fabricProductId;
-      requiredQuantity = firstItem.quantityMeters ?? firstItem.requiredQuantity;
-      color = firstItem.colorOrShade ?? firstItem.color ?? 'Standard';
-      if (!requiredDeliveryDate && firstItem.deliveryDate) {
-        requiredDeliveryDate = firstItem.deliveryDate;
+      itemsToProcess = req.body.items.map((it: any) => ({
+        fabricProductId: it.fabricProductId,
+        requiredQuantity: Number(it.quantityMeters ?? it.requiredQuantity ?? it.quantity ?? 0),
+        color: String(it.colorOrShade ?? it.color ?? 'Standard').trim(),
+        notes: it.notes ? String(it.notes).trim() : undefined,
+      }));
+    } else if (req.body.fabricProductId) {
+      itemsToProcess = [
+        {
+          fabricProductId: req.body.fabricProductId,
+          requiredQuantity: Number(req.body.requiredQuantity ?? req.body.quantityMeters ?? 0),
+          color: String(req.body.color ?? req.body.colorOrShade ?? 'Standard').trim(),
+          notes: req.body.notes ? String(req.body.notes).trim() : undefined,
+        },
+      ];
+    }
+
+    if (itemsToProcess.length === 0) {
+      res.status(400).json({ error: 'At least one fabric product must be selected to place an order.' });
+      return;
+    }
+
+    // Validate each item
+    for (let idx = 0; idx < itemsToProcess.length; idx++) {
+      const it = itemsToProcess[idx];
+      if (!it.fabricProductId) {
+        res.status(400).json({ error: `Item #${idx + 1} is missing fabricProductId.` });
+        return;
       }
-      if (!notes && firstItem.notes) {
-        notes = firstItem.notes;
+      if (isNaN(it.requiredQuantity) || it.requiredQuantity < 1) {
+        res.status(400).json({ error: `Item #${idx + 1} ordered meters must be at least 1 meter.` });
+        return;
+      }
+      if (!it.color || it.color.length < 1) {
+        it.color = 'Pure White';
       }
     }
 
+    // Determine delivery date
+    let requiredDeliveryDate = req.body.requiredDeliveryDate || req.body.deliveryDate;
     if (!requiredDeliveryDate) {
       const defaultDate = new Date();
       defaultDate.setDate(defaultDate.getDate() + 21);
       requiredDeliveryDate = defaultDate.toISOString().split('T')[0];
     }
 
-    const schema = z.object({
-      fabricProductId: z.string(),
-      requiredQuantity: z.number().min(1, 'Quantity must be at least 1 meter'),
-      color: z.string().min(2, 'Color / shade specification is required'),
-      requiredDeliveryDate: z.string().refine((d) => !isNaN(Date.parse(d)), 'Valid delivery date is required'),
-      priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).default('NORMAL'),
-      notes: z.string().optional(),
-    });
-
-    const parsed = schema.safeParse({
-      fabricProductId,
-      requiredQuantity: Number(requiredQuantity),
-      color,
-      requiredDeliveryDate,
-      priority,
-      notes,
-    });
-
-    if (!parsed.success) {
-      res.status(400).json({ error: 'Validation failed', details: parsed.error.errors });
-      return;
-    }
-
-    const product = await prisma.fabricProduct.findUnique({
-      where: { id: parsed.data.fabricProductId },
-    });
-
-    if (!product) {
-      res.status(404).json({ error: 'Selected fabric product does not exist' });
-      return;
-    }
-
+    // Fetch buyer
     const buyer = await prisma.buyer.findUnique({
       where: { id: buyerId },
     });
@@ -337,9 +452,37 @@ router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> =>
       return;
     }
 
-    // Calculate financials
-    const unitPrice = product.unitPricePerMeter;
-    const subtotal = parsed.data.requiredQuantity * unitPrice;
+    // Fetch all referenced products
+    const productIds = Array.from(new Set(itemsToProcess.map((it) => it.fabricProductId)));
+    const products = await prisma.fabricProduct.findMany({
+      where: { id: { in: productIds } },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    for (const it of itemsToProcess) {
+      if (!productMap.has(it.fabricProductId)) {
+        res.status(404).json({ error: `Selected fabric product (${it.fabricProductId}) does not exist.` });
+        return;
+      }
+    }
+
+    // Calculate financials across all products
+    let subtotal = 0;
+    let totalMeters = 0;
+    const preparedItems = itemsToProcess.map((it) => {
+      const p = productMap.get(it.fabricProductId)!;
+      const unitPrice = p.unitPricePerMeter;
+      const lineTotal = it.requiredQuantity * unitPrice;
+      subtotal += lineTotal;
+      totalMeters += it.requiredQuantity;
+      return {
+        ...it,
+        product: p,
+        unitPrice,
+        lineTotal,
+      };
+    });
+
     const taxAmount = subtotal * 0.05; // 5% GST
     const totalAmount = subtotal + taxAmount;
 
@@ -353,32 +496,37 @@ router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> =>
           orderNumber,
           buyerId,
           orderDate: new Date(),
-          requiredDeliveryDate: new Date(parsed.data.requiredDeliveryDate),
-          priority: parsed.data.priority,
+          requiredDeliveryDate: new Date(requiredDeliveryDate),
+          priority: req.body.priority || 'NORMAL',
           status: 'CONFIRMED',
           totalAmount,
-          notes: parsed.data.notes || `Order placed via Buyer Portal by ${buyer.companyName}`,
+          notes:
+            req.body.notes ||
+            `Multi-item order (${preparedItems.length} fabric line items) placed via Buyer Portal by ${buyer.companyName}`,
         },
       });
 
-      await tx.orderItem.create({
-        data: {
-          orderId: createdOrder.id,
-          fabricProductId: product.id,
-          color: parsed.data.color,
-          requiredQuantity: parsed.data.requiredQuantity,
-          unit: 'METERS',
-          unitPrice,
-          totalPrice: subtotal,
-          specifications: `${product.name} | ${product.gsm} GSM | ${product.widthInches}" | ${product.weaveType}`,
-        },
-      });
+      for (const it of preparedItems) {
+        await tx.orderItem.create({
+          data: {
+            orderId: createdOrder.id,
+            fabricProductId: it.product.id,
+            color: it.color,
+            requiredQuantity: it.requiredQuantity,
+            unit: 'METERS',
+            unitPrice: it.unitPrice,
+            totalPrice: it.lineTotal,
+            specifications: `${it.product.name} | ${it.product.gsm} GSM | ${it.product.widthInches}" | ${it.product.weaveType}`,
+          },
+        });
+      }
 
       // Internal factory notification
+      const productSummary = preparedItems.map((i) => `${i.product.name} (${i.requiredQuantity}m ${i.color})`).join(', ');
       await tx.notification.create({
         data: {
           title: `New Order Placed: ${orderNumber}`,
-          message: `${buyer.companyName} placed order for ${parsed.data.requiredQuantity}m of ${product.name} (${parsed.data.color}). Total: ₹${totalAmount.toLocaleString()}`,
+          message: `${buyer.companyName} placed order for ${totalMeters.toLocaleString()}m (${preparedItems.length} fabrics: ${productSummary}). Total: ₹${totalAmount.toLocaleString()}`,
           type: 'INFO',
           link: '/app/orders',
         },
@@ -389,7 +537,7 @@ router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> =>
         data: {
           buyerId,
           title: `Order ${orderNumber} Confirmed`,
-          message: `Your order for ${parsed.data.requiredQuantity}m ${product.name} has been confirmed. Production is scheduled.`,
+          message: `Your order for ${totalMeters.toLocaleString()}m (${preparedItems.length} products) has been confirmed. Production is scheduled.`,
           type: 'SUCCESS',
           link: `/buyer/orders/${createdOrder.id}`,
         },
@@ -402,7 +550,7 @@ router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> =>
       action: 'BUYER_ORDER_PLACED',
       entityType: 'Order',
       entityId: order.id,
-      details: `Buyer ${buyer.companyName} (${req.user?.name}) placed order ${orderNumber} for ₹${totalAmount.toLocaleString()}`,
+      details: `Buyer ${buyer.companyName} (${req.user?.name}) placed order ${orderNumber} with ${preparedItems.length} line items for ₹${totalAmount.toLocaleString()}`,
       performedById: req.user?.id,
       performedByName: req.user?.name,
     });
@@ -411,7 +559,8 @@ router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> =>
       message: 'Purchase order placed successfully!',
       orderId: order.id,
       orderNumber: order.orderNumber,
-      totalMeters: parsed.data.requiredQuantity,
+      itemsCount: preparedItems.length,
+      totalMeters,
       subtotal,
       taxAmount,
       totalAmount,
@@ -427,10 +576,20 @@ router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> =>
 // GET Buyer Dashboard Summary
 router.get('/dashboard', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const buyerId = req.user!.buyerId!;
+    let buyerId = req.user?.buyerId;
+    if (!buyerId && req.user?.email) {
+      const b = await prisma.buyer.findFirst({ where: { email: req.user.email } });
+      buyerId = b?.id || null;
+    }
+    if (!buyerId && ['ADMIN', 'STORE'].includes(req.user?.role || '')) {
+      const firstBuyer = await prisma.buyer.findFirst();
+      buyerId = firstBuyer?.id || null;
+    }
+
+    const whereClause: any = buyerId ? { buyerId } : {};
 
     const orders = await prisma.order.findMany({
-      where: { buyerId },
+      where: whereClause,
       include: {
         items: true,
         rolls: true,
@@ -446,7 +605,7 @@ router.get('/dashboard', async (req: AuthRequest, res: Response): Promise<void> 
     const dispatched = orders.filter((o) => ['DISPATCHED', 'PARTIALLY_DISPATCHED', 'DELIVERED'].includes(o.status));
 
     const invoices = await prisma.invoice.findMany({
-      where: { buyerId },
+      where: whereClause,
     });
 
     const totalOutstanding = invoices.reduce((sum, i) => sum + i.balanceAmount, 0);
@@ -481,16 +640,30 @@ router.get('/dashboard', async (req: AuthRequest, res: Response): Promise<void> 
 // GET Buyer Orders
 router.get('/orders', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const buyerId = req.user!.buyerId!;
+    let whereClause: any = {};
+    if (req.user?.role === 'BUYER') {
+      let buyerId = req.user.buyerId;
+      if (!buyerId && req.user.email) {
+        const b = await prisma.buyer.findFirst({ where: { email: req.user.email } });
+        buyerId = b?.id || null;
+      }
+      whereClause = { buyerId: buyerId || '' };
+    } else if (['ADMIN', 'STORE'].includes(req.user?.role || '')) {
+      if (req.query.buyerId) {
+        whereClause = { buyerId: req.query.buyerId as string };
+      }
+      // If no query buyerId, admin sees all buyer orders
+    }
 
     const orders = await prisma.order.findMany({
-      where: { buyerId },
+      where: whereClause,
       include: {
+        buyer: {
+          select: { id: true, name: true, companyName: true, email: true, phone: true, address: true },
+        },
         items: {
           include: {
-            fabricProduct: {
-              select: { name: true, fabricType: true, gsm: true, widthInches: true },
-            },
+            fabricProduct: true,
           },
         },
         dispatches: {
@@ -509,28 +682,38 @@ router.get('/orders', async (req: AuthRequest, res: Response): Promise<void> => 
   }
 });
 
-// GET Single Buyer Order Details (strictly scoped to buyerId)
+// GET Single Buyer Order Details
 router.get('/orders/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const buyerId = req.user!.buyerId!;
+    const isStaff = ['ADMIN', 'STORE'].includes(req.user?.role || '');
+    let whereClause: any = { id: req.params.id };
+
+    if (!isStaff) {
+      let buyerId = req.user?.buyerId;
+      if (!buyerId && req.user?.email) {
+        const b = await prisma.buyer.findFirst({ where: { email: req.user.email } });
+        buyerId = b?.id || null;
+      }
+      whereClause.buyerId = buyerId || '';
+    }
 
     const order = await prisma.order.findFirst({
-      where: {
-        id: req.params.id,
-        buyerId, // Strict isolation! (TEST 5)
-      },
+      where: whereClause,
       include: {
+        buyer: {
+          select: {
+            id: true,
+            name: true,
+            companyName: true,
+            email: true,
+            phone: true,
+            address: true,
+            taxNumber: true,
+          },
+        },
         items: {
           include: {
-            fabricProduct: {
-              select: {
-                name: true,
-                fabricType: true,
-                gsm: true,
-                widthInches: true,
-                weaveType: true,
-              },
-            },
+            fabricProduct: true,
           },
         },
         rolls: {

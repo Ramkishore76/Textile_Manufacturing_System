@@ -37,9 +37,15 @@ export const BuyerOrdersPage: React.FC = () => {
   };
 
   const filteredOrders = orders.filter((o) => {
+    const term = searchTerm.toLowerCase().trim();
     const matchesSearch =
-      o.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.items?.some((it: any) => it.fabricProduct?.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+      !term ||
+      o.orderNumber?.toLowerCase().includes(term) ||
+      o.items?.some((it: any) =>
+        (it.fabricProduct?.name || it.specifications || it.color || '')
+          .toLowerCase()
+          .includes(term)
+      );
     const matchesStatus = statusFilter === 'ALL' || o.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -112,8 +118,8 @@ export const BuyerOrdersPage: React.FC = () => {
                 <tr>
                   <th className="py-3 px-4">Order #</th>
                   <th className="py-3 px-4">Order Date</th>
-                  <th className="py-3 px-4">Fabric Specifications</th>
-                  <th className="py-3 px-4">Ordered Quantity</th>
+                  <th className="py-3 px-4">Ordered Products</th>
+                  <th className="py-3 px-4">Total Meters</th>
                   <th className="py-3 px-4">Required Delivery</th>
                   <th className="py-3 px-4">Lifecycle Stage</th>
                   <th className="py-3 px-4">Total Amount</th>
@@ -122,7 +128,8 @@ export const BuyerOrdersPage: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-zinc-100 text-zinc-700">
                 {filteredOrders.map((ord) => {
-                  const totalQty = ord.items?.reduce((sum: number, it: any) => sum + it.requiredQuantity, 0) || 0;
+                  const totalQty = ord.items?.reduce((sum: number, it: any) => sum + (it.requiredQuantity || 0), 0) || 0;
+                  const itemCount = ord.items?.length || 0;
                   return (
                     <tr
                       key={ord.id}
@@ -138,11 +145,24 @@ export const BuyerOrdersPage: React.FC = () => {
                       </td>
 
                       <td className="py-3.5 px-4">
-                        {ord.items?.map((it: any, i: number) => (
-                          <div key={i} className="font-semibold text-zinc-900">
-                            {it.fabricProduct?.name} ({it.color})
-                          </div>
-                        ))}
+                        <div className="space-y-1">
+                          {itemCount > 1 && (
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/70 mb-1">
+                              {itemCount} Fabric Products
+                            </span>
+                          )}
+                          {ord.items?.map((it: any, i: number) => (
+                            <div key={i} className="flex items-center space-x-1.5 text-xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span>
+                              <span className="font-semibold text-zinc-900">
+                                {it.fabricProduct?.name || it.specifications?.split('|')?.[0] || 'Fabric Product'}
+                              </span>
+                              <span className="text-[11px] text-zinc-500">
+                                ({it.color} • {it.requiredQuantity?.toLocaleString()}m)
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </td>
 
                       <td className="py-3.5 px-4 font-mono font-bold text-zinc-800">

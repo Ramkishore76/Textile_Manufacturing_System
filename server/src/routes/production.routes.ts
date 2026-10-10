@@ -25,7 +25,20 @@ router.get(
         },
         orderBy: { createdAt: 'desc' },
       });
-      res.json(jobs);
+      const isOwner = req.user?.role === 'ADMIN';
+      const sanitizedJobs = jobs.map((j) => {
+        if (!isOwner && j.order) {
+          return {
+            ...j,
+            order: {
+              ...j.order,
+              buyer: null,
+            },
+          };
+        }
+        return j;
+      });
+      res.json(sanitizedJobs);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch production jobs', details: err.message });
     }

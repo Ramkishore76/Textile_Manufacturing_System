@@ -313,6 +313,24 @@ export const LoginPage: React.FC = () => {
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-8 rounded-2xl border border-zinc-200/80 shadow-xs">
+          {/* Buyer Enrollment Banner */}
+          <div className="mb-5 p-3 bg-gradient-to-r from-indigo-50 via-slate-50 to-blue-50 border border-indigo-200/80 rounded-xl flex items-center justify-between">
+            <div className="flex items-center space-x-2.5">
+              <Building2 className="w-4 h-4 text-indigo-600 shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-indigo-950 block">Apparel Brand or Buyer?</span>
+                <span className="text-[10px] text-zinc-500 block">Enroll your company for direct fabric procurement</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/buyer/enroll')}
+              className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-lg transition shrink-0 cursor-pointer shadow-2xs"
+            >
+              Enroll Now →
+            </button>
+          </div>
+
           {/* Top Segmented Mode Tabs (Sign In vs Create Account) */}
           {(mode === 'SIGN_IN' || mode === 'REGISTER') && (
             <div className="flex bg-zinc-100/80 p-1 rounded-xl mb-6">

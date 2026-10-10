@@ -54,7 +54,22 @@ router.get(
         orderBy: { dispatchDate: 'desc' },
       });
 
-      res.json(dispatches);
+      const isOwner = req.user?.role === 'ADMIN';
+      const isBuyer = req.user?.role === 'BUYER';
+      const sanitized = dispatches.map((d) => {
+        if (!isOwner && !isBuyer && d.buyer) {
+          return {
+            ...d,
+            buyer: {
+              companyName: 'Client Confidential',
+              name: 'Authorized Purchaser',
+            },
+          };
+        }
+        return d;
+      });
+
+      res.json(sanitized);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch dispatch history', details: err.message });
     }

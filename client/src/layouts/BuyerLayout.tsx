@@ -118,6 +118,14 @@ export const BuyerLayout: React.FC = () => {
               )}
 
 
+              <button
+                onClick={() => navigate('/buyer/enroll')}
+                className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold border border-indigo-200 transition cursor-pointer"
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Enroll New Buyer</span>
+              </button>
+
               {/* Notification Bell */}
               <div className="relative">
                 <button
