@@ -243,7 +243,7 @@ router.get(
 router.post(
   '/fabrics',
   authenticateToken,
-  requireRole(['ADMIN', 'PRODUCTION']),
+  requireRole(['ADMIN', 'STORE', 'PRODUCTION']),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const schema = z.object({

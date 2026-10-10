@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import {
   Boxes,
@@ -14,6 +15,7 @@ import {
 import { useToast } from '../context/ToastContext';
 
 export const InventoryPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'YARNS' | 'TRANSACTIONS' | 'BOM'>('YARNS');
   const [yarns, setYarns] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -323,14 +325,23 @@ export const InventoryPage: React.FC = () => {
       {/* TAB 3: BOM */}
       {activeTab === 'BOM' && (
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <p className="text-xs text-zinc-500">Configured Bill-of-Materials rules for automatic yarn calculation.</p>
-            <button
-              onClick={() => setShowBomModal(true)}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition"
-            >
-              + Define BOM Rule
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => navigate('/buyer/catalog?new=1')}
+                className="flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 rounded-xl text-xs font-semibold shadow-xs transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 text-indigo-600" />
+                <span>+ Add Fabric Product</span>
+              </button>
+              <button
+                onClick={() => setShowBomModal(true)}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition cursor-pointer"
+              >
+                + Define BOM Rule
+              </button>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs overflow-hidden">

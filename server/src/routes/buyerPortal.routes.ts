@@ -69,6 +69,136 @@ router.get('/products', async (req: AuthRequest, res: Response): Promise<void> =
   }
 });
 
+// GET Yarn Materials (for Admin / Store to configure initial BOM when creating product)
+router.get('/yarns', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const yarns = await prisma.yarnMaterial.findMany({
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        count: true,
+        color: true,
+        yarnType: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+    res.json(yarns);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to fetch yarn materials', details: err.message });
+  }
+});
+
+// CREATE New Fabric Product (Strictly ADMIN and STORE alone)
+router.post('/products', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!['ADMIN', 'STORE'].includes(req.user?.role || '')) {
+      res.status(403).json({
+        error: 'Permission Denied. Only Plant Owner and Store Manager are authorized to add new fabric products.',
+      });
+      return;
+    }
+
+    const schema = z.object({
+      name: z.string().min(2, 'Product name is required (min 2 characters)'),
+      code: z.string().min(2, 'Product code is required (min 2 characters)'),
+      fabricType: z.string().min(2, 'Fabric category is required'),
+      gsm: z.number().positive('GSM must be a positive number'),
+      widthInches: z.number().positive('Width in inches must be a positive number'),
+      weaveType: z.string().min(2, 'Weave type is required'),
+      unitPricePerMeter: z.number().positive('Unit price must be greater than zero'),
+      description: z.string().optional(),
+      requiresSpinning: z.boolean().default(true),
+      yarnMaterialId: z.string().optional(),
+      yarnQuantityPerMeter: z.number().positive().optional(),
+      wastagePercentage: z.number().nonnegative().optional(),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Validation failed', details: parsed.error.errors });
+      return;
+    }
+
+    const normalizedCode = parsed.data.code.trim().toUpperCase();
+
+    // Check if product code already exists
+    const existing = await prisma.fabricProduct.findUnique({
+      where: { code: normalizedCode },
+    });
+
+    if (existing) {
+      res.status(409).json({
+        error: `A fabric product with code "${normalizedCode}" already exists (${existing.name}). Please use a unique code.`,
+      });
+      return;
+    }
+
+    const newProduct = await prisma.$transaction(async (tx) => {
+      const product = await tx.fabricProduct.create({
+        data: {
+          code: normalizedCode,
+          name: parsed.data.name.trim(),
+          fabricType: parsed.data.fabricType.trim(),
+          gsm: parsed.data.gsm,
+          widthInches: parsed.data.widthInches,
+          weaveType: parsed.data.weaveType.trim(),
+          unitPricePerMeter: parsed.data.unitPricePerMeter,
+          requiresSpinning: parsed.data.requiresSpinning,
+          description: parsed.data.description?.trim() || null,
+        },
+      });
+
+      // If initial BOM yarn is specified, link it immediately
+      if (parsed.data.yarnMaterialId && parsed.data.yarnQuantityPerMeter) {
+        await tx.billOfMaterials.create({
+          data: {
+            fabricProductId: product.id,
+            yarnMaterialId: parsed.data.yarnMaterialId,
+            yarnQuantityPerMeter: parsed.data.yarnQuantityPerMeter,
+            wastagePercentage: parsed.data.wastagePercentage ?? 3.0,
+          },
+        });
+      }
+
+      return await tx.fabricProduct.findUnique({
+        where: { id: product.id },
+        include: {
+          boms: {
+            include: {
+              yarnMaterial: true,
+            },
+          },
+        },
+      });
+    });
+
+    await logAudit({
+      action: 'PRODUCT_CREATED',
+      entityType: 'FabricProduct',
+      entityId: newProduct!.id,
+      performedById: req.user?.id,
+      performedByName: req.user?.name,
+      details: {
+        code: newProduct!.code,
+        name: newProduct!.name,
+        unitPricePerMeter: newProduct!.unitPricePerMeter,
+        fabricType: newProduct!.fabricType,
+        gsm: newProduct!.gsm,
+        widthInches: newProduct!.widthInches,
+      },
+    });
+
+    res.status(201).json({
+      product: newProduct,
+      message: `Product "${newProduct!.name}" (${newProduct!.code}) created and published successfully!`,
+    });
+  } catch (err: any) {
+    console.error('Create fabric product error:', err);
+    res.status(500).json({ error: 'Failed to create fabric product', details: err.message });
+  }
+});
+
 // UPDATE Fabric Product Details & Cost Price (Strictly ADMIN and STORE alone)
 router.put('/products/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -19,6 +19,7 @@ import {
   DollarSign,
   ShieldCheck,
   Tag,
+  PackagePlus,
 } from 'lucide-react';
 
 interface FabricProduct {
@@ -39,6 +40,7 @@ interface FabricProduct {
 export const BuyerCatalogPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
 
   const isStaff = user?.role === 'ADMIN' || user?.role === 'STORE';
@@ -61,6 +63,24 @@ export const BuyerCatalogPage: React.FC = () => {
   const [editDescription, setEditDescription] = useState<string>('');
   const [editRequiresSpinning, setEditRequiresSpinning] = useState<boolean>(true);
   const [savingEdit, setSavingEdit] = useState<boolean>(false);
+
+  // Create Product Modal State (for Plant Owner & Store Manager)
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [createCode, setCreateCode] = useState<string>('');
+  const [createName, setCreateName] = useState<string>('');
+  const [createFabricType, setCreateFabricType] = useState<string>('Cotton Poplin');
+  const [createGsm, setCreateGsm] = useState<number | ''>(140);
+  const [createWidthInches, setCreateWidthInches] = useState<number | ''>(58);
+  const [createWeaveType, setCreateWeaveType] = useState<string>('Plain 1x1');
+  const [createUnitPrice, setCreateUnitPrice] = useState<number | ''>(165);
+  const [createRequiresSpinning, setCreateRequiresSpinning] = useState<boolean>(true);
+  const [createDescription, setCreateDescription] = useState<string>('');
+  const [includeBom, setIncludeBom] = useState<boolean>(true);
+  const [createYarnId, setCreateYarnId] = useState<string>('');
+  const [createYarnRate, setCreateYarnRate] = useState<number | ''>(0.18);
+  const [createWastagePct, setCreateWastagePct] = useState<number | ''>(3.0);
+  const [yarnsList, setYarnsList] = useState<any[]>([]);
+  const [submittingCreate, setSubmittingCreate] = useState<boolean>(false);
 
   // Order Placement Modal State (for Actual Buyer & Order Placing Flow)
   const [orderingProduct, setOrderingProduct] = useState<FabricProduct | null>(null);
@@ -93,6 +113,112 @@ export const BuyerCatalogPage: React.FC = () => {
   useEffect(() => {
     loadProducts();
   }, [loadProducts]);
+
+  // Load yarns for BOM linking when staff is logged in
+  useEffect(() => {
+    if (isStaff) {
+      api.get<any[]>('/buyer-portal/yarns')
+        .then((yarns) => {
+          setYarnsList(yarns);
+          if (yarns.length > 0 && !createYarnId) {
+            setCreateYarnId(yarns[0].id);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to load yarns for BOM configuration:', err);
+        });
+    }
+  }, [isStaff]);
+
+  const openCreateModal = useCallback(() => {
+    // Generate next product code e.g. FAB-005
+    let maxNum = 0;
+    for (const p of products) {
+      const match = p.code.match(/FAB-(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    }
+    const nextCode = `FAB-${String(maxNum + 1).padStart(3, '0')}`;
+    setCreateCode(nextCode);
+    setCreateName('');
+    setCreateFabricType('Cotton Poplin');
+    setCreateGsm(140);
+    setCreateWidthInches(58);
+    setCreateWeaveType('Plain 1x1');
+    setCreateUnitPrice(165);
+    setCreateRequiresSpinning(true);
+    setCreateDescription('');
+    setIncludeBom(yarnsList.length > 0);
+    if (yarnsList.length > 0) {
+      setCreateYarnId(yarnsList[0].id);
+      setCreateYarnRate(0.18);
+      setCreateWastagePct(3.0);
+    }
+    setShowCreateModal(true);
+  }, [products, yarnsList]);
+
+  // Handle URL query trigger e.g. /buyer/catalog?new=1
+  useEffect(() => {
+    if (isStaff && !loading && (location.search.includes('new=1') || location.search.includes('action=new-product'))) {
+      openCreateModal();
+    }
+  }, [isStaff, loading, location.search, openCreateModal]);
+
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createName.trim()) {
+      toast.error('Product name is required.');
+      return;
+    }
+    if (!createCode.trim()) {
+      toast.error('Product code is required.');
+      return;
+    }
+    if (Number(createUnitPrice) <= 0) {
+      toast.error('Wholesale unit price must be greater than zero.');
+      return;
+    }
+    if (Number(createGsm) <= 0) {
+      toast.error('GSM density must be greater than zero.');
+      return;
+    }
+    if (Number(createWidthInches) <= 0) {
+      toast.error('Fabric width in inches must be greater than zero.');
+      return;
+    }
+
+    setSubmittingCreate(true);
+    try {
+      const payload: any = {
+        code: createCode.trim().toUpperCase(),
+        name: createName.trim(),
+        fabricType: createFabricType.trim(),
+        gsm: Number(createGsm),
+        widthInches: Number(createWidthInches),
+        weaveType: createWeaveType.trim(),
+        unitPricePerMeter: Number(createUnitPrice),
+        requiresSpinning: createRequiresSpinning,
+        description: createDescription.trim() || undefined,
+      };
+
+      if (includeBom && createYarnId && Number(createYarnRate) > 0) {
+        payload.yarnMaterialId = createYarnId;
+        payload.yarnQuantityPerMeter = Number(createYarnRate);
+        payload.wastagePercentage = Number(createWastagePct) || 3.0;
+      }
+
+      const res = await api.post<{ product: FabricProduct; message: string }>('/buyer-portal/products', payload);
+      toast.success(res.message || `New fabric product "${createName}" published successfully!`);
+      setShowCreateModal(false);
+      await loadProducts();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create new fabric product');
+    } finally {
+      setSubmittingCreate(false);
+    }
+  };
 
   const openEditModal = (p: FabricProduct) => {
     setEditingProduct(p);
@@ -269,7 +395,18 @@ export const BuyerCatalogPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2.5">
+            {isStaff && !staffPreviewBuyerMode && (
+              <button
+                id="btn-admin-add-product"
+                onClick={openCreateModal}
+                className="flex items-center space-x-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs hover:shadow-md transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ Add New Product</span>
+              </button>
+            )}
+
             <button
               onClick={() => navigate('/buyer/orders')}
               className="flex items-center space-x-2 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded-xl text-xs font-semibold transition"
@@ -325,6 +462,15 @@ export const BuyerCatalogPage: React.FC = () => {
           <ShoppingBag className="w-10 h-10 text-zinc-300 mx-auto mb-3" />
           <h3 className="text-sm font-bold text-zinc-800">No fabric products match your search</h3>
           <p className="text-xs text-zinc-500 mt-1">Try clearing your search filters or browse all fabrics.</p>
+          {isStaff && !staffPreviewBuyerMode && (
+            <button
+              onClick={openCreateModal}
+              className="mt-4 inline-flex items-center space-x-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add New Product Now</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -792,6 +938,354 @@ export const BuyerCatalogPage: React.FC = () => {
                   className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition"
                 >
                   {submittingOrder ? 'Submitting Order...' : 'Confirm & Place Purchase Order'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: Add New Fabric Product (Strictly Plant Owner & Store Manager) */}
+      {showCreateModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowCreateModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-7 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-100 mb-5">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
+                  <PackagePlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="text-base font-bold text-zinc-900">
+                      Add New Fabric Product
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 uppercase">
+                      {roleTitle}
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-500 font-medium">
+                    Publish export-grade fabric specifications to visual catalog and factory ERP
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-1.5 text-zinc-400 hover:text-zinc-600 rounded-lg hover:bg-zinc-100 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
+              {/* Row 1: Code and Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-semibold text-zinc-700 mb-1">
+                    Product Code *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={createCode}
+                    onChange={(e) => setCreateCode(e.target.value.toUpperCase())}
+                    placeholder="e.g. FAB-005"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 font-mono font-bold bg-zinc-50/50 uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  />
+                  <p className="text-[10px] text-zinc-400 mt-0.5">Unique SKU code</p>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block font-semibold text-zinc-700 mb-1">
+                    Fabric Product Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={createName}
+                    onChange={(e) => setCreateName(e.target.value)}
+                    placeholder="e.g. 100% Combed Cotton Poplin 60s"
+                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 font-semibold bg-zinc-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  />
+                  <p className="text-[10px] text-zinc-400 mt-0.5">Commercial descriptive title</p>
+                </div>
+              </div>
+
+              {/* Row 2: Category and Quick Presets */}
+              <div>
+                <label className="block font-semibold text-zinc-700 mb-1">
+                  Fabric Category / Fiber Classification *
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[
+                    'Cotton Poplin',
+                    'Cotton Twill',
+                    'Denim Indigo',
+                    'Linen Blend',
+                    'Rayon Viscose',
+                    'Polyester Blend',
+                    'Canvas Duck',
+                    'Oxford Cotton',
+                  ].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setCreateFabricType(cat)}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                        createFabricType === cat
+                          ? 'bg-indigo-600 text-white shadow-2xs'
+                          : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={createFabricType}
+                  onChange={(e) => setCreateFabricType(e.target.value)}
+                  placeholder="Or enter custom category name..."
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 bg-zinc-50/50 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Row 3: Weave Type and Quick Presets */}
+              <div>
+                <label className="block font-semibold text-zinc-700 mb-1">
+                  Weave Construction / Pattern *
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {[
+                    'Plain 1x1',
+                    'Twill 2/1',
+                    'Twill 3/1',
+                    'Satin / Sateen',
+                    'Oxford Weave',
+                    'Dobby Texture',
+                    'Herringbone',
+                  ].map((wv) => (
+                    <button
+                      key={wv}
+                      type="button"
+                      onClick={() => setCreateWeaveType(wv)}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition cursor-pointer ${
+                        createWeaveType === wv
+                          ? 'bg-indigo-600 text-white shadow-2xs'
+                          : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                      }`}
+                    >
+                      {wv}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={createWeaveType}
+                  onChange={(e) => setCreateWeaveType(e.target.value)}
+                  placeholder="Or enter custom weave..."
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 bg-zinc-50/50 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Row 4: Metrics and Pricing Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-zinc-50/80 p-3 rounded-xl border border-zinc-200/80">
+                  <label className="block font-semibold text-zinc-700 mb-1">
+                    Fabric Density (GSM) *
+                  </label>
+                  <div className="flex items-center space-x-1">
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      step="1"
+                      value={createGsm}
+                      onChange={(e) => setCreateGsm(e.target.value === '' ? '' : Number(e.target.value))}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 text-zinc-900 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    />
+                    <span className="text-[11px] text-zinc-500 font-semibold">g/m²</span>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-50/80 p-3 rounded-xl border border-zinc-200/80">
+                  <label className="block font-semibold text-zinc-700 mb-1">
+                    Usable Width *
+                  </label>
+                  <div className="flex items-center space-x-1">
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      step="0.5"
+                      value={createWidthInches}
+                      onChange={(e) => setCreateWidthInches(e.target.value === '' ? '' : Number(e.target.value))}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-zinc-200 text-zinc-900 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    />
+                    <span className="text-[11px] text-zinc-500 font-semibold">Inches</span>
+                  </div>
+                </div>
+
+                <div className="bg-emerald-50/70 p-3 rounded-xl border border-emerald-200/80">
+                  <label className="block font-bold text-emerald-950 mb-1">
+                    Wholesale Price (₹/m) *
+                  </label>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs font-bold text-emerald-800">₹</span>
+                    <input
+                      type="number"
+                      required
+                      min="0.1"
+                      step="0.5"
+                      value={createUnitPrice}
+                      onChange={(e) => setCreateUnitPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-emerald-300 text-emerald-950 font-extrabold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
+                    />
+                    <span className="text-[10px] text-emerald-700 font-medium">/m</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spinning Toggle */}
+              <div className="flex items-start space-x-2.5 p-3 rounded-xl bg-indigo-50/50 border border-indigo-100">
+                <input
+                  type="checkbox"
+                  id="createReqSpinning"
+                  checked={createRequiresSpinning}
+                  onChange={(e) => setCreateRequiresSpinning(e.target.checked)}
+                  className="w-4 h-4 mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 border-zinc-300 cursor-pointer"
+                />
+                <div>
+                  <label htmlFor="createReqSpinning" className="font-bold text-zinc-900 text-xs cursor-pointer block">
+                    Requires In-House Spinning Stage
+                  </label>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    When enabled, factory production jobs will first route through yarn ring spinning frames before warp beam sizing and loom weaving.
+                  </p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block font-semibold text-zinc-700 mb-1">
+                  Product Description & Technical Specifications
+                </label>
+                <textarea
+                  rows={2}
+                  value={createDescription}
+                  onChange={(e) => setCreateDescription(e.target.value)}
+                  placeholder="e.g. Export-grade combed cotton fabric suitable for luxury shirting. Pre-shrunk, OEKO-TEX Standard 100 certified..."
+                  className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 bg-zinc-50/50 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                />
+              </div>
+
+              {/* Optional BOM Formula Section */}
+              <div className="border border-zinc-200 rounded-xl p-3.5 bg-zinc-50/60 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="toggleBOM"
+                      checked={includeBom}
+                      onChange={(e) => setIncludeBom(e.target.checked)}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-zinc-300 cursor-pointer"
+                    />
+                    <label htmlFor="toggleBOM" className="font-bold text-zinc-900 text-xs cursor-pointer">
+                      Link Initial Bill of Materials (BOM) Formula
+                    </label>
+                  </div>
+                  <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">
+                    Auto-Calculation
+                  </span>
+                </div>
+
+                {includeBom && (
+                  <div className="space-y-3 pt-2 border-t border-zinc-200/80 animate-in fade-in">
+                    <div>
+                      <label className="block font-semibold text-zinc-700 mb-1">
+                        Select Yarn Raw Material
+                      </label>
+                      <select
+                        value={createYarnId}
+                        onChange={(e) => setCreateYarnId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                      >
+                        {yarnsList.map((y) => (
+                          <option key={y.id} value={y.id}>
+                            {y.name} ({y.code}) — {y.count} {y.color} ({y.yarnType})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-zinc-700 mb-1">
+                          Yarn Rate per Meter (KG/m)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          value={createYarnRate}
+                          onChange={(e) => setCreateYarnRate(e.target.value === '' ? '' : Number(e.target.value))}
+                          className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-zinc-700 mb-1">
+                          Loom Wastage Buffer (%)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.5"
+                          min="0"
+                          value={createWastagePct}
+                          onChange={(e) => setCreateWastagePct(e.target.value === '' ? '' : Number(e.target.value))}
+                          className="w-full px-3 py-2 rounded-xl border border-zinc-200 text-zinc-900 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    <p className="text-[11px] text-indigo-700 bg-indigo-50/70 p-2 rounded-lg border border-indigo-100">
+                      💡 <strong>BOM Rule Preview:</strong> For every 1,000 meters produced, system will reserve ~
+                      {(
+                        Number(createYarnRate || 0.18) *
+                        1000 *
+                        (1 + Number(createWastagePct || 3) / 100)
+                      ).toFixed(1)}{' '}
+                      KG of selected yarn stock.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Form Action Buttons */}
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-zinc-100">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 font-medium text-xs transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingCreate}
+                  className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>
+                    {submittingCreate ? 'Publishing Product...' : 'Publish & Add to Catalog'}
+                  </span>
                 </button>
               </div>
             </form>
