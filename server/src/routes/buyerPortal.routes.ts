@@ -663,11 +663,12 @@ router.get('/payments', async (req: AuthRequest, res: Response): Promise<void> =
 // GET Buyer Notifications
 router.get('/notifications', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const buyerId = req.user!.buyerId!;
+    const buyerId = req.user?.buyerId;
 
     const notifications = await prisma.notification.findMany({
-      where: { buyerId },
+      where: buyerId ? { buyerId } : {},
       orderBy: { createdAt: 'desc' },
+      take: 30,
     });
 
     res.json(notifications);
@@ -679,10 +680,13 @@ router.get('/notifications', async (req: AuthRequest, res: Response): Promise<vo
 // Mark Notification as read
 router.put('/notifications/:id/read', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const buyerId = req.user!.buyerId!;
+    const buyerId = req.user?.buyerId;
 
     const notif = await prisma.notification.findFirst({
-      where: { id: req.params.id, buyerId },
+      where: {
+        id: req.params.id,
+        ...(buyerId ? { buyerId } : {}),
+      },
     });
 
     if (!notif) {

@@ -437,7 +437,7 @@ router.post(
         rollId: z.string().optional(),
         orderId: z.string().optional(),
         orderNumber: z.string().optional(),
-        batchOrRollNumber: z.string().min(1, 'Batch or Roll ID is required'),
+        batchOrRollNumber: z.string().optional(),
         fabricType: z.string().optional(),
         stage: z.enum([
           'RAW_MATERIAL',
@@ -445,10 +445,10 @@ router.post(
           'WEAVING_QC',
           'DYEING_QC',
           'FINAL_INSPECTION',
-        ]),
+        ]).default('FINAL_INSPECTION'),
         machineId: z.string().optional(),
         machineName: z.string().optional(),
-        inspectorName: z.string().min(1, 'Inspector name is required'),
+        inspectorName: z.string().optional(),
         inspectionDate: z.string().optional(),
         result: z.enum(['PASSED', 'FAILED', 'REWORK_REQUIRED', 'REJECTED']),
         defectCategory: z.string().optional(),
@@ -492,6 +492,8 @@ router.post(
       }
 
       const data = parsed.data;
+      const effectiveBatchOrRoll = data.batchOrRollNumber?.trim() || data.rollId || 'BATCH-001';
+      const effectiveInspector = data.inspectorName?.trim() || req.user?.name || 'Chief Quality Inspector';
 
       // Conditional validation: If result is failed, defect details are required
       const isFailed = data.result !== 'PASSED';
@@ -511,12 +513,12 @@ router.post(
       if (data.rollId) {
         matchedRoll = await prisma.roll.findUnique({ where: { id: data.rollId } });
       }
-      if (!matchedRoll && data.batchOrRollNumber) {
+      if (!matchedRoll && effectiveBatchOrRoll) {
         matchedRoll = await prisma.roll.findFirst({
           where: {
             OR: [
-              { id: data.batchOrRollNumber },
-              { rollId: data.batchOrRollNumber },
+              { id: effectiveBatchOrRoll },
+              { rollId: effectiveBatchOrRoll },
             ],
           },
         });
@@ -557,13 +559,13 @@ router.post(
             rollId: matchedRoll ? matchedRoll.id : undefined,
             orderId: matchedOrder ? matchedOrder.id : undefined,
             orderNumber: matchedOrder?.orderNumber || data.orderNumber || (matchedRoll ? 'ORD-FAB' : undefined),
-            batchOrRollNumber: data.batchOrRollNumber,
+            batchOrRollNumber: effectiveBatchOrRoll,
             fabricType: data.fabricType || matchedRoll?.fabricType,
             stage: data.stage,
             machineId: data.machineId,
             machineName: data.machineName,
             inspectorId: req.user?.id,
-            inspectorName: data.inspectorName,
+            inspectorName: effectiveInspector,
             inspectionDate: data.inspectionDate ? new Date(data.inspectionDate) : new Date(),
             result: data.result,
             defectCategory: data.defectCategory || 'NONE',
@@ -592,7 +594,7 @@ router.post(
                 compressionRatio: photo.compressionRatio || 'Optimized',
                 mimeType: photo.mimeType || 'image/jpeg',
                 caption: photo.caption || '',
-                uploaderName: req.user?.name || data.inspectorName,
+                uploaderName: req.user?.name || effectiveInspector,
                 uploaderId: req.user?.id,
                 inspectionId: inspection.id,
               },
@@ -617,7 +619,7 @@ router.post(
               inspectionId: inspection.id,
               orderId: matchedOrder ? matchedOrder.id : undefined,
               orderNumber: matchedOrder?.orderNumber || data.orderNumber,
-              batchOrRollNumber: data.batchOrRollNumber,
+              batchOrRollNumber: effectiveBatchOrRoll,
               stage: data.stage,
               defectCategory: data.defectCategory || 'OTHER',
               defectDescription: data.defectDescription || 'Inspection failed defect detected',
@@ -647,7 +649,7 @@ router.post(
                   compressionRatio: photo.compressionRatio || 'Optimized',
                   mimeType: photo.mimeType || 'image/jpeg',
                   caption: photo.caption || '',
-                  uploaderName: req.user?.name || data.inspectorName,
+                  uploaderName: req.user?.name || effectiveInspector,
                   uploaderId: req.user?.id,
                   qualityIssueId: createdIssue.id,
                 },
@@ -663,7 +665,7 @@ router.post(
               toStatus: mandatoryHold ? 'ON_HOLD' : 'CORRECTION_ASSIGNED',
               action: 'INSPECTION_FAILED_HOLD_INITIATED',
               comments: `Material placed on hold at ${data.stage}. Corrective action assigned to ${assignedTeam}.`,
-              performedBy: req.user?.name || data.inspectorName,
+              performedBy: req.user?.name || effectiveInspector,
               performedById: req.user?.id,
             },
           });
@@ -686,9 +688,9 @@ router.post(
           await tx.notification.create({
             data: {
               title: isHole
-                ? `🚨 CRITICAL DEFECT: Hole in Fabric on ${data.batchOrRollNumber}`
-                : `🚨 Quality Alert: ${defectCatLabel} on ${data.batchOrRollNumber}`,
-              message: `Quality Manager ${data.inspectorName} flagged a ${data.severity || 'CRITICAL'} defect (${data.defectCategory || 'DEFECT'}) at ${data.stage}${photoNote}. Material is on MANDATORY HOLD. Production Unit (${assignedTeam}) has been alerted to review defect photographs and initiate immediate corrective action.`,
+                ? `🚨 CRITICAL DEFECT: Hole in Fabric on ${effectiveBatchOrRoll}`
+                : `🚨 Quality Alert: ${defectCatLabel} on ${effectiveBatchOrRoll}`,
+              message: `Quality Manager ${effectiveInspector} flagged a ${data.severity || 'CRITICAL'} defect (${data.defectCategory || 'DEFECT'}) at ${data.stage}${photoNote}. Material is on MANDATORY HOLD. Production Unit (${assignedTeam}) has been alerted to review defect photographs and initiate immediate corrective action.`,
               type: 'ALERT',
               link: '/app/quality',
             },
