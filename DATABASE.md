@@ -157,10 +157,39 @@ npm run db:audit
 
 ---
 
-## 🛡️ PostgreSQL Audit Triggers
+## ⚡ Performance Optimization & Indexing
 
-Automated database-level change capture is implemented in [`server/prisma/audit_triggers.sql`](server/prisma/audit_triggers.sql) to record mutations across critical manufacturing entities (`Order`, `Dispatch`, `Invoice`) directly into the `AuditLog` table.
+High-frequency query performance indexes are implemented in [`server/prisma/performance_indexes.sql`](file:///c:/Users/Sathish%20B/OneDrive/Desktop/Textile_Mannufacturing_System/server/prisma/performance_indexes.sql):
+- **Orders & Lookups**: `idx_orders_buyer_status`, `idx_orders_delivery_date`, `idx_orders_created_at`
+- **Loom Allocations**: `idx_prodjobs_machine_status`, `idx_prodjobs_order_id`
+- **Roll Traceability**: `idx_rolls_barcode`, `idx_rolls_job_qc`, `idx_rolls_grade`
+- **QC 4-Point Inspections**: `idx_inspections_roll_date`, `idx_inspections_status`
+- **Logistics & Shipments**: `idx_dispatches_order`, `idx_dispatches_buyer_status`, `idx_dispatches_tracking`
+- **Financial Invoicing**: `idx_invoices_order_status`, `idx_invoices_due_date`, `idx_payments_invoice`
+- **Yarn Material Inventory**: `idx_yarn_stock_level`, `idx_inventory_tx_material`
+- **HR & Wages**: `idx_attendance_employee_date`, `idx_wages_employee_month`
 
 ---
 
-*Maintained by the AGT Textile Mills Engineering Team.*
+## 📊 Database Query Benchmark & Latency Monitor
+
+Run real-time Supabase query and latency benchmarks:
+
+```bash
+cd server
+npm run db:benchmark
+```
+
+Automated verification measures:
+1. Connection pool latency (`SELECT 1`)
+2. Complex multi-table relational joins (`Order` + `OrderItem` + `Buyer` + `FabricProduct`)
+3. Roll genealogy and 4-point inspection traceability lookups
+4. Commercial invoicing & payment balance aggregates
+5. Raw yarn stock levels & transaction audit histories
+6. Workforce daily shift attendance and payroll rosters
+7. Sequential immutable audit log retrieval
+
+---
+
+*Lead Database Engineer: Sanjay Selvakumar <sanjayselvakumar05@gmail.com>*
+*Maintained by the AGT Textile Mills Database Engineering Team.*
