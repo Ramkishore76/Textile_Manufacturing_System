@@ -130,14 +130,59 @@ router.get(
           rollsCount: finishedStockRolls.length,
           totalMeters: availableFinishedMeters,
         },
-        financials: {
-          totalInvoiced,
-          totalPaid,
-          outstandingReceivables,
-          totalRecordedCost,
-          estimatedGrossProfit,
-          profitMargin: totalInvoiced > 0 ? ((estimatedGrossProfit / totalInvoiced) * 100).toFixed(1) : 0,
+        jobsBreakdown: {
+          pending: await prisma.productionJob.count({ where: { status: 'PENDING' } }),
+          inProgress: await prisma.productionJob.count({ where: { status: 'IN_PROGRESS' } }),
+          completed: await prisma.productionJob.count({ where: { status: 'COMPLETED' } }),
         },
+        yarnsDistribution: yarns.map((y) => ({
+          name: y.code,
+          fullName: y.name,
+          stockKg: y.currentStock,
+        })),
+        // Confidential financials are only accessible to ADMIN and ACCOUNTS
+        financials:
+          req.user?.role === 'ADMIN' || req.user?.role === 'ACCOUNTS'
+            ? {
+                totalInvoiced,
+                totalPaid,
+                outstandingReceivables,
+                totalRecordedCost,
+                estimatedGrossProfit,
+                profitMargin:
+                  totalInvoiced > 0
+                    ? ((estimatedGrossProfit / totalInvoiced) * 100).toFixed(1)
+                    : '0.0',
+              }
+            : null,
+        // Role-filtered recent operational events
+        recentEvents: await (async () => {
+          const role = req.user?.role || 'ADMIN';
+          const roleEntityMap: Record<string, string[]> = {
+            PRODUCTION: ['Machine', 'ProductionJob', 'ProductionLog', 'Roll', 'YarnMaterial'],
+            QUALITY: ['QualityInspection', 'Roll', 'ReworkRecord'],
+            STORE: ['YarnMaterial', 'PurchaseRequest', 'PurchaseOrder', 'GoodsReceipt', 'InventoryTransaction'],
+            SALES: ['Order', 'Buyer'],
+            DISPATCH: ['Dispatch', 'Roll', 'Order'],
+            ACCOUNTS: ['Invoice', 'Payment', 'WageRecord', 'ExpenseRecord', 'Attendance'],
+          };
+          const allowedEntities = roleEntityMap[role];
+          const whereClause = allowedEntities ? { entityType: { in: allowedEntities } } : {};
+          const logs = await prisma.auditLog.findMany({
+            where: whereClause,
+            orderBy: { createdAt: 'desc' },
+            take: 8,
+          });
+          return logs.map((l) => ({
+            id: l.id,
+            action: l.action,
+            entityType: l.entityType,
+            entityId: l.entityId,
+            details: l.details,
+            performedByName: l.performedByName || 'System Process',
+            createdAt: l.createdAt,
+          }));
+        })(),
       });
     } catch (err: any) {
       console.error('Dashboard metrics error:', err);
