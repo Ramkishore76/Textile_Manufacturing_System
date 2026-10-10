@@ -2,49 +2,66 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --bg-body: #fafafa;
+    --text-body: #18181b;
   }
 
   body {
-    background-color: #f8f9fa;
-    color: #18181b;
+    background-color: var(--bg-body);
+    color: var(--text-body);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    letter-spacing: -0.011em;
+    letter-spacing: -0.012em;
+    min-height: 100vh;
   }
 
-  /* Headings with disciplined Swiss typographic hierarchy */
+  /* Headings with crisp typographic hierarchy */
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.025em;
-    color: #111827;
+    color: #09090b;
+    font-weight: 700;
   }
 }
 
-/* Swiss minimalist subtle scrollbars */
+/* Shimmer Loading Animations (IT Task Manager style) */
+@keyframes shimmerFlow {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-block {
+  background: linear-gradient(90deg, #f4f4f5 25%, #e4e4e7 50%, #f4f4f5 75%) !important;
+  background-size: 200% 100% !important;
+  animation: shimmerFlow 1.8s ease-in-out infinite !important;
+}
+
+/* Subtle modern scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f3f5;
+  background: #f4f4f5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
+  background: #d4d4d8;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #a1a1aa;
 }
 
-/* Clean table row and cell styling for maximum legibility */
+/* Modern tables */
 table th {
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
 
-/* Smooth transitions without distracting flashy animations */
+/* Smooth micro-transitions */
 button, a, input, select, textarea {
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
