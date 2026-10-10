@@ -184,6 +184,10 @@ Run all 10 acceptance criteria tests:
 npx tsx tests/run-all-tests.mjs
 ```
 
+### 🛰️ Runtime Diagnostics & System Telemetry
+The backend provides real-time heap telemetry, server uptime, and database latency at `GET /api/system-status`.
+
+
 ---
 
 *Maintained by the Everest Textile Mills Backend Engineering Team.*

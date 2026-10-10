@@ -101,6 +101,33 @@ app.get('/api/health', async (req: Request, res: Response) => {
   }
 });
 
+// Telemetry & runtime diagnostics
+app.get('/api/system-status', async (req: Request, res: Response) => {
+  const start = Date.now();
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    const dbLatency = Date.now() - start;
+    const mem = process.memoryUsage();
+    res.json({
+      service: 'Everest Textile Mills Backend Service Engine',
+      uptimeSeconds: Math.floor(process.uptime()),
+      databaseLatencyMs: dbLatency,
+      memory: {
+        rssMb: Math.round(mem.rss / 1024 / 1024 * 100) / 100,
+        heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024 * 100) / 100,
+        heapTotalMb: Math.round(mem.heapTotal / 1024 / 1024 * 100) / 100,
+      },
+      nodeVersion: process.version,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    res.status(503).json({
+      error: 'System diagnostic failed',
+      details: err.message,
+    });
+  }
+});
+
 // Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/buyers', buyerRoutes);
