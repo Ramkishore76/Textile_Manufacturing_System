@@ -1,0 +1,649 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  password        String
+  name            String
+  role            String        // ADMIN, SALES, STORE, PRODUCTION, QUALITY, DISPATCH, ACCOUNTS, BUYER
+  phone           String?
+  isActive        Boolean       @default(true)
+  buyerAccountId  String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  buyerAccount    BuyerAccount? @relation(fields: [buyerAccountId], references: [id])
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+
+  @@map("users")
+}
+
+model Buyer {
+  id            String         @id @default(cuid())
+  name          String
+  companyName   String
+  email         String
+  phone         String
+  address       String
+  taxNumber     String?
+  creditLimit   Float?         @default(1000000)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  accounts      BuyerAccount[]
+  orders        Order[]
+  dispatches    Dispatch[]
+  invoices      Invoice[]
+  notifications Notification[]
+
+  @@map("buyers")
+}
+
+model BuyerAccount {
+  id        String   @id @default(cuid())
+  buyerId   String
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  buyer     Buyer    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  users     User[]
+
+  @@map("buyer_accounts")
+}
+
+model Supplier {
+  id                 String         @id @default(cuid())
+  name               String
+  contactPerson      String
+  email              String
+  phone              String
+  address            String
+  yarnTypesSupplied  String
+  paymentTerms       String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  purchaseOrders     PurchaseOrder[]
+  goodsReceipts      GoodsReceipt[]
+
+  @@map("suppliers")
+}
+
+model Employee {
+  id                  String             @id @default(cuid())
+  employeeCode        String             @unique
+  name                String
+  department          String             // SPINNING, WEAVING, DYEING, QUALITY, DISPATCH, MAINTENANCE, HR
+  role                String
+  phone               String
+  hourlyRate          Float              @default(100)
+  dailyBaseWage       Float              @default(800)
+  overtimeHourlyRate  Float              @default(150)
+  status              String             @default("ACTIVE")
+  joiningDate         DateTime           @default(now())
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  attendance          Attendance[]
+  wageRecords         WageRecord[]
+  assignedJobs        ProductionJob[]
+
+  @@map("employees")
+}
+
+model FabricProduct {
+  id                 String             @id @default(cuid())
+  code               String             @unique
+  name               String
+  fabricType         String             // Cotton, Poly-Cotton, Linen, Denim, etc.
+  gsm                Float
+  widthInches        Float
+  weaveType          String             // Plain, Twill, Satin
+  unitPricePerMeter  Float
+  requiresSpinning   Boolean            @default(true)
+  description        String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  boms               BillOfMaterials[]
+  orderItems         OrderItem[]
+
+  @@map("fabric_products")
+}
+
+model YarnMaterial {
+  id                  String                 @id @default(cuid())
+  code                String                 @unique
+  name                String
+  yarnType            String
+  count               String                 // 40s, 30s, etc.
+  color               String
+  unit                String                 @default("KG")
+  currentStock        Float                  @default(0)
+  reservedStock       Float                  @default(0)
+  minimumStockAlert   Float                  @default(100)
+  costPerUnit         Float                  @default(250)
+  storageLocation     String?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  boms                BillOfMaterials[]
+  purchaseRequests    PurchaseRequest[]
+  purchaseOrders      PurchaseOrder[]
+  goodsReceipts       GoodsReceipt[]
+  transactions        InventoryTransaction[]
+
+  @@map("yarn_materials")
+}
+
+model BillOfMaterials {
+  id                   String        @id @default(cuid())
+  fabricProductId      String
+  yarnMaterialId       String
+  yarnQuantityPerMeter Float
+  wastagePercentage    Float         @default(3.0)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  fabricProduct        FabricProduct @relation(fields: [fabricProductId], references: [id], onDelete: Cascade)
+  yarnMaterial         YarnMaterial  @relation(fields: [yarnMaterialId], references: [id], onDelete: Cascade)
+
+  @@unique([fabricProductId, yarnMaterialId])
+  @@map("bills_of_materials")
+}
+
+model Order {
+  id                   String           @id @default(cuid())
+  orderNumber          String           @unique
+  buyerId              String
+  orderDate            DateTime         @default(now())
+  requiredDeliveryDate DateTime
+  priority             String           @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  status               String           @default("CONFIRMED") // CONFIRMED, MATERIAL_ALLOCATED, IN_PRODUCTION, QUALITY_INSPECTION, READY_TO_SHIP, PARTIALLY_DISPATCHED, DISPATCHED, DELIVERED, CANCELLED
+  totalAmount          Float            @default(0)
+  notes                String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  buyer                Buyer            @relation(fields: [buyerId], references: [id])
+  items                OrderItem[]
+  purchaseRequests     PurchaseRequest[]
+  productionJobs       ProductionJob[]
+  rolls                Roll[]
+  dispatches           Dispatch[]
+  invoices             Invoice[]
+  expenses             ExpenseRecord[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                 String           @id @default(cuid())
+  orderId            String
+  fabricProductId    String
+  color              String
+  requiredQuantity   Float
+  unit               String           @default("METERS")
+  unitPrice          Float
+  totalPrice         Float
+  specifications     String?
+  producedQuantity   Float            @default(0)
+  passedQuantity     Float            @default(0)
+  reworkQuantity     Float            @default(0)
+  rejectedQuantity   Float            @default(0)
+  dispatchedQuantity Float            @default(0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  order              Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fabricProduct      FabricProduct    @relation(fields: [fabricProductId], references: [id])
+  productionJobs     ProductionJob[]
+  rolls              Roll[]
+  dispatchItems      DispatchItem[]
+
+  @@map("order_items")
+}
+
+model PurchaseRequest {
+  id                String          @id @default(cuid())
+  requestNumber     String          @unique
+  yarnMaterialId    String
+  orderId           String?
+  requestedQuantity Float
+  requiredByDate    DateTime
+  reason            String
+  status            String          @default("PENDING") // PENDING, APPROVED, ORDERED, RECEIVED, REJECTED
+  requestedById     String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  yarnMaterial      YarnMaterial    @relation(fields: [yarnMaterialId], references: [id])
+  order             Order?          @relation(fields: [orderId], references: [id])
+  purchaseOrders    PurchaseOrder[]
+
+  @@map("purchase_requests")
+}
+
+model PurchaseOrder {
+  id                   String          @id @default(cuid())
+  poNumber             String          @unique
+  purchaseRequestId    String?
+  supplierId           String
+  yarnMaterialId       String
+  orderedQuantity      Float
+  unitPrice            Float
+  totalCost            Float
+  expectedDeliveryDate DateTime
+  status               String          @default("ORDERED") // ORDERED, PARTIALLY_RECEIVED, COMPLETED, CANCELLED
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  purchaseRequest      PurchaseRequest? @relation(fields: [purchaseRequestId], references: [id])
+  supplier             Supplier        @relation(fields: [supplierId], references: [id])
+  yarnMaterial         YarnMaterial    @relation(fields: [yarnMaterialId], references: [id])
+  goodsReceipts        GoodsReceipt[]
+
+  @@map("purchase_orders")
+}
+
+model GoodsReceipt {
+  id              String                 @id @default(cuid())
+  receiptNumber   String                 @unique
+  purchaseOrderId String?
+  supplierId      String
+  yarnMaterialId  String
+  batchNumber     String
+  quantityReceived Float
+  unit            String                 @default("KG")
+  unitCost        Float
+  totalCost       Float
+  receiptDate     DateTime               @default(now())
+  inspectionStatus String                @default("ACCEPTED") // ACCEPTED, REJECTED, PENDING
+  remarks         String?
+  receivedById    String?
+  createdAt       DateTime               @default(now())
+
+  purchaseOrder   PurchaseOrder?         @relation(fields: [purchaseOrderId], references: [id])
+  supplier        Supplier               @relation(fields: [supplierId], references: [id])
+  yarnMaterial    YarnMaterial           @relation(fields: [yarnMaterialId], references: [id])
+  transactions    InventoryTransaction[]
+
+  @@map("goods_receipts")
+}
+
+model InventoryTransaction {
+  id               String        @id @default(cuid())
+  yarnMaterialId   String
+  transactionType  String        // RECEIPT, RESERVATION, RELEASE_RESERVATION, CONSUMPTION, ADJUSTMENT, RETURN
+  quantity         Float
+  previousStock    Float
+  newStock         Float
+  previousReserved Float         @default(0)
+  newReserved      Float         @default(0)
+  unitCost         Float         @default(0)
+  referenceType    String?       // GOODS_RECEIPT, ORDER, PRODUCTION_JOB, MANUAL_ADJUSTMENT
+  referenceId      String?
+  goodsReceiptId   String?
+  reason           String?
+  performedById    String?
+  createdAt        DateTime      @default(now())
+
+  yarnMaterial     YarnMaterial  @relation(fields: [yarnMaterialId], references: [id])
+  goodsReceipt     GoodsReceipt? @relation(fields: [goodsReceiptId], references: [id])
+
+  @@map("inventory_transactions")
+}
+
+model Machine {
+  id                  String          @id @default(cuid())
+  code                String          @unique
+  name                String
+  type                String          // SPINNING, WEAVING, DYEING
+  model               String?
+  status              String          @default("IDLE") // IDLE, RUNNING, MAINTENANCE, BREAKDOWN
+  capacityPerHour     Float
+  hourlyOperatingCost Float           @default(150.0)
+  lastMaintenanceDate DateTime?
+  location            String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  productionJobs      ProductionJob[]
+
+  @@map("machines")
+}
+
+model Shift {
+  id             String          @id @default(cuid())
+  name           String          // Shift A, Shift B, Shift C
+  startTime      String          // 06:00
+  endTime        String          // 14:00
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+
+  productionJobs ProductionJob[]
+  attendance     Attendance[]
+
+  @@map("shifts")
+}
+
+model ProductionJob {
+  id                      String          @id @default(cuid())
+  jobNumber               String          @unique
+  orderId                 String
+  orderItemId             String
+  stage                   String          // SPINNING, WEAVING, DYEING
+  machineId               String
+  shiftId                 String?
+  assignedEmployeeId      String?
+  plannedQuantity         Float
+  actualQuantity          Float           @default(0)
+  wastageQuantity         Float           @default(0)
+  startTime               DateTime?
+  completionTime          DateTime?
+  status                  String          @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, PAUSED
+  downtimeDurationMinutes Float           @default(0)
+  downtimeReason          String?
+  operatorRemarks         String?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  order                   Order           @relation(fields: [orderId], references: [id])
+  orderItem               OrderItem       @relation(fields: [orderItemId], references: [id])
+  machine                 Machine         @relation(fields: [machineId], references: [id])
+  shift                   Shift?          @relation(fields: [shiftId], references: [id])
+  assignedEmployee        Employee?       @relation(fields: [assignedEmployeeId], references: [id])
+  logs                    ProductionLog[]
+  rolls                   Roll[]
+
+  @@map("production_jobs")
+}
+
+model ProductionLog {
+  id              String        @id @default(cuid())
+  productionJobId String
+  quantityProduced Float
+  logDate         DateTime      @default(now())
+  operatorName    String?
+  machineStatus   String?
+  notes           String?
+
+  productionJob   ProductionJob @relation(fields: [productionJobId], references: [id], onDelete: Cascade)
+
+  @@map("production_logs")
+}
+
+model FinishedGoodsLocation {
+  id               String   @id @default(cuid())
+  locationCode     String   @unique
+  zone             String
+  capacityRolls    Int      @default(50)
+  currentRollCount Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  rolls            Roll[]
+
+  @@map("finished_goods_locations")
+}
+
+model Roll {
+  id              String                 @id @default(cuid())
+  rollId          String                 @unique // Unique non-reusable roll ID: ROLL-2026-XXXX
+  orderId         String
+  orderItemId     String
+  productionJobId String?
+  fabricType      String
+  color           String
+  lengthMeters    Float
+  weightKg        Float?
+  qualityStatus   String                 @default("PENDING_INSPECTION") // PENDING_INSPECTION, PASSED, REWORK_REQUIRED, REJECTED
+  inventoryStatus String                 @default("IN_PROCESS") // IN_PROCESS, IN_FINISHED_STOCK, ALLOCATED_FOR_DISPATCH, DISPATCHED
+  locationId      String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  order           Order                  @relation(fields: [orderId], references: [id])
+  orderItem       OrderItem              @relation(fields: [orderItemId], references: [id])
+  productionJob   ProductionJob?         @relation(fields: [productionJobId], references: [id])
+  location        FinishedGoodsLocation? @relation(fields: [locationId], references: [id])
+  inspections     QualityInspection[]
+  reworks         ReworkRecord[]
+  dispatchItems   DispatchItem[]
+
+  @@map("rolls")
+}
+
+model QualityInspection {
+  id                String   @id @default(cuid())
+  rollId            String
+  inspectorId       String?
+  inspectorName     String
+  inspectionDate    DateTime @default(now())
+  result            String   // PASSED, REWORK_REQUIRED, REJECTED
+  defectCategory    String?  // HOLES, COLOR_MISMATCH, UNEVEN_WEAVING, STAINS, OTHER, NONE
+  defectDescription String?
+  defectiveQuantity Float    @default(0)
+  severity          String?  // MINOR, MAJOR, CRITICAL
+  remarks           String?
+  createdAt         DateTime @default(now())
+
+  roll              Roll     @relation(fields: [rollId], references: [id], onDelete: Cascade)
+
+  @@map("quality_inspections")
+}
+
+model ReworkRecord {
+  id                  String    @id @default(cuid())
+  rollId              String
+  reworkStage         String    // DYEING, RE_WEAVING, FINISHING
+  reason              String
+  actionTaken         String?
+  assignedTo          String?
+  status              String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  startedAt           DateTime?
+  completedAt         DateTime?
+  reinspectionResult  String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  roll                Roll      @relation(fields: [rollId], references: [id], onDelete: Cascade)
+
+  @@map("rework_records")
+}
+
+model Dispatch {
+  id              String         @id @default(cuid())
+  dispatchNumber  String         @unique
+  orderId         String
+  buyerId         String
+  dispatchDate    DateTime       @default(now())
+  carrierName     String
+  vehicleNumber   String?
+  trackingNumber  String?
+  status          String         @default("DISPATCHED") // PACKED, LOADED, DISPATCHED, IN_TRANSIT, DELIVERED
+  totalMeters     Float
+  totalRolls      Int
+  dispatchStaffId String?
+  notes           String?
+  createdAt       DateTime       @default(now())
+
+  order           Order          @relation(fields: [orderId], references: [id])
+  buyer           Buyer          @relation(fields: [buyerId], references: [id])
+  items           DispatchItem[]
+  invoices        Invoice[]
+
+  @@map("dispatches")
+}
+
+model DispatchItem {
+  id          String    @id @default(cuid())
+  dispatchId  String
+  orderItemId String
+  rollId      String
+  meters      Float
+
+  dispatch    Dispatch  @relation(fields: [dispatchId], references: [id], onDelete: Cascade)
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  roll        Roll      @relation(fields: [rollId], references: [id])
+
+  @@map("dispatch_items")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  orderId       String
+  buyerId       String
+  dispatchId    String?
+  subtotal      Float
+  taxRate       Float         @default(5.0)
+  taxAmount     Float
+  totalAmount   Float
+  paidAmount    Float         @default(0)
+  balanceAmount Float
+  status        String        @default("UNPAID") // UNPAID, PARTIALLY_PAID, PAID, OVERDUE
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  order         Order         @relation(fields: [orderId], references: [id])
+  buyer         Buyer         @relation(fields: [buyerId], references: [id])
+  dispatch      Dispatch?     @relation(fields: [dispatchId], references: [id])
+  items         InvoiceItem[]
+  payments      Payment[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Float
+  unit        String
+  unitPrice   Float
+  amount      Float
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id                   String   @id @default(cuid())
+  paymentNumber        String   @unique
+  invoiceId            String
+  buyerId              String
+  amount               Float
+  paymentDate          DateTime @default(now())
+  paymentMethod        String   // BANK_TRANSFER, CHEQUE, UPI, CASH
+  transactionReference String   @unique
+  recordedById         String?
+  notes                String?
+  createdAt            DateTime @default(now())
+
+  invoice              Invoice  @relation(fields: [invoiceId], references: [id])
+
+  @@map("payments")
+}
+
+model Attendance {
+  id            String    @id @default(cuid())
+  employeeId    String
+  date          DateTime
+  shiftId       String?
+  status        String    // PRESENT, ABSENT, HALF_DAY, ON_LEAVE
+  hoursWorked   Float     @default(8.0)
+  overtimeHours Float     @default(0)
+  remarks       String?
+  createdAt     DateTime  @default(now())
+
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shift         Shift?    @relation(fields: [shiftId], references: [id])
+
+  @@unique([employeeId, date])
+  @@map("attendance")
+}
+
+model WageRecord {
+  id               String    @id @default(cuid())
+  employeeId       String
+  periodMonth      Int
+  periodYear       Int
+  basePay          Float
+  overtimePay      Float     @default(0)
+  bonuses          Float     @default(0)
+  deductions       Float     @default(0)
+  netWage          Float
+  status           String    @default("PENDING") // PENDING, APPROVED, PAID
+  paymentDate      DateTime?
+  calculationNotes String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  employee         Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, periodMonth, periodYear])
+  @@map("wage_records")
+}
+
+model ExpenseRecord {
+  id                String   @id @default(cuid())
+  expenseNumber     String   @unique
+  category          String   // RAW_MATERIAL_CONSUMED, DIRECT_LABOUR, MACHINE_OPERATING, ELECTRICITY_UTILITIES, DYEING_PROCESSING, MAINTENANCE, OTHER
+  orderId           String?
+  amount            Float
+  expenseDate       DateTime @default(now())
+  description       String
+  recordedById      String?
+  receiptReference  String?
+  createdAt         DateTime @default(now())
+
+  order             Order?   @relation(fields: [orderId], references: [id])
+
+  @@map("expense_records")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  buyerId   String?
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, WARNING, SUCCESS, ALERT
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buyer     Buyer?   @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  action          String
+  entityType      String
+  entityId        String
+  performedById   String?
+  performedByName String?
+  details         String
+  ipAddress       String?
+  createdAt       DateTime @default(now())
+
+  user            User?    @relation(fields: [performedById], references: [id])
+
+  @@map("audit_logs")
+}
