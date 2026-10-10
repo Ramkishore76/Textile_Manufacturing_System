@@ -13,7 +13,8 @@
     "db:check": "tsx src/db/dbCheck.ts",
     "db:audit": "tsx src/db/schemaAudit.ts",
     "db:benchmark": "tsx src/db/dbBenchmark.ts",
-    "db:verify-catalog": "tsx src/scripts/verify-buyer-catalog-db.ts"
+    "db:verify-catalog": "tsx src/scripts/verify-buyer-catalog-db.ts",
+    "db:clean-dummy": "tsx src/scripts/clean-dummy-data.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

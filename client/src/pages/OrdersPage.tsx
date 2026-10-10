@@ -461,11 +461,13 @@ export const OrdersPage: React.FC = () => {
                                 title="Click to view full buyer contact details"
                               >
                                 <span className="font-bold text-indigo-700 group-hover:underline block">
-                                  {order.buyer?.companyName || 'Nordic Apparel Corp'}
+                                  {order.buyer?.companyName || '—'}
                                 </span>
-                                <span className="text-[11px] text-zinc-500 block">
-                                  {order.buyer?.name ? `Contact: ${order.buyer?.name}` : 'Anders Lindqvist'}
-                                </span>
+                                {order.buyer?.name && (
+                                  <span className="text-[11px] text-zinc-500 block">
+                                    Contact: {order.buyer.name}
+                                  </span>
+                                )}
                               </button>
                             ) : (
                               <div>
@@ -661,7 +663,7 @@ export const OrdersPage: React.FC = () => {
 
               <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200/80">
                 <span className="text-[10px] font-semibold uppercase text-zinc-400 block">Consignment Address</span>
-                <p className="font-medium text-zinc-800">{inspectedBuyer.address || 'Export factory warehouse'}</p>
+                <p className="font-medium text-zinc-800">{inspectedBuyer.address || 'N/A'}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
@@ -671,7 +673,7 @@ export const OrdersPage: React.FC = () => {
                 </div>
                 <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200/80">
                   <span className="text-[10px] font-semibold uppercase text-zinc-400 block">Credit Limit</span>
-                  <p className="font-mono font-bold text-emerald-700">₹{(inspectedBuyer.creditLimit || 1000000).toLocaleString()}</p>
+                  <p className="font-mono font-bold text-emerald-700">{inspectedBuyer.creditLimit != null ? `₹${inspectedBuyer.creditLimit.toLocaleString()}` : 'N/A'}</p>
                 </div>
               </div>
             </div>
