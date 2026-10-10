@@ -118,25 +118,21 @@ export const WagesPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-indigo-600 mb-1">
-            <Wallet className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-wider">Payroll & Accounts</span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Labour Wages & Payroll Register</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Calculate accurate wages derived from daily shift logs, base pay, overtime, and bonuses
+          <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">Labour Wages & Payroll Register</h1>
+          <p className="text-xs text-neutral-500 mt-0.5">
+            Monthly payroll calculated from shift presence logs, base rates, and overtime hours.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           {/* Month & Year Selectors */}
-          <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+          <div className="flex items-center space-x-2 bg-white border border-neutral-300 px-2.5 py-1.5 rounded-md text-xs">
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none"
+              className="bg-transparent text-xs text-neutral-800 focus:outline-none"
             >
               {months.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -147,7 +143,7 @@ export const WagesPage: React.FC = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-xs font-bold text-slate-800 focus:outline-none"
+              className="bg-transparent text-xs text-neutral-800 focus:outline-none"
             >
               {[2024, 2025, 2026, 2027].map((y) => (
                 <option key={y} value={y}>
@@ -159,122 +155,122 @@ export const WagesPage: React.FC = () => {
 
           <button
             onClick={() => setCalcModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
           >
-            <Calculator className="w-4 h-4" />
-            <span>Calculate Wages for Staff</span>
+            <Calculator className="w-3.5 h-3.5" />
+            <span>Calculate Wages</span>
           </button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Total Net Payroll</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-slate-900">₹{totalNetPayroll.toLocaleString()}</span>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Total Net Payroll</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-neutral-900">₹{totalNetPayroll.toLocaleString()}</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">For {months.find((m) => m.value === selectedMonth)?.name} {selectedYear}</p>
+          <p className="text-[11px] text-neutral-400 mt-0.5">For {months.find((m) => m.value === selectedMonth)?.name} {selectedYear}</p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Base Days Salary</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-indigo-600">₹{totalBasePay.toLocaleString()}</span>
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Base Days Salary</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-neutral-900">₹{totalBasePay.toLocaleString()}</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">Standard shift hours</p>
+          <p className="text-[11px] text-neutral-400 mt-0.5">Standard shift hours</p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Overtime Disbursed</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-purple-600">₹{totalOvertime.toLocaleString()}</span>
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Overtime Disbursed</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-neutral-900">₹{totalOvertime.toLocaleString()}</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">Overtime incentive payout</p>
+          <p className="text-[11px] text-neutral-400 mt-0.5">Overtime incentive payout</p>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Settlement Status</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-emerald-600">
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Settlement Status</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-emerald-700">
               {paidCount} / {wages.length}
             </span>
-            <span className="text-xs font-medium text-slate-400">paid</span>
+            <span className="text-xs text-neutral-400">paid</span>
           </div>
         </div>
       </div>
 
       {/* Wages Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-neutral-200/80 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 font-medium">Loading wages register...</div>
+          <div className="p-8 text-center text-neutral-400 text-xs font-normal">Loading wages register...</div>
         ) : wages.length === 0 ? (
-          <div className="p-12 text-center">
-            <Wallet className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-700">No Wage Records Generated Yet</h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Click "Calculate Wages for Staff" to auto-compile attendance and overtime into monthly wages.
+          <div className="p-10 text-center">
+            <Wallet className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
+            <h3 className="text-xs font-semibold text-neutral-700">No Wage Records Generated Yet</h3>
+            <p className="text-[11px] text-neutral-400 mt-0.5">
+              Click "Calculate Wages" to auto-compile attendance and overtime into monthly wages.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+              <thead className="bg-neutral-50/40 border-b border-neutral-200/80 text-neutral-500 font-medium text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Employee</th>
-                  <th className="py-3 px-4">Base Pay</th>
-                  <th className="py-3 px-4">Overtime Pay</th>
-                  <th className="py-3 px-4">Bonuses</th>
-                  <th className="py-3 px-4">Deductions</th>
-                  <th className="py-3 px-4">Net Wage</th>
-                  <th className="py-3 px-4">Audit Breakdown</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-2.5 px-4">Employee</th>
+                  <th className="py-2.5 px-4">Base Pay</th>
+                  <th className="py-2.5 px-4">Overtime Pay</th>
+                  <th className="py-2.5 px-4">Bonuses</th>
+                  <th className="py-2.5 px-4">Deductions</th>
+                  <th className="py-2.5 px-4">Net Wage</th>
+                  <th className="py-2.5 px-4">Audit Breakdown</th>
+                  <th className="py-2.5 px-4">Status</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-neutral-100 text-neutral-700">
                 {wages.map((w) => (
-                  <tr key={w.id} className="hover:bg-slate-50 transition">
+                  <tr key={w.id} className="hover:bg-neutral-50/60 transition">
                     <td className="py-3 px-4">
-                      <span className="font-mono font-bold text-slate-900 block">{w.employee?.employeeCode}</span>
-                      <span className="font-semibold text-slate-800">{w.employee?.name}</span>
-                      <span className="text-[10px] text-slate-400 block">{w.employee?.department}</span>
+                      <span className="font-mono font-medium text-neutral-900 block">{w.employee?.employeeCode}</span>
+                      <span className="font-medium text-neutral-800">{w.employee?.name}</span>
+                      <span className="text-[10px] text-neutral-400 block">{w.employee?.department}</span>
                     </td>
 
-                    <td className="py-3 px-4 font-mono font-semibold text-slate-800">
+                    <td className="py-3 px-4 text-neutral-800">
                       ₹{w.basePay?.toLocaleString()}
                     </td>
 
-                    <td className="py-3 px-4 font-mono text-purple-600 font-semibold">
+                    <td className="py-3 px-4 text-neutral-800">
                       ₹{w.overtimePay?.toLocaleString()}
                     </td>
 
-                    <td className="py-3 px-4 font-mono text-emerald-600">
+                    <td className="py-3 px-4 text-neutral-800">
                       +₹{w.bonuses?.toLocaleString()}
                     </td>
 
-                    <td className="py-3 px-4 font-mono text-rose-600">
+                    <td className="py-3 px-4 text-neutral-600">
                       -₹{w.deductions?.toLocaleString()}
                     </td>
 
-                    <td className="py-3 px-4 font-mono font-black text-slate-900 text-sm">
+                    <td className="py-3 px-4 font-semibold text-neutral-900">
                       ₹{w.netWage?.toLocaleString()}
                     </td>
 
                     <td className="py-3 px-4 max-w-xs">
-                      <p className="text-[11px] text-slate-500 line-clamp-2" title={w.calculationNotes}>
+                      <p className="text-[11px] text-neutral-500 line-clamp-2" title={w.calculationNotes}>
                         {w.calculationNotes}
                       </p>
                     </td>
 
                     <td className="py-3 px-4">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${
                           w.status === 'PAID'
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/60'
                             : w.status === 'APPROVED'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-amber-100 text-amber-800'
+                            ? 'bg-blue-50 text-blue-800 border border-blue-200/60'
+                            : 'bg-amber-50 text-amber-800 border border-amber-200/60'
                         }`}
                       >
                         {w.status}
@@ -285,7 +281,7 @@ export const WagesPage: React.FC = () => {
                       {w.status === 'PENDING' && (
                         <button
                           onClick={() => handleUpdateStatus(w.id, 'APPROVED')}
-                          className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] shadow-sm transition"
+                          className="px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
                         >
                           Approve
                         </button>
@@ -293,13 +289,13 @@ export const WagesPage: React.FC = () => {
                       {w.status === 'APPROVED' && (
                         <button
                           onClick={() => handleUpdateStatus(w.id, 'PAID')}
-                          className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-sm transition"
+                          className="px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
                         >
                           Mark Paid
                         </button>
                       )}
                       {w.status === 'PAID' && (
-                        <span className="text-[10px] text-emerald-600 font-bold flex items-center justify-end space-x-1">
+                        <span className="text-[11px] text-emerald-700 font-medium flex items-center justify-end space-x-1">
                           <CheckCircle2 className="w-3 h-3" />
                           <span>Settled</span>
                         </span>
@@ -315,33 +311,33 @@ export const WagesPage: React.FC = () => {
 
       {/* Calculate Wage Modal */}
       {calcModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-base font-black text-slate-900">Calculate Monthly Wage</h3>
+        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-neutral-200">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-4">
+              <h3 className="text-sm font-semibold text-neutral-900">Calculate Monthly Wage</h3>
               <button
                 onClick={() => setCalcModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                className="p-1 text-neutral-400 hover:text-neutral-600 rounded-md"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {calcError && (
-              <div className="mt-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+              <div className="mb-3 p-2.5 rounded-md bg-rose-50 border border-rose-200/60 text-rose-800 text-xs">
                 {calcError}
               </div>
             )}
 
-            <form onSubmit={handleCalculateWage} className="mt-4 space-y-4">
+            <form onSubmit={handleCalculateWage} className="space-y-3 text-xs">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Select Employee *
                 </label>
                 <select
                   value={calcEmployeeId}
                   onChange={(e) => setCalcEmployeeId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 bg-white focus:outline-none focus:border-neutral-900"
                   required
                 >
                   {employees.map((e) => (
@@ -354,7 +350,7 @@ export const WagesPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-medium text-neutral-700 mb-1">
                     Bonuses (₹)
                   </label>
                   <input
@@ -362,12 +358,12 @@ export const WagesPage: React.FC = () => {
                     value={bonuses}
                     onChange={(e) => setBonuses(Number(e.target.value))}
                     min={0}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label className="block text-xs font-medium text-neutral-700 mb-1">
                     Deductions (₹)
                   </label>
                   <input
@@ -375,13 +371,13 @@ export const WagesPage: React.FC = () => {
                     value={deductions}
                     onChange={(e) => setDeductions(Number(e.target.value))}
                     min={0}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Adjustment Reason (Optional)
                 </label>
                 <input
@@ -389,7 +385,7 @@ export const WagesPage: React.FC = () => {
                   value={adjustmentReason}
                   onChange={(e) => setAdjustmentReason(e.target.value)}
                   placeholder="e.g. Festival attendance bonus"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
                 />
               </div>
 
@@ -397,14 +393,14 @@ export const WagesPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setCalcModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs"
+                  className="px-3 py-1.5 rounded-md bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 font-medium text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={calcSubmitting}
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition"
+                  className="px-4 py-1.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
                 >
                   {calcSubmitting ? 'Calculating...' : 'Run Auto Calculation'}
                 </button>
@@ -416,3 +412,4 @@ export const WagesPage: React.FC = () => {
     </div>
   );
 };
+

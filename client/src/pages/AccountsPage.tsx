@@ -175,24 +175,20 @@ export const AccountsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-indigo-600 mb-1">
-            <FileText className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-wider">Financial Accounting & Profitability</span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Billing, Payments & Cost Control</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Track commercial invoices, buyer cash receipts, manufacturing overheads, and real-time order margins
+          <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">Billing, Payments & Cost Control</h1>
+          <p className="text-xs text-neutral-500 mt-0.5">
+            Commercial invoices, buyer receipts, plant expenses, and order margin analysis.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => setExpenseModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>Record Plant Expense</span>
           </button>
         </div>
@@ -200,60 +196,60 @@ export const AccountsPage: React.FC = () => {
 
       {/* Financial Executive Summary Cards */}
       {financials && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 uppercase">Gross Invoiced Revenue</p>
-            <div className="flex items-baseline space-x-2 mt-2">
-              <span className="text-2xl font-black text-slate-900">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+            <p className="text-xs font-medium text-neutral-500">Gross Invoiced Revenue</p>
+            <div className="flex items-baseline space-x-1.5 mt-1">
+              <span className="text-2xl font-semibold text-neutral-900">
                 ₹{financials.salesRevenue?.toLocaleString()}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">+ ₹{financials.gstCollected?.toLocaleString()} GST collected</p>
+            <p className="text-[11px] text-neutral-400 mt-0.5">+ ₹{financials.gstCollected?.toLocaleString()} GST collected</p>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 uppercase">Cash Collected</p>
-            <div className="flex items-baseline space-x-2 mt-2">
-              <span className="text-2xl font-black text-emerald-600">
+          <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+            <p className="text-xs font-medium text-neutral-500">Cash Collected</p>
+            <div className="flex items-baseline space-x-1.5 mt-1">
+              <span className="text-2xl font-semibold text-emerald-700">
                 ₹{financials.cashPaymentsReceived?.toLocaleString()}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Settled payments received</p>
+            <p className="text-[11px] text-neutral-400 mt-0.5">Settled payments received</p>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 uppercase">Accounts Receivable</p>
-            <div className="flex items-baseline space-x-2 mt-2">
-              <span className="text-2xl font-black text-amber-600">
+          <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+            <p className="text-xs font-medium text-neutral-500">Accounts Receivable</p>
+            <div className="flex items-baseline space-x-1.5 mt-1">
+              <span className="text-2xl font-semibold text-amber-700">
                 ₹{financials.outstandingReceivables?.toLocaleString()}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Pending buyer collections</p>
+            <p className="text-[11px] text-neutral-400 mt-0.5">Pending buyer collections</p>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 uppercase">Gross Operating Margin</p>
-            <div className="flex items-baseline space-x-2 mt-2">
-              <span className="text-2xl font-black text-indigo-600">
+          <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+            <p className="text-xs font-medium text-neutral-500">Gross Operating Margin</p>
+            <div className="flex items-baseline space-x-1.5 mt-1">
+              <span className="text-2xl font-semibold text-neutral-900">
                 {financials.profitMargin}%
               </span>
-              <span className="text-xs font-bold text-slate-500">
+              <span className="text-xs font-normal text-neutral-500">
                 (₹{financials.netProfit?.toLocaleString()})
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">Net of materials, power & labour</p>
+            <p className="text-[11px] text-neutral-400 mt-0.5">Net of materials, power & labour</p>
           </div>
         </div>
       )}
 
       {/* Tabs Navigation */}
-      <div className="flex border-b border-slate-200 bg-white px-6 rounded-t-2xl">
+      <div className="flex border-b border-neutral-200 space-x-6 text-xs">
         <button
           onClick={() => setActiveTab('invoices')}
-          className={`py-4 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition ${
+          className={`pb-2.5 transition border-b-2 text-xs ${
             activeTab === 'invoices'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-400 hover:text-slate-700'
+              ? 'border-neutral-900 text-neutral-900 font-semibold'
+              : 'border-transparent text-neutral-500 hover:text-neutral-800 font-normal'
           }`}
         >
           Commercial Invoices ({invoices.length})
@@ -261,10 +257,10 @@ export const AccountsPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('payments')}
-          className={`py-4 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition ${
+          className={`pb-2.5 transition border-b-2 text-xs ${
             activeTab === 'payments'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-400 hover:text-slate-700'
+              ? 'border-neutral-900 text-neutral-900 font-semibold'
+              : 'border-transparent text-neutral-500 hover:text-neutral-800 font-normal'
           }`}
         >
           Buyer Payments Ledger ({payments.length})
@@ -272,10 +268,10 @@ export const AccountsPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('expenses')}
-          className={`py-4 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition ${
+          className={`pb-2.5 transition border-b-2 text-xs ${
             activeTab === 'expenses'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-400 hover:text-slate-700'
+              ? 'border-neutral-900 text-neutral-900 font-semibold'
+              : 'border-transparent text-neutral-500 hover:text-neutral-800 font-normal'
           }`}
         >
           Manufacturing Overheads ({expenses.length})
@@ -283,10 +279,10 @@ export const AccountsPage: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('profitability')}
-          className={`py-4 px-4 text-xs font-bold uppercase tracking-wider border-b-2 transition ${
+          className={`pb-2.5 transition border-b-2 text-xs ${
             activeTab === 'profitability'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-400 hover:text-slate-700'
+              ? 'border-neutral-900 text-neutral-900 font-semibold'
+              : 'border-transparent text-neutral-500 hover:text-neutral-800 font-normal'
           }`}
         >
           Order Cost & Profit Explorer
@@ -295,63 +291,63 @@ export const AccountsPage: React.FC = () => {
 
       {/* TAB 1: INVOICES */}
       {activeTab === 'invoices' && (
-        <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-neutral-200/80 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
+              <thead className="bg-neutral-50/40 border-b border-neutral-200/80 text-neutral-500 font-medium text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Invoice #</th>
-                  <th className="py-3 px-4">Buyer Company</th>
-                  <th className="py-3 px-4">Order #</th>
-                  <th className="py-3 px-4">Issue Date</th>
-                  <th className="py-3 px-4">Due Date</th>
-                  <th className="py-3 px-4">Subtotal</th>
-                  <th className="py-3 px-4">Total (5% GST)</th>
-                  <th className="py-3 px-4">Paid / Balance</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-2.5 px-4">Invoice #</th>
+                  <th className="py-2.5 px-4">Buyer Company</th>
+                  <th className="py-2.5 px-4">Order #</th>
+                  <th className="py-2.5 px-4">Issue Date</th>
+                  <th className="py-2.5 px-4">Due Date</th>
+                  <th className="py-2.5 px-4">Subtotal</th>
+                  <th className="py-2.5 px-4">Total (5% GST)</th>
+                  <th className="py-2.5 px-4">Paid / Balance</th>
+                  <th className="py-2.5 px-4">Status</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-neutral-100 text-neutral-700">
                 {invoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50 transition">
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-600">
+                  <tr key={inv.id} className="hover:bg-neutral-50/60 transition">
+                    <td className="py-3 px-4 font-mono font-medium text-neutral-900">
                       {inv.invoiceNumber}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-slate-800">
+                    <td className="py-3 px-4 font-medium text-neutral-800">
                       {inv.buyer?.companyName}
                     </td>
-                    <td className="py-3 px-4 font-bold text-slate-900">
+                    <td className="py-3 px-4 font-medium text-neutral-900">
                       {inv.order?.orderNumber}
                     </td>
-                    <td className="py-3 px-4 text-slate-500">
+                    <td className="py-3 px-4 text-neutral-500">
                       {new Date(inv.issueDate).toLocaleDateString()}
                     </td>
-                    <td className="py-3 px-4 text-slate-500">
+                    <td className="py-3 px-4 text-neutral-500">
                       {new Date(inv.dueDate).toLocaleDateString()}
                     </td>
-                    <td className="py-3 px-4 font-mono">
+                    <td className="py-3 px-4">
                       ₹{inv.subtotal?.toLocaleString()}
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                    <td className="py-3 px-4 font-semibold text-neutral-900">
                       ₹{inv.totalAmount?.toLocaleString()}
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-mono text-emerald-600 font-semibold">
+                      <div className="text-emerald-700 font-medium">
                         Paid: ₹{inv.paidAmount?.toLocaleString()}
                       </div>
-                      <div className="font-mono text-amber-600 font-bold text-[10px]">
+                      <div className="text-neutral-500 text-[10px]">
                         Bal: ₹{inv.balanceAmount?.toLocaleString()}
                       </div>
                     </td>
                     <td className="py-3 px-4">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium ${
                           inv.status === 'PAID'
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/60'
                             : inv.status === 'PARTIALLY_PAID'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-rose-100 text-rose-800'
+                            ? 'bg-amber-50 text-amber-800 border border-amber-200/60'
+                            : 'bg-rose-50 text-rose-800 border border-rose-200/60'
                         }`}
                       >
                         {inv.status}
@@ -361,7 +357,7 @@ export const AccountsPage: React.FC = () => {
                       {inv.balanceAmount > 0 && (
                         <button
                           onClick={() => openPaymentModal(inv)}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-sm transition"
+                          className="px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
                         >
                           Record Payment
                         </button>
@@ -377,48 +373,48 @@ export const AccountsPage: React.FC = () => {
 
       {/* TAB 2: PAYMENTS LEDGER */}
       {activeTab === 'payments' && (
-        <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-neutral-200/80 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
+              <thead className="bg-neutral-50/40 border-b border-neutral-200/80 text-neutral-500 font-medium text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Payment #</th>
-                  <th className="py-3 px-4">Payment Date</th>
-                  <th className="py-3 px-4">Invoice #</th>
-                  <th className="py-3 px-4">Buyer Company</th>
-                  <th className="py-3 px-4">Amount Received</th>
-                  <th className="py-3 px-4">Method</th>
-                  <th className="py-3 px-4">Txn Reference #</th>
-                  <th className="py-3 px-4">Notes</th>
+                  <th className="py-2.5 px-4">Payment #</th>
+                  <th className="py-2.5 px-4">Payment Date</th>
+                  <th className="py-2.5 px-4">Invoice #</th>
+                  <th className="py-2.5 px-4">Buyer Company</th>
+                  <th className="py-2.5 px-4">Amount Received</th>
+                  <th className="py-2.5 px-4">Method</th>
+                  <th className="py-2.5 px-4">Txn Reference #</th>
+                  <th className="py-2.5 px-4">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-neutral-100 text-neutral-700">
                 {payments.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50 transition">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                  <tr key={p.id} className="hover:bg-neutral-50/60 transition">
+                    <td className="py-3 px-4 font-mono font-medium text-neutral-900">
                       {p.paymentNumber}
                     </td>
-                    <td className="py-3 px-4 text-slate-500">
+                    <td className="py-3 px-4 text-neutral-500">
                       {new Date(p.paymentDate).toLocaleDateString()}
                     </td>
-                    <td className="py-3 px-4 font-mono font-semibold text-indigo-600">
+                    <td className="py-3 px-4 font-mono font-medium text-neutral-800">
                       {p.invoice?.invoiceNumber}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-slate-800">
+                    <td className="py-3 px-4 text-neutral-700">
                       {p.invoice?.buyer?.companyName}
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-emerald-600 text-sm">
+                    <td className="py-3 px-4 font-semibold text-neutral-900">
                       ₹{p.amount?.toLocaleString()}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-700 border border-neutral-200/60">
                         {p.paymentMethod}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-mono text-slate-600">
+                    <td className="py-3 px-4 font-mono text-neutral-600">
                       {p.transactionReference}
                     </td>
-                    <td className="py-3 px-4 text-slate-500 italic">
+                    <td className="py-3 px-4 text-neutral-500 italic">
                       {p.notes || '—'}
                     </td>
                   </tr>
@@ -431,44 +427,44 @@ export const AccountsPage: React.FC = () => {
 
       {/* TAB 3: MANUFACTURING EXPENSES */}
       {activeTab === 'expenses' && (
-        <div className="bg-white rounded-b-2xl border-x border-b border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-neutral-200/80 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
+              <thead className="bg-neutral-50/40 border-b border-neutral-200/80 text-neutral-500 font-medium text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Expense #</th>
-                  <th className="py-3 px-4">Date</th>
-                  <th className="py-3 px-4">Cost Category</th>
-                  <th className="py-3 px-4">Description</th>
-                  <th className="py-3 px-4">Associated Order</th>
-                  <th className="py-3 px-4">Voucher / Receipt Ref</th>
-                  <th className="py-3 px-4 text-right">Amount</th>
+                  <th className="py-2.5 px-4">Expense #</th>
+                  <th className="py-2.5 px-4">Date</th>
+                  <th className="py-2.5 px-4">Cost Category</th>
+                  <th className="py-2.5 px-4">Description</th>
+                  <th className="py-2.5 px-4">Associated Order</th>
+                  <th className="py-2.5 px-4">Voucher / Receipt Ref</th>
+                  <th className="py-2.5 px-4 text-right">Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-neutral-100 text-neutral-700">
                 {expenses.map((e) => (
-                  <tr key={e.id} className="hover:bg-slate-50 transition">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                  <tr key={e.id} className="hover:bg-neutral-50/60 transition">
+                    <td className="py-3 px-4 font-mono font-medium text-neutral-900">
                       {e.expenseNumber}
                     </td>
-                    <td className="py-3 px-4 text-slate-500">
+                    <td className="py-3 px-4 text-neutral-500">
                       {new Date(e.expenseDate).toLocaleDateString()}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-neutral-100 text-neutral-700 border border-neutral-200/60">
                         {e.category?.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-semibold text-slate-800">
+                    <td className="py-3 px-4 text-neutral-800">
                       {e.description}
                     </td>
-                    <td className="py-3 px-4 text-indigo-600 font-semibold">
+                    <td className="py-3 px-4 font-medium text-neutral-800">
                       {e.order?.orderNumber || 'General Plant Overhead'}
                     </td>
-                    <td className="py-3 px-4 font-mono text-slate-500">
+                    <td className="py-3 px-4 font-mono text-neutral-500">
                       {e.receiptReference || '—'}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-rose-600 text-sm">
+                    <td className="py-3 px-4 text-right font-semibold text-neutral-900">
                       ₹{e.amount?.toLocaleString()}
                     </td>
                   </tr>
@@ -481,21 +477,21 @@ export const AccountsPage: React.FC = () => {
 
       {/* TAB 4: ORDER PROFITABILITY EXPLORER */}
       {activeTab === 'profitability' && (
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-lg border border-neutral-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div>
-              <h3 className="text-base font-black text-slate-900">Order-wise Profitability Breakdown</h3>
-              <p className="text-xs text-slate-500">Select any buyer order to analyze raw materials, machine hours, and margins</p>
+              <h3 className="font-semibold text-neutral-900">Order-wise Profitability Breakdown</h3>
+              <p className="text-[11px] text-neutral-500">Select any buyer order to analyze raw materials, machine hours, and margins</p>
             </div>
 
-            <div className="w-full md:w-80">
+            <div className="w-full sm:w-72">
               <select
                 value={selectedOrderId}
                 onChange={(e) => {
                   setSelectedOrderId(e.target.value);
                   loadOrderCost(e.target.value);
                 }}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 bg-white focus:outline-none focus:border-neutral-900"
               >
                 {orders.map((o) => (
                   <option key={o.id} value={o.id}>
@@ -507,56 +503,56 @@ export const AccountsPage: React.FC = () => {
           </div>
 
           {orderCostLoading ? (
-            <div className="p-12 text-center text-slate-400 font-medium">Calculating profitability breakdown...</div>
+            <div className="p-8 text-center text-neutral-400 font-normal text-xs">Calculating profitability breakdown...</div>
           ) : orderCostReport ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Financial Summary Card */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm md:col-span-1 space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <div className="bg-white p-5 rounded-lg border border-neutral-200/80 md:col-span-1 space-y-3">
+                <h4 className="text-xs font-semibold text-neutral-900">
                   Profit Statement: {orderCostReport.orderNumber}
                 </h4>
 
-                <div className="space-y-3 pt-2 text-sm">
-                  <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span className="text-slate-500">Gross Sales Revenue</span>
-                    <span className="font-mono font-bold text-slate-900">
+                <div className="space-y-2 pt-1 text-xs">
+                  <div className="flex justify-between items-center py-1.5 border-b border-neutral-100">
+                    <span className="text-neutral-500">Gross Sales Revenue</span>
+                    <span className="font-semibold text-neutral-900">
                       ₹{orderCostReport.financials.revenue?.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 border-b border-slate-100 text-rose-600">
+                  <div className="flex justify-between items-center py-1.5 border-b border-neutral-100 text-neutral-600">
                     <span>(-) Raw Material BOM Cost</span>
-                    <span className="font-mono font-bold">
+                    <span className="font-medium text-neutral-900">
                       ₹{orderCostReport.financials.materialCost?.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 border-b border-slate-100 text-rose-600">
+                  <div className="flex justify-between items-center py-1.5 border-b border-neutral-100 text-neutral-600">
                     <span>(-) Machine Operating Cost</span>
-                    <span className="font-mono font-bold">
+                    <span className="font-medium text-neutral-900">
                       ₹{orderCostReport.financials.machineOperatingCost?.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 border-b border-slate-100 text-rose-600">
+                  <div className="flex justify-between items-center py-1.5 border-b border-neutral-100 text-neutral-600">
                     <span>(-) Plant Direct Expenses</span>
-                    <span className="font-mono font-bold">
+                    <span className="font-medium text-neutral-900">
                       ₹{orderCostReport.financials.attributableExpenses?.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-2 border-b border-slate-200 font-bold text-slate-900">
+                  <div className="flex justify-between items-center py-1.5 border-b border-neutral-200 font-medium text-neutral-900">
                     <span>Total Manufacturing Cost</span>
-                    <span className="font-mono text-rose-700">
+                    <span className="text-neutral-900">
                       ₹{orderCostReport.financials.totalCost?.toLocaleString()}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center pt-3 text-lg font-black bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-emerald-900">
-                    <span>Net Gross Profit</span>
+                  <div className="flex justify-between items-center pt-2 p-2.5 rounded-lg bg-neutral-50 border border-neutral-200/80 text-neutral-900">
+                    <span className="font-semibold">Net Gross Profit</span>
                     <div className="text-right">
-                      <div>₹{orderCostReport.financials.netProfit?.toLocaleString()}</div>
-                      <div className="text-xs font-bold text-emerald-600">
+                      <div className="font-semibold">₹{orderCostReport.financials.netProfit?.toLocaleString()}</div>
+                      <div className="text-[11px] text-emerald-700 font-medium">
                         {orderCostReport.financials.profitMarginPercentage}% Margin
                       </div>
                     </div>
@@ -565,15 +561,15 @@ export const AccountsPage: React.FC = () => {
               </div>
 
               {/* Detailed Cost Drivers */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm md:col-span-2 space-y-6">
+              <div className="bg-white p-5 rounded-lg border border-neutral-200/80 md:col-span-2 space-y-4">
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center space-x-2">
-                    <Boxes className="w-4 h-4 text-indigo-500" />
+                  <h4 className="text-xs font-semibold text-neutral-900 mb-2 flex items-center space-x-1.5">
+                    <Boxes className="w-3.5 h-3.5 text-neutral-500" />
                     <span>Raw Material Breakdown (Yarn Consumption & Wastage)</span>
                   </h4>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase">
+                      <thead className="bg-neutral-50/40 text-neutral-500 font-medium text-[11px]">
                         <tr>
                           <th className="py-2 px-3">Yarn Name</th>
                           <th className="py-2 px-3">Quantity (Kg)</th>
@@ -581,13 +577,13 @@ export const AccountsPage: React.FC = () => {
                           <th className="py-2 px-3 text-right">Subtotal</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-neutral-100">
                         {orderCostReport.breakdowns.materials.map((m: any, idx: number) => (
                           <tr key={idx}>
-                            <td className="py-2 px-3 font-semibold text-slate-800">{m.yarnName} ({m.yarnCode})</td>
-                            <td className="py-2 px-3 font-mono">{m.quantityKg.toFixed(1)} kg</td>
-                            <td className="py-2 px-3 font-mono">₹{m.unitCost}</td>
-                            <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
+                            <td className="py-2 px-3 font-medium text-neutral-800">{m.yarnName} ({m.yarnCode})</td>
+                            <td className="py-2 px-3">{m.quantityKg.toFixed(1)} kg</td>
+                            <td className="py-2 px-3">₹{m.unitCost}</td>
+                            <td className="py-2 px-3 text-right font-medium text-neutral-900">
                               ₹{m.totalCost.toLocaleString()}
                             </td>
                           </tr>
@@ -598,13 +594,13 @@ export const AccountsPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center space-x-2">
-                    <Cpu className="w-4 h-4 text-purple-500" />
+                  <h4 className="text-xs font-semibold text-neutral-900 mb-2 flex items-center space-x-1.5">
+                    <Cpu className="w-3.5 h-3.5 text-neutral-500" />
                     <span>Machine Operating Breakdown (Power & Looms)</span>
                   </h4>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 text-slate-500 font-bold uppercase">
+                      <thead className="bg-neutral-50/40 text-neutral-500 font-medium text-[11px]">
                         <tr>
                           <th className="py-2 px-3">Job & Stage</th>
                           <th className="py-2 px-3">Loom Machine</th>
@@ -613,14 +609,14 @@ export const AccountsPage: React.FC = () => {
                           <th className="py-2 px-3 text-right">Subtotal</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-neutral-100">
                         {orderCostReport.breakdowns.machines.map((mac: any, idx: number) => (
                           <tr key={idx}>
-                            <td className="py-2 px-3 font-semibold text-slate-800">{mac.jobNumber} ({mac.stage})</td>
-                            <td className="py-2 px-3 text-slate-600">{mac.machineName}</td>
-                            <td className="py-2 px-3 font-mono">{mac.operatingHours} hrs</td>
-                            <td className="py-2 px-3 font-mono">₹{mac.hourlyRate}/hr</td>
-                            <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
+                            <td className="py-2 px-3 font-medium text-neutral-800">{mac.jobNumber} ({mac.stage})</td>
+                            <td className="py-2 px-3 text-neutral-600">{mac.machineName}</td>
+                            <td className="py-2 px-3">{mac.operatingHours} hrs</td>
+                            <td className="py-2 px-3">₹{mac.hourlyRate}/hr</td>
+                            <td className="py-2 px-3 text-right font-medium text-neutral-900">
                               ₹{mac.totalCost.toLocaleString()}
                             </td>
                           </tr>
@@ -637,30 +633,30 @@ export const AccountsPage: React.FC = () => {
 
       {/* Record Payment Modal */}
       {paymentModalOpen && selectedInvoice && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-neutral-200">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-4">
               <div>
-                <h3 className="text-base font-black text-slate-900">Record Buyer Payment</h3>
-                <p className="text-xs text-slate-400">Invoice #{selectedInvoice.invoiceNumber}</p>
+                <h3 className="text-sm font-semibold text-neutral-900">Record Buyer Payment</h3>
+                <p className="text-[11px] text-neutral-500">Invoice #{selectedInvoice.invoiceNumber}</p>
               </div>
               <button
                 onClick={() => setPaymentModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                className="p-1 text-neutral-400 hover:text-neutral-600 rounded-md"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {paymentError && (
-              <div className="mt-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+              <div className="mb-3 p-2.5 rounded-md bg-rose-50 border border-rose-200/60 text-rose-800 text-xs">
                 {paymentError}
               </div>
             )}
 
-            <form onSubmit={handleRecordPayment} className="mt-4 space-y-4">
+            <form onSubmit={handleRecordPayment} className="space-y-3 text-xs">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Payment Amount (₹) *
                 </label>
                 <input
@@ -669,22 +665,22 @@ export const AccountsPage: React.FC = () => {
                   onChange={(e) => setPaymentAmount(Number(e.target.value))}
                   max={selectedInvoice.balanceAmount}
                   min={1}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900 font-medium"
                   required
                 />
-                <span className="text-[10px] text-slate-400 block mt-1">
-                  Remaining balance on invoice: ₹{selectedInvoice.balanceAmount?.toLocaleString()}
+                <span className="text-[10px] text-neutral-400 block mt-0.5">
+                  Remaining balance: ₹{selectedInvoice.balanceAmount?.toLocaleString()}
                 </span>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Payment Method *
                 </label>
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 bg-white focus:outline-none focus:border-neutral-900"
                 >
                   <option value="BANK_TRANSFER">Bank Transfer (NEFT/RTGS)</option>
                   <option value="UPI">UPI / Digital</option>
@@ -694,7 +690,7 @@ export const AccountsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Transaction / Bank Ref No. *
                 </label>
                 <input
@@ -702,21 +698,21 @@ export const AccountsPage: React.FC = () => {
                   value={transactionRef}
                   onChange={(e) => setTransactionRef(e.target.value)}
                   placeholder="e.g. UTR-98234123"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Notes / Narration
                 </label>
                 <input
                   type="text"
                   value={paymentNotes}
                   onChange={(e) => setPaymentNotes(e.target.value)}
-                  placeholder="e.g. Received via HDFC Bank Current A/C"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  placeholder="e.g. Received via Bank Current A/C"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
                 />
               </div>
 
@@ -724,14 +720,14 @@ export const AccountsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs"
+                  className="px-3 py-1.5 rounded-md bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 font-medium text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={paymentSubmitting}
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition"
+                  className="px-4 py-1.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
                 >
                   {paymentSubmitting ? 'Recording...' : 'Confirm Receipt'}
                 </button>
@@ -743,33 +739,33 @@ export const AccountsPage: React.FC = () => {
 
       {/* Record Expense Modal */}
       {expenseModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-base font-black text-slate-900">Record Manufacturing Expense</h3>
+        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-neutral-200">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-4">
+              <h3 className="text-sm font-semibold text-neutral-900">Record Manufacturing Expense</h3>
               <button
                 onClick={() => setExpenseModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                className="p-1 text-neutral-400 hover:text-neutral-600 rounded-md"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {expenseError && (
-              <div className="mt-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+              <div className="mb-3 p-2.5 rounded-md bg-rose-50 border border-rose-200/60 text-rose-800 text-xs">
                 {expenseError}
               </div>
             )}
 
-            <form onSubmit={handleRecordExpense} className="mt-4 space-y-4">
+            <form onSubmit={handleRecordExpense} className="space-y-3 text-xs">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Cost Category *
                 </label>
                 <select
                   value={expenseCategory}
                   onChange={(e) => setExpenseCategory(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 bg-white focus:outline-none focus:border-neutral-900"
                 >
                   <option value="RAW_MATERIAL_CONSUMED">Raw Material Consumed</option>
                   <option value="DIRECT_LABOUR">Direct Labour</option>
@@ -782,7 +778,7 @@ export const AccountsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Amount (₹) *
                 </label>
                 <input
@@ -790,33 +786,33 @@ export const AccountsPage: React.FC = () => {
                   value={expenseAmount}
                   onChange={(e) => setExpenseAmount(Number(e.target.value))}
                   min={1}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900 font-medium"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Description *
                 </label>
                 <input
                   type="text"
                   value={expenseDescription}
                   onChange={(e) => setExpenseDescription(e.target.value)}
-                  placeholder="e.g. Monthly high-tension electricity grid tariff"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  placeholder="e.g. Monthly electricity tariff"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Associate with Order (Optional)
                 </label>
                 <select
                   value={expenseOrderId}
                   onChange={(e) => setExpenseOrderId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 bg-white focus:outline-none focus:border-neutral-900"
                 >
                   <option value="">-- General Factory Overhead --</option>
                   {orders.map((o) => (
@@ -828,7 +824,7 @@ export const AccountsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
                   Voucher / Receipt Ref # (Optional)
                 </label>
                 <input
@@ -836,7 +832,7 @@ export const AccountsPage: React.FC = () => {
                   value={receiptRef}
                   onChange={(e) => setReceiptRef(e.target.value)}
                   placeholder="e.g. TANGEDCO-EB-8812"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
                 />
               </div>
 
@@ -844,14 +840,14 @@ export const AccountsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setExpenseModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs"
+                  className="px-3 py-1.5 rounded-md bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 font-medium text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={expenseSubmitting}
-                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition"
+                  className="px-4 py-1.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
                 >
                   {expenseSubmitting ? 'Recording...' : 'Save Expense'}
                 </button>
