@@ -212,8 +212,8 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-[#fafafa] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       {/* Brand Header */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 items-center justify-center text-white mb-3 shadow-xs">
-          <Factory className="w-6 h-6 text-white" />
+        <div className="inline-flex w-16 h-16 rounded-2xl bg-white border border-zinc-200/90 p-2 items-center justify-center mb-3 shadow-xs">
+          <img src="/logo.png" alt="AGT Textile Mills Logo" className="w-full h-full object-contain" />
         </div>
         <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
           AGT Textile Mills

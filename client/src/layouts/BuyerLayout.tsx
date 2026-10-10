@@ -59,8 +59,8 @@ export const BuyerLayout: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             {/* Brand Logo & Name */}
             <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                AGT
+              <div className="w-10 h-10 rounded-xl bg-white border border-zinc-200/90 p-1 flex items-center justify-center shrink-0 shadow-xs">
+                <img src="/logo.png" alt="AGT Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex items-center space-x-2.5">
                 <span className="text-sm font-bold tracking-tight text-zinc-900">AGT TEXTILE MILLS</span>
