@@ -134,7 +134,9 @@ export const ProductionPage: React.FC = () => {
 
   const handleCompleteJob = async (jobId: string) => {
     try {
-      await api.post(`/production/jobs/${jobId}/complete`, {});
+      const targetJob = jobs.find((j) => j.id === jobId);
+      const actualQuantity = targetJob ? (targetJob.actualQuantity > 0 ? targetJob.actualQuantity : targetJob.plannedQuantity) : undefined;
+      await api.post(`/production/jobs/${jobId}/complete`, { actualQuantity });
       toast.success('Job finished! Status set to COMPLETED.');
       setBanner({ message: 'Job finished! Status set to COMPLETED. You can now generate fabric rolls.', type: 'success' });
       await loadData();

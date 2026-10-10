@@ -312,6 +312,7 @@ const handleCompleteJob = async (req: AuthRequest, res: Response): Promise<void>
   try {
     const job = await prisma.productionJob.findUnique({
       where: { id: req.params.id },
+      include: { rolls: true },
     });
 
     if (!job) {
@@ -319,14 +320,36 @@ const handleCompleteJob = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
+    const { actualQuantity } = req.body || {};
+    const totalRollMeters = job.rolls.reduce((sum, r) => sum + r.lengthMeters, 0);
+
+    // Ensure actualQuantity accurately reflects completed production
+    let finalActual = job.actualQuantity;
+    if (typeof actualQuantity === 'number' && actualQuantity > 0) {
+      finalActual = actualQuantity;
+    } else if (totalRollMeters > 0) {
+      finalActual = Math.max(job.actualQuantity, totalRollMeters);
+    } else if (job.actualQuantity === 0) {
+      finalActual = job.plannedQuantity;
+    }
+
     const updated = await prisma.$transaction(async (tx) => {
       const j = await tx.productionJob.update({
         where: { id: job.id },
         data: {
           status: 'COMPLETED',
+          actualQuantity: finalActual,
           completionTime: new Date(),
         },
       });
+
+      const diff = finalActual - job.actualQuantity;
+      if (diff > 0) {
+        await tx.orderItem.update({
+          where: { id: job.orderItemId },
+          data: { producedQuantity: { increment: diff } },
+        });
+      }
 
       await tx.machine.update({
         where: { id: job.machineId },
@@ -421,6 +444,33 @@ router.post(
           });
           results.push(newRoll);
         }
+
+        const totalRollMeters = parsed.data.rolls.reduce((sum: number, r: any) => sum + r.lengthMeters, 0);
+        const newActual = Math.max(job.actualQuantity, totalRollMeters);
+
+        // Update job actualQuantity, mark as COMPLETED, and free machine
+        await tx.productionJob.update({
+          where: { id: job.id },
+          data: {
+            actualQuantity: newActual,
+            status: 'COMPLETED',
+            completionTime: job.completionTime || new Date(),
+          },
+        });
+
+        // Sync orderItem producedQuantity
+        const diff = newActual - job.actualQuantity;
+        if (diff > 0) {
+          await tx.orderItem.update({
+            where: { id: job.orderItemId },
+            data: { producedQuantity: { increment: diff } },
+          });
+        }
+
+        await tx.machine.update({
+          where: { id: job.machineId },
+          data: { status: 'IDLE' },
+        });
 
         // Update order status to QUALITY_INSPECTION
         await tx.order.update({
