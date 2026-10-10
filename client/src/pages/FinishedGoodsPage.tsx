@@ -14,7 +14,8 @@ import {
   Send,
   Calendar,
   X,
-  FileText
+  FileText,
+  Clock,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
@@ -25,23 +26,56 @@ export const FinishedGoodsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [gradeFilter, setGradeFilter] = useState('ALL');
+  const [stockTab, setStockTab] = useState<'PASSED' | 'PENDING' | 'ALL'>('PASSED');
+  const [pendingCount, setPendingCount] = useState(0);
+  const [certifyingId, setCertifyingId] = useState<string | null>(null);
   const [selectedRoll, setSelectedRoll] = useState<any | null>(null);
   const [rollDetailsLoading, setRollDetailsLoading] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
-    loadFinishedStock();
+    loadFinishedStock(stockTab);
+    fetchPendingCount();
   }, []);
 
-  const loadFinishedStock = async () => {
+  const fetchPendingCount = async () => {
+    try {
+      const data = await api.get<any[]>('/rolls/finished-stock?filter=PENDING');
+      setPendingCount(data.length);
+    } catch {
+      // ignore
+    }
+  };
+
+  const loadFinishedStock = async (tab: 'PASSED' | 'PENDING' | 'ALL' = stockTab) => {
     setLoading(true);
     try {
-      const data = await api.get<any[]>('/rolls/finished-stock');
+      const data = await api.get<any[]>(`/rolls/finished-stock?filter=${tab}`);
       setRolls(data);
     } catch (err: any) {
       console.error('Failed to load finished stock:', err);
+      toast.error('Failed to load finished stock: ' + err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTabChange = (tab: 'PASSED' | 'PENDING' | 'ALL') => {
+    setStockTab(tab);
+    loadFinishedStock(tab);
+  };
+
+  const handleCertifyRoll = async (rollId: string) => {
+    setCertifyingId(rollId);
+    try {
+      await api.post(`/rolls/${rollId}/certify`, {});
+      toast.success(`Roll ${rollId} certified and stored into Finished Goods Warehouse!`);
+      await loadFinishedStock(stockTab);
+      await fetchPendingCount();
+    } catch (err: any) {
+      toast.error('Failed to certify roll: ' + err.message);
+    } finally {
+      setCertifyingId(null);
     }
   };
 
@@ -92,13 +126,46 @@ export const FinishedGoodsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Pending QC notification banner */}
+      {pendingCount > 0 && stockTab === 'PASSED' && (
+        <div className="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-in fade-in">
+          <div className="flex items-center space-x-3 text-amber-900">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-900">
+                {pendingCount} fabric roll(s) completed from production are in staging awaiting inspection
+              </p>
+              <p className="text-[11px] text-amber-700 mt-0.5">
+                Rolls must pass Quality Control before entering certified finished stock for shipment.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 shrink-0">
+            <button
+              onClick={() => handleTabChange('PENDING')}
+              className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition shadow-xs text-xs"
+            >
+              Review Pending Rolls ({pendingCount})
+            </button>
+            <button
+              onClick={() => navigate('/app/quality')}
+              className="px-3.5 py-1.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl font-medium transition text-xs"
+            >
+              Open QA Portal
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
-          <p className="text-xs font-medium text-zinc-500">Total Finished Rolls</p>
+          <p className="text-xs font-medium text-zinc-500">
+            {stockTab === 'PENDING' ? 'Pending Staging Rolls' : 'Total Finished Rolls'}
+          </p>
           <div className="flex items-baseline space-x-1.5 mt-1.5">
             <span className="text-2xl font-bold tracking-tight text-zinc-900">{filteredRolls.length}</span>
-            <span className="text-xs text-zinc-400">rolls in stock</span>
+            <span className="text-xs text-zinc-400">rolls in view</span>
           </div>
         </div>
 
@@ -119,12 +186,60 @@ export const FinishedGoodsPage: React.FC = () => {
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
-          <p className="text-xs font-medium text-zinc-500">Inspection Compliance</p>
+          <p className="text-xs font-medium text-zinc-500">Pending QA Staging</p>
           <div className="flex items-baseline space-x-1.5 mt-1.5">
-            <span className="text-2xl font-bold tracking-tight text-emerald-700">100%</span>
-            <span className="text-xs text-zinc-400">Quality Passed</span>
+            <span className={`text-2xl font-bold tracking-tight ${pendingCount > 0 ? 'text-amber-600' : 'text-emerald-700'}`}>
+              {pendingCount}
+            </span>
+            <span className="text-xs text-zinc-400">rolls awaiting QC</span>
           </div>
         </div>
+      </div>
+
+      {/* View Tabs */}
+      <div className="flex items-center space-x-2 border-b border-zinc-200 pb-2 text-xs">
+        <button
+          onClick={() => handleTabChange('PASSED')}
+          className={`px-3.5 py-1.5 rounded-xl font-semibold transition flex items-center space-x-1.5 ${
+            stockTab === 'PASSED'
+              ? 'bg-indigo-600 text-white shadow-xs'
+              : 'bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200/80'
+          }`}
+        >
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span>Certified Finished Stock (Ready for Dispatch)</span>
+        </button>
+
+        <button
+          onClick={() => handleTabChange('PENDING')}
+          className={`px-3.5 py-1.5 rounded-xl font-semibold transition flex items-center space-x-1.5 ${
+            stockTab === 'PENDING'
+              ? 'bg-amber-600 text-white shadow-xs'
+              : 'bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200/80'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Production Staging (Pending QC)</span>
+          {pendingCount > 0 && (
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+              stockTab === 'PENDING' ? 'bg-amber-800 text-white' : 'bg-amber-100 text-amber-800'
+            }`}>
+              {pendingCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => handleTabChange('ALL')}
+          className={`px-3.5 py-1.5 rounded-xl font-semibold transition flex items-center space-x-1.5 ${
+            stockTab === 'ALL'
+              ? 'bg-zinc-800 text-white shadow-xs'
+              : 'bg-white text-zinc-600 hover:bg-zinc-100 border border-zinc-200/80'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          <span>All Mill Rolls</span>
+        </button>
       </div>
 
       {/* Controls & Filter */}
@@ -158,14 +273,26 @@ export const FinishedGoodsPage: React.FC = () => {
       {/* Rolls Table */}
       <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-zinc-400 font-medium text-xs">Loading finished goods stock...</div>
+          <div className="p-12 text-center text-zinc-400 font-medium text-xs">Loading fabric stock...</div>
         ) : filteredRolls.length === 0 ? (
           <div className="p-12 text-center">
             <Layers className="w-10 h-10 text-zinc-300 mx-auto mb-2" />
-            <h3 className="text-xs font-semibold text-zinc-700">No Finished Rolls Found</h3>
+            <h3 className="text-xs font-semibold text-zinc-700">
+              {stockTab === 'PENDING' ? 'No Rolls Pending Inspection' : 'No Finished Rolls Found'}
+            </h3>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              Either all rolls have been dispatched, or quality inspection is pending.
+              {stockTab === 'PENDING'
+                ? 'All generated rolls have already been inspected and certified.'
+                : 'Either all rolls have been dispatched, or completed jobs need rolls generated and QA approved.'}
             </p>
+            {stockTab === 'PASSED' && pendingCount > 0 && (
+              <button
+                onClick={() => handleTabChange('PENDING')}
+                className="mt-3 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-medium transition"
+              >
+                View {pendingCount} Pending Rolls in Staging
+              </button>
+            )}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -177,9 +304,9 @@ export const FinishedGoodsPage: React.FC = () => {
                   <th className="py-3 px-4">Fabric Product</th>
                   <th className="py-3 px-4">Length</th>
                   <th className="py-3 px-4">Weight</th>
-                  <th className="py-3 px-4">Quality Grade</th>
+                  <th className="py-3 px-4">Quality Status / Grade</th>
                   <th className="py-3 px-4">Location</th>
-                  <th className="py-3 px-4 text-right">Traceability</th>
+                  <th className="py-3 px-4 text-right">Actions & Traceability</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 text-zinc-700">
@@ -205,16 +332,23 @@ export const FinishedGoodsPage: React.FC = () => {
                       {roll.weightKg ? `${roll.weightKg} kg` : '—'}
                     </td>
                     <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
-                          roll.qualityGrade === 'GRADE_A'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200/70'
-                        }`}
-                      >
-                        <ShieldCheck className="w-3 h-3 mr-1" />
-                        {roll.qualityGrade?.replace('_', ' ') || 'PASSED'}
-                      </span>
+                      {roll.qualityStatus === 'PASSED' ? (
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
+                            roll.qualityGrade === 'GRADE_A'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200/70'
+                          }`}
+                        >
+                          <ShieldCheck className="w-3 h-3 mr-1" />
+                          {roll.qualityGrade?.replace('_', ' ') || 'PASSED'}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200/70">
+                          <Clock className="w-3 h-3 mr-1" />
+                          PENDING INSPECTION
+                        </span>
+                      )}
                     </td>
                     <td className="py-3.5 px-4">
                       {roll.location ? (
@@ -226,7 +360,17 @@ export const FinishedGoodsPage: React.FC = () => {
                         <span className="text-zinc-400 italic">FG Staging</span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right space-x-1.5">
+                      {roll.qualityStatus !== 'PASSED' && (
+                        <button
+                          onClick={() => handleCertifyRoll(roll.id)}
+                          disabled={certifyingId === roll.id}
+                          className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>{certifyingId === roll.id ? 'Certifying...' : 'Certify & Store'}</span>
+                        </button>
+                      )}
                       <button
                         onClick={() => openTraceabilityModal(roll.id)}
                         className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-600 text-zinc-700 font-semibold text-xs transition"

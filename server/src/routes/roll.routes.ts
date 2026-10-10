@@ -40,24 +40,34 @@ router.get(
   }
 );
 
-// GET finished goods rolls available for dispatch
+// GET finished goods rolls available for dispatch (with optional stage filtering)
 router.get(
   '/finished-stock',
   authenticateToken,
-  requireRole(['ADMIN', 'DISPATCH', 'SALES', 'STORE', 'QUALITY']),
+  requireRole(['ADMIN', 'DISPATCH', 'SALES', 'STORE', 'QUALITY', 'PRODUCTION']),
   async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+      const { filter } = req.query;
+      const where: any = {};
+
+      if (filter === 'PENDING') {
+        where.qualityStatus = 'PENDING_INSPECTION';
+      } else if (filter === 'ALL') {
+        where.inventoryStatus = { in: ['IN_FINISHED_STOCK', 'IN_PROCESS'] };
+      } else {
+        where.qualityStatus = 'PASSED';
+        where.inventoryStatus = 'IN_FINISHED_STOCK';
+      }
+
       const rolls = await prisma.roll.findMany({
-        where: {
-          qualityStatus: 'PASSED',
-          inventoryStatus: 'IN_FINISHED_STOCK',
-        },
+        where,
         include: {
           order: { select: { id: true, orderNumber: true, buyer: { select: { id: true, companyName: true } } } },
-          orderItem: true,
+          orderItem: { include: { fabricProduct: true } },
           location: true,
+          productionJob: { select: { id: true, jobNumber: true, stage: true, status: true } },
         },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { createdAt: 'desc' },
       });
 
       const isOwner = req.user?.role === 'ADMIN';
@@ -67,6 +77,57 @@ router.get(
       res.json(sanitized);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch finished stock', details: err.message });
+    }
+  }
+);
+
+// CERTIFY roll and store into Finished Goods Warehouse
+router.post(
+  '/:rollId/certify',
+  authenticateToken,
+  requireRole(['ADMIN', 'QUALITY', 'PRODUCTION', 'STORE']),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const roll = await prisma.roll.findFirst({
+        where: {
+          OR: [{ id: req.params.rollId }, { rollId: req.params.rollId }],
+        },
+      });
+
+      if (!roll) {
+        res.status(404).json({ error: 'Roll not found' });
+        return;
+      }
+
+      let locId = roll.locationId;
+      if (!locId) {
+        const defLoc = await prisma.finishedGoodsLocation.findFirst();
+        locId = defLoc ? defLoc.id : null;
+      }
+
+      const updated = await prisma.$transaction(async (tx) => {
+        const r = await tx.roll.update({
+          where: { id: roll.id },
+          data: {
+            qualityStatus: 'PASSED',
+            inventoryStatus: 'IN_FINISHED_STOCK',
+            locationId: locId,
+          },
+        });
+
+        if (roll.qualityStatus !== 'PASSED') {
+          await tx.orderItem.update({
+            where: { id: roll.orderItemId },
+            data: { passedQuantity: { increment: roll.lengthMeters } },
+          });
+        }
+
+        return r;
+      });
+
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ error: 'Failed to certify roll', details: err.message });
     }
   }
 );
