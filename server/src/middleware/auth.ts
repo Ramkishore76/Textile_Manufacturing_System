@@ -118,10 +118,10 @@ export const requireBuyerOrStaff = async (
     return;
   }
 
-  // Allow BUYER, ADMIN (Plant Owner), and STORE (Store Manager)
-  if (['BUYER', 'ADMIN', 'STORE'].includes(req.user.role)) {
-    // If ADMIN or STORE, but no buyerId, assign the first active buyer or allow query param ?buyerId=...
-    if (['ADMIN', 'STORE'].includes(req.user.role) && !req.user.buyerId) {
+  // Allow BUYER, ADMIN, and all factory staff (PRODUCTION, STORE, SALES, QUALITY, DISPATCH, ACCOUNTS)
+  if (['BUYER', 'ADMIN', 'STORE', 'PRODUCTION', 'SALES', 'QUALITY', 'DISPATCH', 'ACCOUNTS'].includes(req.user.role)) {
+    // If internal staff, but no buyerId, assign the first active buyer or allow query param ?buyerId=...
+    if (req.user.role !== 'BUYER' && !req.user.buyerId) {
       const targetBuyerId = req.query.buyerId as string;
       if (targetBuyerId) {
         req.user.buyerId = targetBuyerId;

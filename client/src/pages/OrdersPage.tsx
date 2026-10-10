@@ -86,14 +86,17 @@ export const OrdersPage: React.FC = () => {
     setLoading(true);
     try {
       const [ordersData, fabricsData, yarnsData] = await Promise.all([
-        api.get<any[]>('/orders'),
-        api.get<any[]>('/buyer-portal/products'),
+        api.get<any[]>('/orders').catch((err) => {
+          console.error('Failed to fetch orders:', err);
+          return [];
+        }),
+        api.get<any[]>('/buyer-portal/products').catch(() => []),
         isOwner ? api.get<any[]>('/buyer-portal/yarns').catch(() => []) : Promise.resolve([]),
       ]);
-      setOrders(ordersData);
-      setFabrics(fabricsData);
-      setYarns(yarnsData);
-      if (yarnsData.length > 0 && !createYarnId) {
+      setOrders(ordersData || []);
+      setFabrics(fabricsData || []);
+      setYarns(yarnsData || []);
+      if (yarnsData && yarnsData.length > 0 && !createYarnId) {
         setCreateYarnId(yarnsData[0].id);
       }
     } catch (err: any) {
