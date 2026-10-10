@@ -37,10 +37,53 @@ app.use(
 
 app.use(express.json());
 
+// Request logger middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(`[API] ${req.method} ${req.originalUrl} -> ${res.statusCode} (${duration}ms)`);
+    }
+  });
+  next();
+});
+
+// Root API discovery endpoint
+app.get('/api', (req: Request, res: Response) => {
+  res.json({
+    service: 'Everest Textile Mills — Enterprise API Gateway',
+    version: '1.0.0',
+    status: 'ONLINE',
+    environment: process.env.NODE_ENV || 'development',
+    documentation: '/api/health',
+    endpoints: {
+      auth: '/api/auth (Login, Profile, Verification)',
+      buyers: '/api/buyers (Buyer directory & credit settings)',
+      inventory: '/api/inventory (Yarn stocks, BOM formulas, reservation)',
+      purchases: '/api/purchases (Suppliers, Purchase Requests, POs, GRN Receipts)',
+      orders: '/api/orders (Buyer orders, BOM availability check)',
+      machines: '/api/machines (Looms, Spinning frames, Status monitor, Downtime)',
+      production: '/api/production (Jobs, Loom allocation, Hourly logs)',
+      quality: '/api/quality (4-Point inspections, Defect grading, Rework cycles)',
+      rolls: '/api/rolls (Roll barcodes, Finished stock, Traceability passport)',
+      dispatch: '/api/dispatch (Atomic shipments, duplicate prevention, tax invoices)',
+      invoices: '/api/invoices (Commercial invoices, 5% GST, net terms)',
+      payments: '/api/payments (Buyer payments, unique reference validation)',
+      employees: '/api/employees (Staff directory & base wage rates)',
+      attendance: '/api/attendance (Daily shift attendance & overtime)',
+      wages: '/api/wages (Attendance-derived monthly wage calculations & payroll)',
+      expenses: '/api/expenses (Manufacturing overheads & cost categories)',
+      reports: '/api/reports (Plant dashboard, order-wise margins, financials)',
+      buyerPortal: '/api/buyer-portal (Isolated buyer dashboard, 7-stage tracker)',
+      notifications: '/api/notifications (Real-time in-app alerts)',
+    },
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', async (req: Request, res: Response) => {
   try {
-    // Quick DB ping
     const userCount = await prisma.user.count();
     res.json({
       status: 'UP',
@@ -88,13 +131,26 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`=======================================================`);
     console.log(`Everest Textile Mills Server running on port ${PORT}`);
     console.log(`API Base: http://localhost:${PORT}/api`);
     console.log(`Health Check: http://localhost:${PORT}/api/health`);
     console.log(`=======================================================`);
   });
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    console.log('\nShutting down server gracefully...');
+    server.close(async () => {
+      await prisma.$disconnect();
+      console.log('Database connections closed. Exiting process.');
+      process.exit(0);
+    });
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 export default app;
