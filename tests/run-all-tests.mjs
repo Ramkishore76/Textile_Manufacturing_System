@@ -39,7 +39,7 @@ function request(path, options = {}) {
 
 async function runTests() {
   console.log('========================================================================');
-  console.log('  EVEREST TEXTILE MILLS — MANDATORY 10 ACCEPTANCE TESTS RUNNER');
+  console.log('  AGT TEXTILE MILLS — MANDATORY 10 ACCEPTANCE TESTS RUNNER');
   console.log('========================================================================\n');
 
   // Server is running via import
@@ -65,7 +65,7 @@ async function runTests() {
     // Authenticate Admin
     const adminLogin = await request('/auth/login', {
       method: 'POST',
-      body: { email: 'admin@everesttextile.com', password: 'Admin@123' },
+      body: { email: 'admin@agttextile.com', password: 'Admin@123' },
     });
     if (adminLogin.status !== 200) throw new Error('Admin login failed');
     const adminToken = adminLogin.body.token;
@@ -183,7 +183,7 @@ async function runTests() {
         headers: { Authorization: `Bearer ${adminToken}` },
         body: {
           orderId,
-          carrierName: 'Everest Express Logistics',
+          carrierName: 'AGT Express Logistics',
           rollIds: [roll.id],
           generateInvoice: true,
         },
@@ -573,7 +573,7 @@ async function runTests() {
           headers: { Authorization: `Bearer ${adminToken}` },
           body: {
             orderId,
-            carrierName: 'Everest Partial Logistics',
+            carrierName: 'AGT Partial Logistics',
             rollIds: [allEligible.body[0].id],
           },
         });

@@ -1,4 +1,4 @@
-# 🏭 Everest Textile Mills — Integrated Textile Manufacturing Management System
+# 🏭 AGT Textile Mills — Integrated Textile Manufacturing Management System
 
 [![Live Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![ORM](https://img.shields.io/badge/ORM-Prisma%20v5.22-2D3748?logo=prisma&logoColor=white)](https://prisma.io)
@@ -7,7 +7,7 @@
 [![Styling](https://img.shields.io/badge/Styling-Tailwind%20CSS%20v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Acceptance Tests](https://img.shields.io/badge/Tests-10%2F10%20PASSED-success?logo=checkmarx&logoColor=white)](#-acceptance-criteria--test-suite-results)
 
-An end-to-end, enterprise-grade digital platform engineered for **Everest Textile Mills** to modernize and unify mill operations. This system eliminates manual registers, paper production slips, spreadsheets, and disconnected communications by establishing **one single source of truth** across the entire textile manufacturing lifecycle.
+An end-to-end, enterprise-grade digital platform engineered for **AGT Textile Mills** to modernize and unify mill operations. This system eliminates manual registers, paper production slips, spreadsheets, and disconnected communications by establishing **one single source of truth** across the entire textile manufacturing lifecycle.
 
 ---
 
@@ -159,7 +159,7 @@ The comprehensive automated test suite in [`tests/run-all-tests.mjs`](file:///c:
 
 ```
 ========================================================================
-  EVEREST TEXTILE MILLS — MANDATORY 10 ACCEPTANCE TESTS RUNNER
+  AGT TEXTILE MILLS — MANDATORY 10 ACCEPTANCE TESTS RUNNER
 ========================================================================
 
 • Running TEST 1: Successful Order Lifecycle................... PASSED ✓
@@ -186,14 +186,14 @@ The application includes pre-configured demo accounts for all roles with one-cli
 
 | Role | Email | Password | Primary Accessible Modules |
 |---|---|---|---|
-| **Admin / Owner** | `admin@everesttextile.com` | `Admin@123` | Full access across all 12 modules, financial oversight & user management |
-| **Sales Staff** | `sales@everesttextile.com` | `Sales@123` | Orders, Buyer Registration, Invoices, Delivery Tracking |
-| **Store Manager** | `store@everesttextile.com` | `Store@123` | Yarn Inventory, Suppliers, Purchase Requests, POs & GRN Receipts |
-| **Production Mgr** | `production@everesttextile.com` | `Prod@123` | Loom Monitoring, Job Scheduling, Shift Logs, Machine Downtime |
-| **Quality Inspector** | `quality@everesttextile.com` | `Quality@123` | Roll Inspections, 4-Point Defect Logging, Rework Approvals |
-| **Dispatch Staff** | `dispatch@everesttextile.com` | `Dispatch@123` | Finished Goods Stock, Dispatch Planning, Logistics & Invoices |
-| **HR / Accounts** | `accounts@everesttextile.com` | `Accounts@123` | Commercial Invoices, Buyer Payments, Attendance, Wages & Expenses |
-| **Buyer Portal** | `buyer@zara.com` | `Buyer@123` | Dedicated Buyer Portal: Active Orders, 7-Stage Progress Bar, Invoices |
+| **Admin / Owner** | `admin@agttextile.com` | `Admin@123` | Full access across all 12 modules, financial oversight & user management |
+| **Sales Staff** | `sales@agttextile.com` | `Sales@123` | Orders, Buyer Registration, Invoices, Delivery Tracking |
+| **Store Manager** | `store@agttextile.com` | `Store@123` | Yarn Inventory, Suppliers, Purchase Requests, POs & GRN Receipts |
+| **Production Mgr** | `production@agttextile.com` | `Prod@123` | Loom Monitoring, Job Scheduling, Shift Logs, Machine Downtime |
+| **Quality Inspector** | `quality@agttextile.com` | `Quality@123` | Roll Inspections, 4-Point Defect Logging, Rework Approvals |
+| **Dispatch Staff** | `dispatch@agttextile.com` | `Dispatch@123` | Finished Goods Stock, Dispatch Planning, Logistics & Invoices |
+| **HR / Accounts** | `accounts@agttextile.com` | `Accounts@123` | Commercial Invoices, Buyer Payments, Attendance, Wages & Expenses |
+| **Buyer Portal** | `buyer@nordicapparel.com` | `Buyer@123` | Dedicated Buyer Portal: Active Orders, 7-Stage Progress Bar, Invoices |
 
 ---
 
@@ -217,7 +217,7 @@ Ensure [`server/.env`](file:///c:/Users/Sathish%20B/OneDrive/Desktop/Textile_Man
 ```env
 PORT=5000
 DATABASE_URL="postgresql://postgres.cipfdzjrlgtyletdcqql:%40Textile_Manufacturing@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
-JWT_SECRET="everest_textile_super_secure_jwt_secret_key_2026_xyz"
+JWT_SECRET="agt_textile_super_secure_jwt_secret_key_2026_xyz"
 NODE_ENV="development"
 ```
 
@@ -301,4 +301,4 @@ All code contributions were committed across the authorized team member tokens s
 
 ---
 
-*© 2026 Everest Textile Mills. All rights reserved.*
+*© 2026 AGT Textile Mills. All rights reserved.*

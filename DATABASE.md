@@ -1,10 +1,10 @@
-# 🗄️ Everest Textile Mills — Database Architecture & Data Dictionary
+# 🗄️ AGT Textile Mills — Database Architecture & Data Dictionary
 
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%2015-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Supabase](https://img.shields.io/badge/Cloud-Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![Prisma ORM](https://img.shields.io/badge/ORM-Prisma%20v5.22-2D3748?logo=prisma&logoColor=white)](https://prisma.io)
 
-This document provides complete documentation of the **32 relational entities**, indexes, constraints, foreign key cascades, and connection configurations powering **Everest Textile Mills**.
+This document provides complete documentation of the **32 relational entities**, indexes, constraints, foreign key cascades, and connection configurations powering **AGT Textile Mills**.
 
 ---
 
@@ -163,4 +163,4 @@ Automated database-level change capture is implemented in [`server/prisma/audit_
 
 ---
 
-*Maintained by the Everest Textile Mills Engineering Team.*
+*Maintained by the AGT Textile Mills Engineering Team.*

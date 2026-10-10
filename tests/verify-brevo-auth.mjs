@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 console.log('========================================================================');
-console.log('  BREVO EMAIL TRANSACTIONAL VERIFICATION SUITE — EVEREST TEXTILE MILLS');
+console.log('  BREVO EMAIL TRANSACTIONAL VERIFICATION SUITE — AGT TEXTILE MILLS');
 console.log('========================================================================\n');
 
 const BASE_URL = 'http://localhost:5000/api';
@@ -20,7 +20,7 @@ async function runTests() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: 'admin@everesttextile.com',
+      email: 'admin@agttextile.com',
       password: 'Admin@123',
     }),
   });
@@ -55,7 +55,7 @@ async function runTests() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      email: 'sales@everesttextile.com',
+      email: 'sales@agttextile.com',
       password: 'Sales@123',
     }),
   });
@@ -74,7 +74,7 @@ async function runTests() {
 
   // Test 5: New User Registration & Email Verification
   console.log('\n[STEP 5] Testing New User Registration & Verification with Brevo...');
-  const newEmail = `user_${Date.now()}@everesttextile.com`;
+  const newEmail = `user_${Date.now()}@agttextile.com`;
   const regRes = await fetch(`${BASE_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

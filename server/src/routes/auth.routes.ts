@@ -7,7 +7,7 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { EmailService } from '../services/email.service';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'everest_textile_mills_super_secret_jwt_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'agt_textile_mills_super_secret_jwt_key_2026';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -79,8 +79,14 @@ router.post('/login', async (req, res): Promise<void> => {
     const { email, password } = parseResult.data;
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          { email: normalizedEmail.replace('@agttextile.com', '@everesttextile.com') },
+          { email: normalizedEmail.replace('@everesttextile.com', '@agttextile.com') },
+        ],
+      },
       include: {
         buyerAccount: {
           include: {

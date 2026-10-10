@@ -2,7 +2,7 @@ import { prisma } from './prisma';
 
 async function auditDatabaseSchema() {
   console.log('========================================================================');
-  console.log('  EVEREST TEXTILE MILLS — SCHEMA INTEGRITY & AUDIT VALIDATOR');
+  console.log('  AGT TEXTILE MILLS — SCHEMA INTEGRITY & AUDIT VALIDATOR');
   console.log('========================================================================\n');
 
   try {

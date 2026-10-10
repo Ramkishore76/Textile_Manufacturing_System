@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db/prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'everest_textile_mills_super_secret_jwt_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'agt_textile_mills_super_secret_jwt_key_2026';
 
 export interface AuthenticatedUser {
   id: string;

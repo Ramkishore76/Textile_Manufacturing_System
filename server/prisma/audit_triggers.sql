@@ -1,5 +1,5 @@
 -- =========================================================================
--- EVEREST TEXTILE MILLS — SUPABASE POSTGRESQL AUTOMATED AUDIT TRIGGERS
+-- AGT TEXTILE MILLS — SUPABASE POSTGRESQL AUTOMATED AUDIT TRIGGERS
 -- =========================================================================
 
 CREATE OR REPLACE FUNCTION process_audit_log()

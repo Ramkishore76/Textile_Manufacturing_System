@@ -1,7 +1,7 @@
 {
-  "name": "everest-textile-server",
+  "name": "agt-textile-server",
   "version": "1.0.0",
-  "description": "Backend API for Everest Textile Mills Management System",
+  "description": "Backend API for AGT Textile Mills Management System",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

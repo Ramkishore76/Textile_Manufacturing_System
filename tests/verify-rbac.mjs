@@ -1,12 +1,12 @@
 // ========================================================================
-// EVEREST TEXTILE MILLS — ROLE-BASED ACCESS CONTROL (RBAC) VERIFICATION
+// AGT TEXTILE MILLS — ROLE-BASED ACCESS CONTROL (RBAC) VERIFICATION
 // ========================================================================
 
 const API_BASE = 'http://localhost:5000/api';
 
 async function testRBAC() {
   console.log('========================================================================');
-  console.log('  EVEREST TEXTILE MILLS — RBAC & FUNCTIONAL ACCESS VERIFICATION');
+  console.log('  AGT TEXTILE MILLS — RBAC & FUNCTIONAL ACCESS VERIFICATION');
   console.log('========================================================================\n');
 
   // Helper login function
@@ -14,15 +14,15 @@ async function testRBAC() {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, skipOtp: true }),
     });
     if (!res.ok) throw new Error(`Login failed for ${email}`);
     return await res.json();
   }
 
   // 1. Test Production Manager Role
-  console.log('[TEST 1] Testing Production Manager Persona (production@everesttextile.com)...');
-  const prodAuth = await loginAs('production@everesttextile.com', 'Prod@123');
+  console.log('[TEST 1] Testing Production Manager Persona (production@agttextile.com)...');
+  const prodAuth = await loginAs('production@agttextile.com', 'Prod@123');
   console.log(`  • Logged in as: ${prodAuth.user.name} (Role: ${prodAuth.user.role})`);
 
   // 1.1 Verify Dashboard Financial Privacy for Production Manager
@@ -67,8 +67,8 @@ async function testRBAC() {
   }
 
   // 2. Test Quality Inspector Role
-  console.log('\n[TEST 2] Testing Quality Inspector Persona (quality@everesttextile.com)...');
-  const qcAuth = await loginAs('quality@everesttextile.com', 'Quality@123');
+  console.log('\n[TEST 2] Testing Quality Inspector Persona (quality@agttextile.com)...');
+  const qcAuth = await loginAs('quality@agttextile.com', 'Quality@123');
   console.log(`  • Logged in as: ${qcAuth.user.name} (Role: ${qcAuth.user.role})`);
 
   const qcPurchaseAttempt = await fetch(`${API_BASE}/purchases/requests`, {
@@ -89,8 +89,8 @@ async function testRBAC() {
   }
 
   // 3. Test Accounts & HR Manager Role
-  console.log('\n[TEST 3] Testing Accounts & HR Manager Persona (accounts@everesttextile.com)...');
-  const accAuth = await loginAs('accounts@everesttextile.com', 'Accounts@123');
+  console.log('\n[TEST 3] Testing Accounts & HR Manager Persona (accounts@agttextile.com)...');
+  const accAuth = await loginAs('accounts@agttextile.com', 'Accounts@123');
   console.log(`  • Logged in as: ${accAuth.user.name} (Role: ${accAuth.user.role})`);
 
   const accDashRes = await fetch(`${API_BASE}/reports/dashboard`, {
@@ -104,8 +104,8 @@ async function testRBAC() {
   }
 
   // 4. Test Admin Role
-  console.log('\n[TEST 4] Testing Admin Persona (admin@everesttextile.com)...');
-  const adminAuth = await loginAs('admin@everesttextile.com', 'Admin@123');
+  console.log('\n[TEST 4] Testing Admin Persona (admin@agttextile.com)...');
+  const adminAuth = await loginAs('admin@agttextile.com', 'Admin@123');
   console.log(`  • Logged in as: ${adminAuth.user.name} (Role: ${adminAuth.user.role})`);
 
   const adminDashRes = await fetch(`${API_BASE}/reports/dashboard`, {

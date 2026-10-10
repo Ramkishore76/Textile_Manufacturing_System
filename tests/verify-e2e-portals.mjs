@@ -35,7 +35,7 @@ async function fetchJson(url, options = {}) {
 
 async function runEndToEndVerification() {
   console.log('========================================================================');
-  console.log('  EVEREST TEXTILE MILLS — COMPREHENSIVE DUAL-PORTAL E2E VERIFICATION');
+  console.log('  AGT TEXTILE MILLS — COMPREHENSIVE DUAL-PORTAL E2E VERIFICATION');
   console.log('========================================================================\n');
 
   let passed = 0;
@@ -56,7 +56,7 @@ async function runEndToEndVerification() {
   const clientRes = await fetchJson(CLIENT_BASE);
   assert(
     'Vite Frontend Client is Serving HTTP 200',
-    clientRes.status === 200 && typeof clientRes.data === 'string' && clientRes.data.includes('Everest Textile Mills'),
+    clientRes.status === 200 && typeof clientRes.data === 'string' && clientRes.data.includes('AGT Textile Mills'),
     'Port 5173'
   );
 
@@ -75,7 +75,7 @@ async function runEndToEndVerification() {
   // 4. Internal Admin Authentication
   const adminLogin = await fetchJson(`${API_BASE}/auth/login`, {
     method: 'POST',
-    body: { email: 'admin@everesttextile.com', password: 'Admin@123', skipOtp: true },
+    body: { email: 'admin@agttextile.com', password: 'Admin@123', skipOtp: true },
   });
   assert('Admin Portal Login', adminLogin.status === 200 && adminLogin.data.user.role === 'ADMIN', adminLogin.data.user.name);
   const adminToken = adminLogin.data.token;

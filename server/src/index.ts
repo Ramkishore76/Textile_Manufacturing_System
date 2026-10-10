@@ -52,7 +52,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Root API discovery endpoint
 app.get('/api', (req: Request, res: Response) => {
   res.json({
-    service: 'Everest Textile Mills — Enterprise API Gateway',
+    service: 'AGT Textile Mills — Enterprise API Gateway',
     version: '1.0.0',
     status: 'ONLINE',
     environment: process.env.NODE_ENV || 'development',
@@ -87,7 +87,7 @@ app.get('/api/health', async (req: Request, res: Response) => {
     const userCount = await prisma.user.count();
     res.json({
       status: 'UP',
-      system: 'Everest Textile Mills Management API',
+      system: 'AGT Textile Mills Management API',
       timestamp: new Date().toISOString(),
       database: 'Connected (PostgreSQL / Supabase)',
       userCount,
@@ -109,7 +109,7 @@ app.get('/api/system-status', async (req: Request, res: Response) => {
     const dbLatency = Date.now() - start;
     const mem = process.memoryUsage();
     res.json({
-      service: 'Everest Textile Mills Backend Service Engine',
+      service: 'AGT Textile Mills Backend Service Engine',
       uptimeSeconds: Math.floor(process.uptime()),
       databaseLatencyMs: dbLatency,
       memory: {
@@ -160,7 +160,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, () => {
     console.log(`=======================================================`);
-    console.log(`Everest Textile Mills Server running on port ${PORT}`);
+    console.log(`AGT Textile Mills Server running on port ${PORT}`);
     console.log(`API Base: http://localhost:${PORT}/api`);
     console.log(`Health Check: http://localhost:${PORT}/api/health`);
     console.log(`=======================================================`);

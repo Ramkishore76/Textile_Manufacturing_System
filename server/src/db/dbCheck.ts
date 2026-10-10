@@ -2,7 +2,7 @@ import { prisma } from './prisma';
 
 async function checkDatabaseHealth() {
   console.log('========================================================================');
-  console.log('  EVEREST TEXTILE MILLS — SUPABASE POSTGRESQL DATABASE DIAGNOSTIC');
+  console.log('  AGT TEXTILE MILLS — SUPABASE POSTGRESQL DATABASE DIAGNOSTIC');
   console.log('========================================================================\n');
 
   const start = Date.now();

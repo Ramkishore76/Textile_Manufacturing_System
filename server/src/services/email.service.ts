@@ -32,7 +32,7 @@ setInterval(() => {
 export class EmailService {
   private static apiKey = process.env.BREVO_API_KEY || '';
   private static senderEmail = process.env.BREVO_SENDER_EMAIL || 'ramkishoresm@gmail.com';
-  private static senderName = process.env.BREVO_SENDER_NAME || 'Everest Textile Mills';
+  private static senderName = process.env.BREVO_SENDER_NAME || 'AGT Textile Mills';
 
   /**
    * Generate a random 6-digit numeric OTP code
@@ -52,8 +52,8 @@ export class EmailService {
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const isRegistration = purpose === 'NEW_USER_VERIFICATION';
     const subject = isRegistration
-      ? `Welcome to Everest Textile Mills — Verify Your Account (${otpCode})`
-      : `Everest Textile Mills — One-Time Verification Code: ${otpCode}`;
+      ? `Welcome to AGT Textile Mills — Verify Your Account (${otpCode})`
+      : `AGT Textile Mills — One-Time Verification Code: ${otpCode}`;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -79,7 +79,7 @@ export class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Everest Textile Mills</h1>
+            <h1>AGT Textile Mills</h1>
             <p>Manufacturing Vault & Task Governance Platform</p>
           </div>
           <div class="content">
@@ -87,8 +87,8 @@ export class EmailService {
             <div class="message">
               ${
                 isRegistration
-                  ? 'Thank you for registering your profile with Everest Textile Mills. Please verify your email address to activate your factory access portal.'
-                  : 'A session authentication request was initiated for your Everest Textile Mills account. Use the one-time verification code below to authorize your login:'
+                  ? 'Thank you for registering your profile with AGT Textile Mills. Please verify your email address to activate your factory access portal.'
+                  : 'A session authentication request was initiated for your AGT Textile Mills account. Use the one-time verification code below to authorize your login:'
               }
             </div>
 
@@ -102,7 +102,7 @@ export class EmailService {
             </div>
 
             <div class="security-footer">
-              <strong>Security Notice:</strong> Everest Textile Mills employees will never ask for your verification code. If you did not request this code, please disregard this email or report unauthorized activity to the IT department.
+              <strong>Security Notice:</strong> AGT Textile Mills employees will never ask for your verification code. If you did not request this code, please disregard this email or report unauthorized activity to the IT department.
             </div>
           </div>
         </div>

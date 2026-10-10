@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('--- Seeding Everest Textile Mills Database ---');
+  console.log('--- Seeding AGT Textile Mills Database ---');
 
   // Clear existing records in proper dependency order
   await prisma.auditLog.deleteMany();
@@ -89,49 +89,49 @@ async function main() {
   const usersData = [
     {
       name: 'Rajendran Murthy (Owner)',
-      email: 'admin@everesttextile.com',
+      email: 'admin@agttextile.com',
       password: defaultPasswordHash,
       role: 'ADMIN',
       phone: '+91 98422 10001',
     },
     {
       name: 'Vikram Seth (Sales Head)',
-      email: 'sales@everesttextile.com',
+      email: 'sales@agttextile.com',
       password: await bcrypt.hash('Sales@123', salt),
       role: 'SALES',
       phone: '+91 98422 10002',
     },
     {
       name: 'Gopalakrishnan N (Store Manager)',
-      email: 'store@everesttextile.com',
+      email: 'store@agttextile.com',
       password: await bcrypt.hash('Store@123', salt),
       role: 'STORE',
       phone: '+91 98422 10003',
     },
     {
       name: 'Karthik Raman (Production Mgr)',
-      email: 'production@everesttextile.com',
+      email: 'production@agttextile.com',
       password: await bcrypt.hash('Prod@123', salt),
       role: 'PRODUCTION',
       phone: '+91 98422 10004',
     },
     {
       name: 'Subramanian V (Quality Inspector)',
-      email: 'quality@everesttextile.com',
+      email: 'quality@agttextile.com',
       password: await bcrypt.hash('Quality@123', salt),
       role: 'QUALITY',
       phone: '+91 98422 10005',
     },
     {
       name: 'Selvam D (Dispatch Supervisor)',
-      email: 'dispatch@everesttextile.com',
+      email: 'dispatch@agttextile.com',
       password: await bcrypt.hash('Dispatch@123', salt),
       role: 'DISPATCH',
       phone: '+91 98422 10006',
     },
     {
       name: 'Meenakshi Sundaram (Finance/Accounts)',
-      email: 'accounts@everesttextile.com',
+      email: 'accounts@agttextile.com',
       password: await bcrypt.hash('Accounts@123', salt),
       role: 'ACCOUNTS',
       phone: '+91 98422 10007',
@@ -651,9 +651,9 @@ async function main() {
       orderId: order1.id,
       buyerId: buyer1.id,
       dispatchDate: new Date('2026-09-26'),
-      carrierName: 'Everest Global Cargo / Maersk Sea Freight',
+      carrierName: 'AGT Global Cargo / Maersk Sea Freight',
       vehicleNumber: 'TN-38-BZ-4412',
-      trackingNumber: 'EVRST-SEAFRT-99812',
+      trackingNumber: 'AGT-SEAFRT-99812',
       status: 'DELIVERED',
       totalMeters: 2000.0,
       totalRolls: 2,
@@ -924,7 +924,7 @@ async function main() {
     data: {
       buyerId: buyer1.id,
       title: 'Order ORD-2026-001 Dispatched',
-      message: 'Your order of 2,000 meters has been loaded and dispatched via Everest Global Cargo. Tracking: EVRST-SEAFRT-99812',
+      message: 'Your order of 2,000 meters has been loaded and dispatched via AGT Global Cargo. Tracking: AGT-SEAFRT-99812',
       type: 'SUCCESS',
       link: '/buyer/dispatch',
     },

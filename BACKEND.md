@@ -1,11 +1,11 @@
-# ⚙️ Everest Textile Mills — Backend API Architecture & Services
+# ⚙️ AGT Textile Mills — Backend API Architecture & Services
 
 [![Node.js](https://img.shields.io/badge/Runtime-Node.js%20v24%20LTS-43853D?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Express.js](https://img.shields.io/badge/Framework-Express%20v4.21-000000?logo=express&logoColor=white)](https://expressjs.com)
 [![TypeScript](https://img.shields.io/badge/Language-TypeScript%20v5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Security](https://img.shields.io/badge/Security-JWT%20%2B%20Bcrypt-FF6B6B?logo=auth0&logoColor=white)](#-security--authentication)
 
-This document provides complete documentation of the **Backend REST API Engine** powering Everest Textile Mills, including route controllers, transactional workflows, authentication, role authorization, and audit logging.
+This document provides complete documentation of the **Backend REST API Engine** powering AGT Textile Mills, including route controllers, transactional workflows, authentication, role authorization, and audit logging.
 
 ---
 
@@ -190,4 +190,4 @@ The backend provides real-time heap telemetry, server uptime, and database laten
 
 ---
 
-*Maintained by the Everest Textile Mills Backend Engineering Team.*
+*Maintained by the AGT Textile Mills Backend Engineering Team.*
