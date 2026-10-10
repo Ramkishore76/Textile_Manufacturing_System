@@ -34,3 +34,13 @@ server/prisma/*.db-journal
 # Temporary caches
 .tmp/
 .cache/
+
+# User-uploaded files
+server/uploads/*
+!server/uploads/.gitkeep
+!server/uploads/quality/
+!server/uploads/quality/.gitkeep
+!server/uploads/quality/*.svg
+server/uploads/quality/*.jpg
+server/uploads/quality/*.png
+

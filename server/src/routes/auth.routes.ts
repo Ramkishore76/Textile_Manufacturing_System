@@ -34,6 +34,17 @@ const resendOtpSchema = z.object({
   tempToken: z.string().min(1, 'Temporary session token required'),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  otp: z.string().length(6, 'Verification code must be 6 digits'),
+  tempToken: z.string().min(1, 'Temporary session token required'),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
 export const getRoleRedirectUrl = (role: string): string => {
   switch (role) {
     case 'ADMIN':
@@ -112,72 +123,30 @@ router.post('/login', async (req, res): Promise<void> => {
       return;
     }
 
-    // Support direct token issuance for automated test suites
-    if (req.body.skipOtp === true || req.headers['x-skip-otp'] === 'true') {
-      const token = jwt.sign(
-        {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          buyerId: user.buyerAccount?.buyerId || null,
-        },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
-
-      res.json({
-        message: 'Login successful',
-        token,
-        redirectUrl: getRoleRedirectUrl(user.role),
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          buyerId: user.buyerAccount?.buyerId || null,
-          buyerCompany: user.buyerAccount?.buyer?.companyName || null,
-        },
-      });
-      return;
-    }
-
-    // Generate 6-digit OTP code
-    const otp = EmailService.generateOtp();
-
-    // Store in-memory with 10-min expiration
-    EmailService.setOtp(normalizedEmail, otp, 'LOGIN_2FA');
-
-    // Sign temporary token for OTP step
-    const tempToken = jwt.sign(
+    // Direct password authentication (No verification code requested during standard login)
+    const token = jwt.sign(
       {
         id: user.id,
         email: user.email,
-        type: 'LOGIN_2FA',
+        role: user.role,
+        buyerId: user.buyerAccount?.buyerId || null,
       },
       JWT_SECRET,
-      { expiresIn: '10m' }
+      { expiresIn: '24h' }
     );
-
-    // Dispatch real email via Brevo API
-    const emailResult = await EmailService.sendOtpEmail(
-      user.email,
-      user.name,
-      otp,
-      'LOGIN_2FA'
-    );
-
-    console.log(`[Auth Login] Generated OTP ${otp} for ${user.email} (Brevo Status: ${emailResult.success ? 'Delivered' : 'Pending'})`);
 
     res.json({
-      requiresOtp: true,
-      email: user.email,
-      maskedEmail: maskEmail(user.email),
-      name: user.name,
-      role: user.role,
-      tempToken,
-      message: `Security code sent via Brevo to ${maskEmail(user.email)}.`,
-      // In development mode, provide code as fallback hint so local demo personas never get stuck
-      devOtp: process.env.NODE_ENV !== 'production' ? otp : undefined,
+      message: 'Login successful',
+      token,
+      redirectUrl: getRoleRedirectUrl(user.role),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        buyerId: user.buyerAccount?.buyerId || null,
+        buyerCompany: user.buyerAccount?.buyer?.companyName || null,
+      },
     });
   } catch (error: any) {
     console.error('Login error:', error);
@@ -531,7 +500,178 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response): Pr
       },
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Error fetching user profile.' });
+    console.error('Fetch me error:', error);
+    res.status(500).json({ error: 'Server error retrieving user profile.' });
+  }
+});
+
+/**
+ * Request Password Reset (Dispatches 6-Digit Email Verification Code via Brevo)
+ */
+router.post('/forgot-password', async (req, res): Promise<void> => {
+  try {
+    const parseResult = forgotPasswordSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: parseResult.error.errors[0]?.message || 'Invalid email address' });
+      return;
+    }
+
+    const { email } = parseResult.data;
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          { email: normalizedEmail.replace('@agttextile.com', '@everesttextile.com') },
+          { email: normalizedEmail.replace('@everesttextile.com', '@agttextile.com') },
+        ],
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'No account registered with this email address.' });
+      return;
+    }
+
+    if (!user.isActive) {
+      res.status(403).json({ error: 'Account is deactivated. Please contact the administrator.' });
+      return;
+    }
+
+    const otp = EmailService.generateOtp();
+
+    EmailService.setOtp(normalizedEmail, otp, 'FORGOT_PASSWORD', {
+      name: user.name,
+      role: user.role,
+      passwordHash: '',
+    });
+
+    const tempToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        type: 'FORGOT_PASSWORD',
+      },
+      JWT_SECRET,
+      { expiresIn: '10m' }
+    );
+
+    const emailResult = await EmailService.sendOtpEmail(
+      user.email,
+      user.name,
+      otp,
+      'FORGOT_PASSWORD'
+    );
+
+    console.log(`[Forgot Password] Generated OTP ${otp} for ${user.email} (Brevo Status: ${emailResult.success ? 'Delivered' : 'Pending'})`);
+
+    res.json({
+      requiresOtp: true,
+      email: user.email,
+      maskedEmail: maskEmail(user.email),
+      tempToken,
+      message: `Password reset verification code sent via Brevo to ${maskEmail(user.email)}.`,
+      devOtp: process.env.NODE_ENV !== 'production' ? otp : undefined,
+    });
+  } catch (error: any) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Server error processing password reset request.' });
+  }
+});
+
+/**
+ * Reset Password with Verified Email OTP
+ */
+router.post('/reset-password', async (req, res): Promise<void> => {
+  try {
+    const parseResult = resetPasswordSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: parseResult.error.errors[0]?.message || 'Invalid input' });
+      return;
+    }
+
+    const { email, otp, tempToken, newPassword } = parseResult.data;
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Verify tempToken
+    try {
+      const decoded = jwt.verify(tempToken, JWT_SECRET) as any;
+      if (decoded.email.toLowerCase() !== normalizedEmail || decoded.type !== 'FORGOT_PASSWORD') {
+        res.status(401).json({ error: 'Invalid password reset session. Please request a new code.' });
+        return;
+      }
+    } catch {
+      res.status(401).json({ error: 'Password reset session expired. Please request a new code.' });
+      return;
+    }
+
+    // Verify OTP against store
+    const verification = EmailService.verifyOtp(normalizedEmail, otp);
+    if (!verification.valid || !verification.record || verification.record.type !== 'FORGOT_PASSWORD') {
+      res.status(400).json({ error: verification.error || 'Invalid or expired verification code.' });
+      return;
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          { email: normalizedEmail.replace('@agttextile.com', '@everesttextile.com') },
+          { email: normalizedEmail.replace('@everesttextile.com', '@agttextile.com') },
+        ],
+      },
+      include: {
+        buyerAccount: {
+          include: {
+            buyer: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'User account not found.' });
+      return;
+    }
+
+    // Hash new password and update
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: passwordHash },
+    });
+
+    // Issue session token
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        buyerId: user.buyerAccount?.buyerId || null,
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      message: 'Password has been reset successfully! You are now logged in.',
+      token,
+      redirectUrl: getRoleRedirectUrl(user.role),
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        buyerId: user.buyerAccount?.buyerId || null,
+        buyerCompany: user.buyerAccount?.buyer?.companyName || null,
+      },
+    });
+  } catch (error: any) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Server error resetting password.' });
   }
 });
 

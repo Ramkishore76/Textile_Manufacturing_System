@@ -6,7 +6,7 @@ export interface OtpRecord {
   expiresAt: number;
   lastSentAt: number;
   attempts: number;
-  type: 'LOGIN_2FA' | 'NEW_USER_VERIFICATION';
+  type: 'LOGIN_2FA' | 'NEW_USER_VERIFICATION' | 'FORGOT_PASSWORD';
   userData?: {
     name: string;
     role: string;
@@ -48,11 +48,14 @@ export class EmailService {
     toEmail: string,
     toName: string,
     otpCode: string,
-    purpose: 'LOGIN_2FA' | 'NEW_USER_VERIFICATION' = 'LOGIN_2FA'
+    purpose: 'LOGIN_2FA' | 'NEW_USER_VERIFICATION' | 'FORGOT_PASSWORD' = 'NEW_USER_VERIFICATION'
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const isRegistration = purpose === 'NEW_USER_VERIFICATION';
+    const isForgotPassword = purpose === 'FORGOT_PASSWORD';
     const subject = isRegistration
       ? `Welcome to AGT Textile Mills — Verify Your Account (${otpCode})`
+      : isForgotPassword
+      ? `AGT Textile Mills — Password Reset Verification Code: ${otpCode}`
       : `AGT Textile Mills — One-Time Verification Code: ${otpCode}`;
 
     const htmlContent = `
@@ -88,6 +91,8 @@ export class EmailService {
               ${
                 isRegistration
                   ? 'Thank you for registering your profile with AGT Textile Mills. Please verify your email address to activate your factory access portal.'
+                  : isForgotPassword
+                  ? 'A password reset request was initiated for your AGT Textile Mills account. Use the one-time verification code below to authorize your password reset:'
                   : 'A session authentication request was initiated for your AGT Textile Mills account. Use the one-time verification code below to authorize your login:'
               }
             </div>
@@ -159,7 +164,7 @@ export class EmailService {
   public static setOtp(
     email: string,
     code: string,
-    type: 'LOGIN_2FA' | 'NEW_USER_VERIFICATION',
+    type: 'LOGIN_2FA' | 'NEW_USER_VERIFICATION' | 'FORGOT_PASSWORD',
     userData?: OtpRecord['userData']
   ): void {
     const key = email.toLowerCase().trim();

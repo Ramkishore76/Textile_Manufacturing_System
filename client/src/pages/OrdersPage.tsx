@@ -48,6 +48,7 @@ export const OrdersPage: React.FC = () => {
 
   // Selected Order Detail Modal
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [reserving, setReserving] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -119,9 +120,10 @@ export const OrdersPage: React.FC = () => {
   };
 
   const handleManualReserve = async (orderId: string) => {
+    setReserving(true);
     try {
       const res: any = await api.post(`/orders/${orderId}/reserve-yarn`, {});
-      toast.info(res.message || 'Yarn allocation updated');
+      toast.success(res.message || 'Yarn allocation updated successfully');
       await loadData();
       if (selectedOrder) {
         const updated = await api.get(`/orders/${orderId}`);
@@ -129,6 +131,8 @@ export const OrdersPage: React.FC = () => {
       }
     } catch (err: any) {
       toast.error('Reservation error: ' + err.message);
+    } finally {
+      setReserving(false);
     }
   };
 
@@ -464,8 +468,8 @@ export const OrdersPage: React.FC = () => {
                       value={quantity}
                       onChange={(e) => setQuantity(Number(e.target.value))}
                       required
-                      min={100}
-                      step={50}
+                      min={1}
+                      step={1}
                       className="w-full border border-zinc-200 rounded-xl p-2.5 text-xs text-zinc-800 bg-zinc-50/50 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition"
                     />
                   </div>
@@ -624,9 +628,10 @@ export const OrdersPage: React.FC = () => {
                   <span className="text-zinc-700 font-medium text-xs">Yarn stock available for reservation?</span>
                   <button
                     onClick={() => handleManualReserve(selectedOrder.id)}
-                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition"
+                    disabled={reserving}
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition disabled:opacity-50 cursor-pointer"
                   >
-                    Allocate & Reserve Yarn
+                    {reserving ? 'Allocating Yarn...' : 'Allocate & Reserve Yarn'}
                   </button>
                 </div>
               )}

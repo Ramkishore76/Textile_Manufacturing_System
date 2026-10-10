@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+    <rect width="600" height="400" fill="#0f172a" />
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+    <rect width="600" height="400" fill="url(#grid)" />
+    
+    <!-- Textile Fabric Weave Texture Simulation -->
+    <g opacity="0.2">
+      <line x1="0" y1="50" x2="600" y2="50" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+      <line x1="0" y1="100" x2="600" y2="100" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+      <line x1="0" y1="150" x2="600" y2="150" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+      <line x1="0" y1="200" x2="600" y2="200" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+      <line x1="0" y1="250" x2="600" y2="250" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+      <line x1="0" y1="300" x2="600" y2="300" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+      <line x1="0" y1="350" x2="600" y2="350" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4"/>
+    </g>
+
+    <!-- Defect Visual Highlighting Box -->
+    <rect x="180" y="110" width="240" height="150" rx="12" fill="#475569" fill-opacity="0.18" stroke="#475569" stroke-width="3" stroke-dasharray="6,4" />
+    <circle cx="300" cy="185" r="32" fill="#475569" fill-opacity="0.35" stroke="#475569" stroke-width="2" />
+    <text x="300" y="191" font-family="monospace" font-size="20" font-weight="bold" fill="#ffffff" text-anchor="middle">⚠️ DEFECT</text>
+
+    <!-- Header Badge -->
+    <rect x="30" y="30" width="160" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="110" y="49" font-family="sans-serif" font-size="11" font-weight="bold" fill="#38bdf8" text-anchor="middle">WEAVING CHECKPOINT</text>
+
+    <!-- Description Card -->
+    <rect x="30" y="300" width="540" height="70" rx="8" fill="#1e293b" fill-opacity="0.9" stroke="#334155" stroke-width="1"/>
+    <text x="50" y="326" font-family="sans-serif" font-size="15" font-weight="bold" fill="#f8fafc">Loom Lubricant Oil Stains</text>
+    <text x="50" y="350" font-family="sans-serif" font-size="12" fill="#94a3b8">Grease splatter spot detected across 1.2m of greige fabric.</text>
+  </svg>

@@ -10,7 +10,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
     const role = req.user?.role || 'ADMIN';
 
     const roleAllowedPrefixes: Record<string, string[]> = {
-      PRODUCTION: ['/app/production', '/app/inventory', '/app/finished-goods', '/app/orders'],
+      PRODUCTION: ['/app/production', '/app/inventory', '/app/finished-goods', '/app/orders', '/app/quality'],
       QUALITY: ['/app/quality', '/app/finished-goods', '/app/production'],
       STORE: ['/app/inventory', '/app/purchases', '/app/finished-goods', '/app/orders'],
       SALES: ['/app/orders', '/app/finished-goods'],

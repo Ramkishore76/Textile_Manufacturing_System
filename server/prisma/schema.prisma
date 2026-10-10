@@ -183,6 +183,8 @@ model Order {
   dispatches           Dispatch[]
   invoices             Invoice[]
   expenses             ExpenseRecord[]
+  qualityInspections   QualityInspection[]
+  qualityIssues        QualityIssue[]
 
   @@map("orders")
 }
@@ -319,6 +321,7 @@ model Machine {
   updatedAt           DateTime        @updatedAt
 
   productionJobs      ProductionJob[]
+  qualityInspections  QualityInspection[]
 
   @@map("machines")
 }
@@ -424,22 +427,147 @@ model Roll {
 }
 
 model QualityInspection {
-  id                String   @id @default(cuid())
-  rollId            String
-  inspectorId       String?
-  inspectorName     String
-  inspectionDate    DateTime @default(now())
-  result            String   // PASSED, REWORK_REQUIRED, REJECTED
-  defectCategory    String?  // HOLES, COLOR_MISMATCH, UNEVEN_WEAVING, STAINS, OTHER, NONE
-  defectDescription String?
-  defectiveQuantity Float    @default(0)
-  severity          String?  // MINOR, MAJOR, CRITICAL
-  remarks           String?
-  createdAt         DateTime @default(now())
+  id                   String              @id @default(cuid())
+  inspectionNumber     String?             @unique
+  rollId               String?
+  orderId              String?
+  orderNumber          String?
+  batchOrRollNumber    String?
+  fabricType           String?
+  stage                String?             @default("FINAL_INSPECTION") // RAW_MATERIAL, SPINNING_QC, WEAVING_QC, DYEING_QC, FINAL_INSPECTION
+  machineId            String?
+  machineName          String?
+  inspectorId          String?
+  inspectorName        String
+  inspectionDate       DateTime            @default(now())
+  result               String              // PASSED, FAILED, REWORK_REQUIRED, REJECTED
+  defectCategory       String?
+  defectDescription    String?
+  defectiveQuantity    Float               @default(0)
+  affectedQuantity     Float?              @default(0)
+  unit                 String?             @default("METERS") // METERS, KG
+  severity             String?             // MINOR, MAJOR, CRITICAL
+  correctiveActionReq  String?
+  remarks              String?
+  inspectorComments    String?
+  isReinspection       Boolean?            @default(false)
+  originalInspectionId String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime?           @updatedAt
 
-  roll              Roll     @relation(fields: [rollId], references: [id], onDelete: Cascade)
+  roll                 Roll?               @relation(fields: [rollId], references: [id], onDelete: SetNull)
+  order                Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  machine              Machine?            @relation(fields: [machineId], references: [id], onDelete: SetNull)
+  photos               QualityAttachment[]
+  qualityIssue         QualityIssue?
 
   @@map("quality_inspections")
+}
+
+model QualityIssue {
+  id                    String              @id @default(cuid())
+  issueNumber           String              @unique // e.g. QI-2026-0001
+  inspectionId          String              @unique
+  orderId               String?
+  orderNumber           String?
+  batchOrRollNumber     String
+  stage                 String              // RAW_MATERIAL, SPINNING_QC, WEAVING_QC, DYEING_QC, FINAL_INSPECTION
+  defectCategory        String
+  defectDescription     String
+  severity              String              // MINOR, MAJOR, CRITICAL
+  affectedQuantity      Float
+  unit                  String              @default("METERS")
+  rootCause             String?
+  recommendedAction     String
+  assignedTeam          String              // SPINNING_DEPT, WEAVING_DEPT, DYEING_DEPT, FINISHING_DEPT, QUALITY_LAB
+  assignedPerson        String?
+  dueDate               DateTime
+  status                String              @default("ON_HOLD") 
+  // ON_HOLD, CORRECTION_ASSIGNED, CORRECTION_IN_PROGRESS, AWAITING_REINSPECTION, REINSPECTION_FAILED, APPROVED_TO_CONTINUE, REJECTED_OR_SCRAPPED
+  holdStatus            String              @default("ON_HOLD") // ON_HOLD, RELEASED
+  documentationAccepted         Boolean             @default(false)
+  documentationAcceptedBy       String?
+  documentationAcceptedAt       DateTime?
+  documentationAcceptanceNotes  String?
+  strategyType                  String?             // PARAMETER_ADJUSTMENT, MACHINE_DIVERSION, MATERIAL_BATCH_SWAP, MAINTENANCE_OVERHAUL, RECIPE_MODIFICATION
+  strategySummary               String?
+  strategyDetails               String?
+  parameterChanges              String?
+  preventiveMeasures            String?
+  strategyImplementedBy         String?
+  strategyImplementedAt         DateTime?
+  correctionNotes       String?
+  correctionCompletedAt DateTime?
+  correctionSubmittedBy String?
+  reinspectionResult    String?             // PASSED, FAILED
+  reinspectionNotes     String?
+  reinspectedBy         String?
+  reinspectedAt         DateTime?
+  approvedBy            String?
+  approvedAt            DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  inspection            QualityInspection   @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  order                 Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  photos                QualityAttachment[]
+  statusHistory         QualityStatusLog[]
+
+  @@map("quality_issues")
+}
+
+model QualityAttachment {
+  id               String             @id @default(cuid())
+  fileName         String
+  fileUrl          String
+  thumbnailUrl     String?
+  fileSize         Int                @default(0)
+  originalSize     Int?               @default(0)
+  compressedSize   Int?               @default(0)
+  compressionRatio String?
+  mimeType         String             @default("image/jpeg")
+  caption          String?
+  uploaderName     String
+  uploaderId       String?
+  inspectionId     String?
+  qualityIssueId   String?
+  createdAt        DateTime           @default(now())
+
+  inspection       QualityInspection? @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  qualityIssue     QualityIssue?      @relation(fields: [qualityIssueId], references: [id], onDelete: Cascade)
+
+  @@map("quality_attachments")
+}
+
+model QualityStatusLog {
+  id             String       @id @default(cuid())
+  qualityIssueId String
+  fromStatus     String
+  toStatus       String
+  action         String
+  comments       String?
+  performedBy    String
+  performedById  String?
+  createdAt      DateTime     @default(now())
+
+  qualityIssue   QualityIssue @relation(fields: [qualityIssueId], references: [id], onDelete: Cascade)
+
+  @@map("quality_status_logs")
+}
+
+model QualityCheckpointConfig {
+  id              String   @id @default(cuid())
+  stageCode       String   @unique // RAW_MATERIAL, SPINNING_QC, WEAVING_QC, DYEING_QC, FINAL_INSPECTION
+  stageName       String
+  sequenceOrder   Int
+  isRequired      Boolean  @default(true)
+  mandatoryHold   Boolean  @default(true)
+  inspectionType  String   @default("4_POINT_STANDARD")
+  responsibleTeam String
+  description     String?
+  updatedAt       DateTime @updatedAt
+
+  @@map("quality_checkpoint_configs")
 }
 
 model ReworkRecord {

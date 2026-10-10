@@ -313,15 +313,26 @@ The system features a dedicated, externally scoped Buyer Portal accessible at **
 
 ---
 
+## 🔍 Stage-Wise Quality Control & Production Governance
+
+The system implements complete stage-wise quality inspection across all operations:
+- **Operation Stages:** Spinning, Weaving, Dyeing, Printing, Finishing, and Final Inspection.
+- **Stage Hold Gate:** Material is prevented from proceeding to the next manufacturing operation until required inspections pass or corrective actions are verified.
+- **Visual Defect Evidence:** Quality inspectors capture photographic evidence directly using connected webcams or uploaded photos.
+- **Client & Server Image Compression:** Defect photos are automatically compressed and thumbnail-generated for lightweight storage and fast shop-floor viewing.
+- **Production Strategy Review:** Defect reports trigger alerts to the Production Manager with corrective instructions. The Production Manager reviews the defect evidence and updates the production strategy to resume operations.
+
+---
+
 ## 👥 Multi-Token Collaborative Development Changelog
 
-All code contributions were authored, verified, and pushed across the authorized team member tokens spaced at scheduled 1-hour intervals:
+All code contributions were authored, verified, and pushed across the authorized team member tokens:
 
 | Contributor | GitHub Account | Token Attribution | Primary Functional Focus |
 |---|---|---|---|
-| **RAMKISHORE SM** | `Ramkishore76` | `Verified PAT (Ram)` | Frontend architecture, Buyer Catalog Desk, Brevo OTP UI, IT Task Manager styling & routing |
+| **RAMKISHORE SM** | `Ramkishore76` | `Verified PAT (Ram)` | Frontend architecture, Stage-wise QC UI, Buyer Catalog Desk, Brevo OTP UI & responsive styling |
 | **SANJAY S** | `Sanjay8555` | `Verified PAT (Sanjay)` | Database query indexing, Supabase PostgreSQL seeds, performance audit benchmarks & verification |
-| **Santhoshkumar S** | `SanthoshkumarS2407` | `Verified PAT (Santhosh)` | Express API gateway, Buyer Portal REST endpoints, RBAC middleware, 5% GST calculation & E2E suite |
+| **Santhoshkumar S** | `SanthoshkumarS2407` | `Verified PAT (Santhosh)` | Express API gateway, Stage-wise QC holds & photo compression, RBAC middleware, 5% GST & E2E suite |
 
 ---
 

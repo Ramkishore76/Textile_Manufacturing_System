@@ -168,7 +168,7 @@ router.post('/orders', async (req: AuthRequest, res: Response): Promise<void> =>
 
     const schema = z.object({
       fabricProductId: z.string(),
-      requiredQuantity: z.number().min(10, 'Minimum order quantity is 10 meters'),
+      requiredQuantity: z.number().min(1, 'Quantity must be at least 1 meter'),
       color: z.string().min(2, 'Color / shade specification is required'),
       requiredDeliveryDate: z.string().refine((d) => !isNaN(Date.parse(d)), 'Valid delivery date is required'),
       priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).default('NORMAL'),

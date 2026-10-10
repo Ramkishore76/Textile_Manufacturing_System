@@ -327,9 +327,9 @@ router.post(
   }
 );
 
-// Manual Material Reservation Trigger
+// Manual Material / Yarn Reservation Trigger
 router.post(
-  '/:id/reserve-materials',
+  ['/:id/reserve-yarn', '/:id/reserve-materials'],
   authenticateToken,
   requireRole(['ADMIN', 'SALES', 'STORE', 'PRODUCTION']),
   async (req: AuthRequest, res: Response): Promise<void> => {
@@ -351,6 +351,13 @@ router.post(
 
       if (!order) {
         res.status(404).json({ error: 'Order not found' });
+        return;
+      }
+
+      if (order.status !== 'CONFIRMED') {
+        res.status(400).json({
+          error: `Order is already in "${order.status}" status. Yarn materials can only be reserved for Confirmed orders.`,
+        });
         return;
       }
 
@@ -402,7 +409,16 @@ router.post(
         return updatedOrder;
       });
 
-      res.json({ message: 'Materials reserved successfully', order: result });
+      await logAudit({
+        action: 'ORDER_STATUS_UPDATED',
+        entityType: 'Order',
+        entityId: order.id,
+        performedById: req.user?.id,
+        performedByName: req.user?.name,
+        details: { newStatus: 'MATERIAL_ALLOCATED', action: 'MANUAL_YARN_RESERVATION' },
+      });
+
+      res.json({ message: 'Yarn materials reserved and allocated successfully', order: result });
     } catch (err: any) {
       res.status(400).json({ error: err.message || 'Failed to reserve materials' });
     }

@@ -55,6 +55,7 @@ export const ROLE_CONFIGS: Record<string, RoleConfig> = {
       '/app/inventory',
       '/app/finished-goods',
       '/app/orders',
+      '/app/quality',
     ],
     primaryAction: {
       label: 'Schedule Production Job',

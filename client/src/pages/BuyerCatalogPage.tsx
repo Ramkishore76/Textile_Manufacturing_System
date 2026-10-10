@@ -150,8 +150,8 @@ export const BuyerCatalogPage: React.FC = () => {
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderingProduct) return;
-    if (orderQuantity < 10) {
-      toast.error('Minimum order quantity is 10 meters.');
+    if (orderQuantity < 1) {
+      toast.error('Please enter a valid quantity of at least 1 meter.');
       return;
     }
 
@@ -650,8 +650,8 @@ export const BuyerCatalogPage: React.FC = () => {
                 </label>
                 <input
                   type="number"
-                  min="10"
-                  step="50"
+                  min="1"
+                  step="1"
                   value={orderQuantity}
                   onChange={(e) => setOrderQuantity(Number(e.target.value))}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs"

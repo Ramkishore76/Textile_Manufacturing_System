@@ -117,7 +117,7 @@ function App() {
             <Route
               path="quality"
               element={
-                <ProtectedRoute allowedRoles={['ADMIN', 'QUALITY']}>
+                <ProtectedRoute allowedRoles={['ADMIN', 'QUALITY', 'PRODUCTION']}>
                   <QualityPage />
                 </ProtectedRoute>
               }

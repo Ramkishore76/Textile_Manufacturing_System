@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  // Mode: 'SIGN_IN' | 'REGISTER' | 'VERIFY_OTP'
-  const [mode, setMode] = useState<'SIGN_IN' | 'REGISTER' | 'VERIFY_OTP'>('SIGN_IN');
+  // Mode: 'SIGN_IN' | 'REGISTER' | 'VERIFY_OTP' | 'FORGOT_PASSWORD' | 'RESET_PASSWORD'
+  const [mode, setMode] = useState<
+    'SIGN_IN' | 'REGISTER' | 'VERIFY_OTP' | 'FORGOT_PASSWORD' | 'RESET_PASSWORD'
+  >('SIGN_IN');
 
   // Sign In State
   const [email, setEmail] = useState('');
@@ -33,6 +35,11 @@ export const LoginPage: React.FC = () => {
   const [regRole, setRegRole] = useState('STORE');
   const [regPhone, setRegPhone] = useState('');
   const [regCompany, setRegCompany] = useState('');
+
+  // Forgot / Reset Password State
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // OTP Verification State
   const [otp, setOtp] = useState('');
@@ -56,7 +63,7 @@ export const LoginPage: React.FC = () => {
   // Resend Countdown Timer
   useEffect(() => {
     let timer: any;
-    if (mode === 'VERIFY_OTP' && countdown > 0) {
+    if ((mode === 'VERIFY_OTP' || mode === 'RESET_PASSWORD') && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -90,7 +97,8 @@ export const LoginPage: React.FC = () => {
   };
 
   /**
-   * Handle Step 1: Login Request (Dispatches Brevo Email OTP)
+   * Handle Step 1: Direct Login with Email and Password
+   * Standard sign in logs in immediately with password (no OTP verification code required)
    */
   const handleSignInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,30 +108,35 @@ export const LoginPage: React.FC = () => {
     try {
       const res = await api.post<any>('/auth/login', { email, password });
 
+      // Direct login successful
+      if (res.token && res.user) {
+        login(res.token, res.user);
+        navigate(res.redirectUrl || '/app/dashboard');
+        return;
+      }
+
+      // Fallback if requiresOtp was returned
       if (res.requiresOtp) {
         setTargetEmail(res.email);
         setMaskedEmail(res.maskedEmail || res.email);
-        setUserName(res.name);
+        setUserName(res.name || '');
         setTempToken(res.tempToken);
         setDevHintOtp(res.devOtp || null);
         setMode('VERIFY_OTP');
         setCountdown(60);
         setCanResend(false);
         setSuccessInfo(res.message || 'Verification code sent to your email.');
-      } else if (res.token) {
-        // Fallback if OTP is bypassed
-        login(res.token, res.user);
-        navigate(res.redirectUrl || '/app/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      setError(err.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * Handle Step 1 (Alternative): New User Registration (Dispatches Brevo Email OTP)
+   * Handle Step 1 (Alternative): New User Registration
+   * Dispatches Brevo Email OTP to verify identity during account onboarding
    */
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,7 +172,7 @@ export const LoginPage: React.FC = () => {
   };
 
   /**
-   * Handle Step 2: Verify Brevo OTP Code & Authorize Session
+   * Handle Step 2: Verify Brevo OTP Code & Authorize Session (For Registration)
    */
   const handleVerifyOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +190,75 @@ export const LoginPage: React.FC = () => {
       navigate(res.redirectUrl || '/app/dashboard');
     } catch (err: any) {
       setError(err.message || 'Invalid or expired verification code.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Handle Forgot Password Request: Dispatches Brevo Email OTP
+   */
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await api.post<any>('/auth/forgot-password', { email: forgotEmail });
+      setTargetEmail(res.email);
+      setMaskedEmail(res.maskedEmail || res.email);
+      setTempToken(res.tempToken);
+      setDevHintOtp(res.devOtp || null);
+      setOtp('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setMode('RESET_PASSWORD');
+      setCountdown(60);
+      setCanResend(false);
+      setSuccessInfo(res.message || 'Password reset verification code sent to your email.');
+    } catch (err: any) {
+      setError(err.message || 'Could not find an account with this email address.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Handle Reset Password Submission: Verifies Email OTP & Sets New Password
+   */
+  const handleResetPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match. Please verify.');
+      return;
+    }
+
+    if (otp.length !== 6) {
+      setError('Please enter the complete 6-digit verification code.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await api.post<any>('/auth/reset-password', {
+        email: targetEmail,
+        otp: otp.trim(),
+        tempToken,
+        newPassword,
+      });
+
+      login(res.token, res.user);
+      navigate(res.redirectUrl || '/app/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Failed to reset password. Please check your verification code.');
     } finally {
       setLoading(false);
     }
@@ -221,24 +303,25 @@ export const LoginPage: React.FC = () => {
           Manufacturing Vault & Role Governance Platform
         </p>
 
-        {/* Security Badge with Brevo verification indicator */}
+        {/* Security Badge */}
         <div className="inline-flex items-center space-x-1.5 mt-3 px-3 py-1 rounded-full bg-indigo-50/80 border border-indigo-200/60 text-[11px] font-medium text-indigo-700">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <ShieldCheck className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Protected by Brevo Transactional Email Verification</span>
+          <span>Email Verification via Brevo for Onboarding & Security</span>
         </div>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-8 rounded-2xl border border-zinc-200/80 shadow-xs">
           {/* Top Segmented Mode Tabs (Sign In vs Create Account) */}
-          {mode !== 'VERIFY_OTP' && (
+          {(mode === 'SIGN_IN' || mode === 'REGISTER') && (
             <div className="flex bg-zinc-100/80 p-1 rounded-xl mb-6">
               <button
                 type="button"
                 onClick={() => {
                   setMode('SIGN_IN');
                   setError(null);
+                  setSuccessInfo(null);
                 }}
                 className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
                   mode === 'SIGN_IN'
@@ -253,6 +336,7 @@ export const LoginPage: React.FC = () => {
                 onClick={() => {
                   setMode('REGISTER');
                   setError(null);
+                  setSuccessInfo(null);
                 }}
                 className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition ${
                   mode === 'REGISTER'
@@ -281,7 +365,7 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
-          {/* VIEW 1: SIGN IN FORM */}
+          {/* VIEW 1: SIGN IN FORM (DIRECT PASSWORD LOGIN - NO EMAIL CODE REQUIRED) */}
           {mode === 'SIGN_IN' && (
             <form className="space-y-4" onSubmit={handleSignInSubmit}>
               <div>
@@ -304,9 +388,23 @@ export const LoginPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
-                  Password
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-zinc-700">
+                    Password
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotEmail(email);
+                      setMode('FORGOT_PASSWORD');
+                      setError(null);
+                      setSuccessInfo(null);
+                    }}
+                    className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline transition"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
                     <Lock className="w-4 h-4" />
@@ -325,16 +423,16 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50"
+                className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (
                   <span className="flex items-center space-x-2">
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>Sending Brevo Verification Code...</span>
+                    <span>Signing In...</span>
                   </span>
                 ) : (
                   <span className="flex items-center space-x-2">
-                    <span>Send Verification Code</span>
+                    <span>Sign In</span>
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 )}
@@ -351,7 +449,7 @@ export const LoginPage: React.FC = () => {
                       key={acc.role}
                       type="button"
                       onClick={() => handleSelectDemo(acc)}
-                      className="px-2 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 text-[11px] font-medium text-zinc-700 truncate transition"
+                      className="px-2 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 text-[11px] font-medium text-zinc-700 truncate transition cursor-pointer"
                       title={`${acc.role} (${acc.email})`}
                     >
                       {acc.role}
@@ -362,7 +460,7 @@ export const LoginPage: React.FC = () => {
             </form>
           )}
 
-          {/* VIEW 2: NEW USER REGISTRATION */}
+          {/* VIEW 2: NEW USER REGISTRATION (REQUIRES BREVO EMAIL OTP VERIFICATION) */}
           {mode === 'REGISTER' && (
             <form className="space-y-3.5" onSubmit={handleRegisterSubmit}>
               <div>
@@ -487,16 +585,16 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50"
+                className="w-full mt-2 flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (
                   <span className="flex items-center space-x-2">
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>Creating & Dispatching Brevo OTP...</span>
+                    <span>Sending Verification Code via Brevo...</span>
                   </span>
                 ) : (
                   <span className="flex items-center space-x-2">
-                    <span>Register & Verify Email</span>
+                    <span>Register & Send Email Code</span>
                     <ArrowRight className="w-4 h-4" />
                   </span>
                 )}
@@ -504,7 +602,7 @@ export const LoginPage: React.FC = () => {
             </form>
           )}
 
-          {/* VIEW 3: BREVO EMAIL OTP VERIFICATION SCREEN */}
+          {/* VIEW 3: BREVO EMAIL OTP VERIFICATION SCREEN (FOR NEW USER SIGN UP) */}
           {mode === 'VERIFY_OTP' && (
             <div className="space-y-5 animate-in fade-in duration-200">
               <div className="text-center">
@@ -515,7 +613,7 @@ export const LoginPage: React.FC = () => {
                   Verify Your Email{userName ? `, ${userName}` : ''}
                 </h3>
                 <p className="text-xs text-zinc-500 mt-1">
-                  We sent a 6-digit security code via Brevo to
+                  We sent a 6-digit account verification code via Brevo to
                 </p>
                 <div className="inline-block mt-1 font-mono font-semibold text-xs text-indigo-700 bg-indigo-50/70 border border-indigo-200/60 px-2.5 py-0.5 rounded-full">
                   {maskedEmail || targetEmail}
@@ -533,7 +631,7 @@ export const LoginPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setOtp(devHintOtp)}
-                      className="px-2 py-0.5 bg-amber-200/80 hover:bg-amber-300 text-amber-900 rounded font-mono font-bold text-[11px] transition"
+                      className="px-2 py-0.5 bg-amber-200/80 hover:bg-amber-300 text-amber-900 rounded font-mono font-bold text-[11px] transition cursor-pointer"
                     >
                       Autofill {devHintOtp}
                     </button>
@@ -564,7 +662,7 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading || otp.length !== 6}
-                  className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50"
+                  className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <span className="flex items-center space-x-2">
@@ -573,7 +671,7 @@ export const LoginPage: React.FC = () => {
                     </span>
                   ) : (
                     <span className="flex items-center space-x-2">
-                      <span>Authorize Session</span>
+                      <span>Activate Account & Sign In</span>
                       <ArrowRight className="w-4 h-4" />
                     </span>
                   )}
@@ -588,7 +686,7 @@ export const LoginPage: React.FC = () => {
                       type="button"
                       onClick={handleResendOtp}
                       disabled={resending}
-                      className="font-semibold text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center space-x-1"
+                      className="font-semibold text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center space-x-1 cursor-pointer"
                     >
                       <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
                       <span>{resending ? 'Resending Code...' : 'Resend Verification Code'}</span>
@@ -609,7 +707,232 @@ export const LoginPage: React.FC = () => {
                     setError(null);
                     setSuccessInfo(null);
                   }}
-                  className="inline-flex items-center justify-center space-x-1.5 text-zinc-400 hover:text-zinc-700 transition font-medium pt-1"
+                  className="inline-flex items-center justify-center space-x-1.5 text-zinc-400 hover:text-zinc-700 transition font-medium pt-1 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Sign In</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW 4: FORGOT PASSWORD REQUEST FORM */}
+          {mode === 'FORGOT_PASSWORD' && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div className="text-center">
+                <div className="inline-flex w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200/80 items-center justify-center text-indigo-600 mb-2 shadow-2xs">
+                  <KeyRound className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900 tracking-tight">
+                  Reset Your Password
+                </h3>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Enter your registered work email and we'll send a 6-digit verification code via Brevo to reset your password.
+                </p>
+              </div>
+
+              <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1.5">
+                    Registered Email Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="email"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      required
+                      placeholder="name@agttextile.com"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition placeholder:text-zinc-400 shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {loading ? (
+                    <span className="flex items-center space-x-2">
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Sending Reset Code via Brevo...</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center space-x-2">
+                      <span>Send Verification Code</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </button>
+              </form>
+
+              <div className="pt-3 border-t border-zinc-100 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('SIGN_IN');
+                    setError(null);
+                    setSuccessInfo(null);
+                  }}
+                  className="inline-flex items-center justify-center space-x-1.5 text-xs text-zinc-500 hover:text-zinc-800 transition font-medium cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Back to Sign In</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW 5: RESET PASSWORD FORM (REQUIRES BREVO EMAIL OTP + NEW PASSWORD) */}
+          {mode === 'RESET_PASSWORD' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <div className="text-center">
+                <div className="inline-flex w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200/80 items-center justify-center text-indigo-600 mb-2 shadow-2xs">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900 tracking-tight">
+                  Enter Code & Set New Password
+                </h3>
+                <p className="text-xs text-zinc-500 mt-1">
+                  We sent a 6-digit password reset verification code to
+                </p>
+                <div className="inline-block mt-1 font-mono font-semibold text-xs text-indigo-700 bg-indigo-50/70 border border-indigo-200/60 px-2.5 py-0.5 rounded-full">
+                  {maskedEmail || targetEmail}
+                </div>
+              </div>
+
+              {/* Developer Sandbox Fast Autofill Badge */}
+              {devHintOtp && (
+                <div className="p-3 bg-amber-50/90 border border-amber-200/70 rounded-xl text-xs text-amber-900">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold flex items-center space-x-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Brevo OTP Delivered:</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOtp(devHintOtp)}
+                      className="px-2 py-0.5 bg-amber-200/80 hover:bg-amber-300 text-amber-900 rounded font-mono font-bold text-[11px] transition cursor-pointer"
+                    >
+                      Autofill {devHintOtp}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleResetPasswordSubmit} className="space-y-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1.5 text-center">
+                    6-Digit Email Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                      setOtp(val);
+                    }}
+                    required
+                    maxLength={6}
+                    autoFocus
+                    placeholder="••••••"
+                    className="w-full text-center py-2.5 bg-zinc-50 border-2 border-indigo-200 rounded-xl text-xl font-mono font-bold tracking-[0.4em] text-zinc-900 focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition placeholder:text-zinc-300 shadow-2xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    New Password (min 6 chars)
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      placeholder="••••••••"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs text-zinc-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      placeholder="••••••••"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs text-zinc-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading || otp.length !== 6 || newPassword.length < 6}
+                  className="w-full mt-2 flex justify-center items-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {loading ? (
+                    <span className="flex items-center space-x-2">
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Verifying & Resetting Password...</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center space-x-2">
+                      <span>Reset Password & Sign In</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </span>
+                  )}
+                </button>
+              </form>
+
+              {/* Resend Controls & Back Button */}
+              <div className="pt-3 border-t border-zinc-100 flex flex-col space-y-2 text-center text-xs">
+                <div className="text-zinc-500">
+                  {canResend ? (
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={resending}
+                      className="font-semibold text-indigo-600 hover:text-indigo-800 hover:underline inline-flex items-center space-x-1 cursor-pointer"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
+                      <span>{resending ? 'Resending Code...' : 'Resend Verification Code'}</span>
+                    </button>
+                  ) : (
+                    <span>
+                      Resend code available in{' '}
+                      <strong className="text-zinc-700 font-mono">{countdown}s</strong>
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('SIGN_IN');
+                    setOtp('');
+                    setError(null);
+                    setSuccessInfo(null);
+                  }}
+                  className="inline-flex items-center justify-center space-x-1.5 text-zinc-400 hover:text-zinc-700 transition font-medium pt-1 cursor-pointer"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Back to Sign In</span>
