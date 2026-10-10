@@ -73,86 +73,79 @@ export const FinishedGoodsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-indigo-600 mb-1">
-            <Layers className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-wider">Inventory & Warehouse</span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Finished Goods Fabric Stock</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Certified quality-passed fabric rolls stored in finished warehouse awaiting shipment
+          <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">Finished Goods Fabric Stock</h1>
+          <p className="text-xs text-neutral-500 mt-0.5">
+            Certified fabric rolls stored in finished goods warehouse awaiting customer shipment.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => navigate('/app/dispatch')}
-            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-3.5 h-3.5" />
             <span>Go to Dispatch Planning</span>
           </button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Total Finished Rolls</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-slate-900">{filteredRolls.length}</span>
-            <span className="text-xs font-medium text-slate-400">rolls in stock</span>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Total Finished Rolls</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-neutral-900">{filteredRolls.length}</span>
+            <span className="text-xs text-neutral-400">rolls in stock</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Available Fabric Length</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-indigo-600">{totalMeters.toLocaleString()}</span>
-            <span className="text-xs font-medium text-slate-400">meters</span>
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Available Fabric Length</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-neutral-900">{totalMeters.toLocaleString()}</span>
+            <span className="text-xs text-neutral-400">meters</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Total Fabric Weight</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-slate-900">{totalWeight.toFixed(1)}</span>
-            <span className="text-xs font-medium text-slate-400">kg</span>
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Total Fabric Weight</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-neutral-900">{totalWeight.toFixed(1)}</span>
+            <span className="text-xs text-neutral-400">kg</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <p className="text-xs font-semibold text-slate-500 uppercase">Inspection Compliance</p>
-          <div className="flex items-baseline space-x-2 mt-2">
-            <span className="text-3xl font-black text-emerald-600">100%</span>
-            <span className="text-xs font-medium text-slate-400">Quality Passed</span>
+        <div className="bg-white p-4 rounded-lg border border-neutral-200/80">
+          <p className="text-xs font-medium text-neutral-500">Inspection Compliance</p>
+          <div className="flex items-baseline space-x-1.5 mt-1">
+            <span className="text-2xl font-semibold text-emerald-700">100%</span>
+            <span className="text-xs text-neutral-400">Quality Passed</span>
           </div>
         </div>
       </div>
 
       {/* Controls & Filter */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative flex-1 w-full md:w-auto">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+      <div className="bg-white p-3 rounded-lg border border-neutral-200/80 flex flex-col sm:flex-row gap-3 items-center justify-between text-xs">
+        <div className="relative flex-1 w-full sm:w-auto">
+          <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="Search by Roll ID, Order #, Buyer, Bin location..."
+            placeholder="Search by Roll ID, Order #, Buyer, Bin..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-9 pr-3 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 focus:outline-none focus:border-neutral-900"
           />
         </div>
 
-        <div className="flex items-center space-x-3 w-full md:w-auto">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-slate-400" />
-            <span className="text-xs font-bold text-slate-500 uppercase">Grade:</span>
-          </div>
+        <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <span className="text-xs font-medium text-neutral-500">Grade:</span>
           <select
             value={gradeFilter}
             onChange={(e) => setGradeFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-2.5 py-1.5 rounded-md border border-neutral-300 text-xs text-neutral-800 bg-white focus:outline-none focus:border-neutral-900"
           >
             <option value="ALL">All Grades</option>
             <option value="GRADE_A">Grade A (Premium)</option>
@@ -163,60 +156,60 @@ export const FinishedGoodsPage: React.FC = () => {
       </div>
 
       {/* Rolls Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border border-neutral-200/80 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400 font-medium">Loading finished goods stock...</div>
+          <div className="p-8 text-center text-neutral-400 font-normal text-xs">Loading finished goods stock...</div>
         ) : filteredRolls.length === 0 ? (
-          <div className="p-12 text-center">
-            <Layers className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-700">No Finished Rolls Found</h3>
-            <p className="text-xs text-slate-400 mt-1">
+          <div className="p-10 text-center">
+            <Layers className="w-8 h-8 text-neutral-300 mx-auto mb-2" />
+            <h3 className="text-xs font-semibold text-neutral-700">No Finished Rolls Found</h3>
+            <p className="text-[11px] text-neutral-400 mt-0.5">
               Either all rolls have been dispatched, or quality inspection is pending.
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-xs uppercase tracking-wider">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-neutral-50/40 border-b border-neutral-200/80 text-neutral-500 font-medium text-[11px]">
                 <tr>
-                  <th className="py-3 px-4">Roll ID & Barcode</th>
-                  <th className="py-3 px-4">Associated Order</th>
-                  <th className="py-3 px-4">Buyer Company</th>
-                  <th className="py-3 px-4">Length (m)</th>
-                  <th className="py-3 px-4">Weight (kg)</th>
-                  <th className="py-3 px-4">Quality Grade</th>
-                  <th className="py-3 px-4">Warehouse Location</th>
-                  <th className="py-3 px-4 text-right">Traceability</th>
+                  <th className="py-2.5 px-4">Roll ID</th>
+                  <th className="py-2.5 px-4">Associated Order</th>
+                  <th className="py-2.5 px-4">Buyer Company</th>
+                  <th className="py-2.5 px-4">Length</th>
+                  <th className="py-2.5 px-4">Weight</th>
+                  <th className="py-2.5 px-4">Quality Grade</th>
+                  <th className="py-2.5 px-4">Location</th>
+                  <th className="py-2.5 px-4 text-right">Traceability</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-neutral-100 text-neutral-700">
                 {filteredRolls.map((roll) => (
-                  <tr key={roll.id} className="hover:bg-slate-50 transition">
+                  <tr key={roll.id} className="hover:bg-neutral-50/60 transition">
                     <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <QrCode className="w-4 h-4 text-indigo-500" />
-                        <span className="font-mono font-bold text-slate-900">{roll.rollId}</span>
+                      <div className="flex items-center space-x-1.5">
+                        <QrCode className="w-3.5 h-3.5 text-neutral-500" />
+                        <span className="font-mono font-medium text-neutral-900">{roll.rollId}</span>
                       </div>
-                      <span className="text-[10px] text-slate-400">Created: {new Date(roll.createdAt).toLocaleDateString()}</span>
+                      <span className="text-[10px] text-neutral-400 block mt-0.5">Created: {new Date(roll.createdAt).toLocaleDateString()}</span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="font-bold text-indigo-600">{roll.order?.orderNumber}</span>
+                      <span className="font-medium text-neutral-800">{roll.order?.orderNumber}</span>
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="font-semibold text-slate-800">{roll.order?.buyer?.companyName}</span>
+                    <td className="py-3 px-4 text-neutral-700">
+                      {roll.order?.buyer?.companyName}
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                    <td className="py-3 px-4 font-semibold text-neutral-900">
                       {roll.lengthMeters} m
                     </td>
-                    <td className="py-3 px-4 font-mono">
+                    <td className="py-3 px-4 text-neutral-600">
                       {roll.weightKg ? `${roll.weightKg} kg` : '—'}
                     </td>
                     <td className="py-3 px-4">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium ${
                           roll.qualityGrade === 'GRADE_A'
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                            : 'bg-amber-100 text-amber-800 border border-amber-200'
+                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/60'
+                            : 'bg-amber-50 text-amber-800 border border-amber-200/60'
                         }`}
                       >
                         <ShieldCheck className="w-3 h-3 mr-1" />
@@ -225,21 +218,21 @@ export const FinishedGoodsPage: React.FC = () => {
                     </td>
                     <td className="py-3 px-4">
                       {roll.location ? (
-                        <div className="flex items-center space-x-1.5 text-xs text-slate-600 bg-slate-100 px-2 py-1 rounded inline-flex">
-                          <MapPin className="w-3.5 h-3.5 text-rose-500" />
-                          <span>Zone {roll.location.zone} - Rack {roll.location.rack} ({roll.location.bin})</span>
+                        <div className="flex items-center space-x-1 text-neutral-600 text-xs">
+                          <MapPin className="w-3 h-3 text-neutral-400" />
+                          <span>Zone {roll.location.zone} · Rack {roll.location.rack} ({roll.location.bin})</span>
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 italic">FG Staging Area</span>
+                        <span className="text-neutral-400 italic">FG Staging</span>
                       )}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <button
                         onClick={() => openTraceabilityModal(roll.id)}
-                        className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+                        className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-300 font-medium text-xs transition"
                       >
-                        <span>Inspect Trace</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
+                        <span>Passport</span>
+                        <ChevronRight className="w-3 h-3 text-neutral-400" />
                       </button>
                     </td>
                   </tr>
@@ -252,134 +245,134 @@ export const FinishedGoodsPage: React.FC = () => {
 
       {/* Roll Traceability Modal */}
       {selectedRoll && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-                  <QrCode className="w-5 h-5" />
+        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 shadow-xl border border-neutral-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-8 h-8 rounded-lg bg-neutral-100 text-neutral-800 flex items-center justify-center">
+                  <QrCode className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">Roll Traceability Passport</h2>
-                  <p className="text-xs text-slate-400 font-mono">Roll #{selectedRoll.rollId}</p>
+                  <h2 className="text-sm font-semibold text-neutral-900">Roll Traceability Passport</h2>
+                  <p className="text-[11px] text-neutral-500 font-mono">Roll #{selectedRoll.rollId}</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedRoll(null)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                className="p-1.5 text-neutral-400 hover:text-neutral-600 rounded-md"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="mt-6 space-y-6">
+            <div className="space-y-4 text-xs">
               {/* Core Specs */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-neutral-50/70 p-3.5 rounded-lg border border-neutral-200/60">
                 <div>
-                  <span className="text-slate-400 block uppercase font-bold text-[10px]">Length</span>
-                  <span className="font-black text-slate-800 text-sm">{selectedRoll.lengthMeters} m</span>
+                  <span className="text-neutral-400 block font-medium text-[10px] uppercase">Length</span>
+                  <span className="font-semibold text-neutral-900 text-xs">{selectedRoll.lengthMeters} m</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block uppercase font-bold text-[10px]">Weight</span>
-                  <span className="font-black text-slate-800 text-sm">{selectedRoll.weightKg || 'N/A'} kg</span>
+                  <span className="text-neutral-400 block font-medium text-[10px] uppercase">Weight</span>
+                  <span className="font-semibold text-neutral-900 text-xs">{selectedRoll.weightKg || 'N/A'} kg</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block uppercase font-bold text-[10px]">Grade</span>
-                  <span className="font-black text-emerald-600 text-sm">{selectedRoll.qualityGrade || 'PASSED'}</span>
+                  <span className="text-neutral-400 block font-medium text-[10px] uppercase">Grade</span>
+                  <span className="font-semibold text-emerald-800 text-xs">{selectedRoll.qualityGrade || 'PASSED'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block uppercase font-bold text-[10px]">Status</span>
-                  <span className="font-black text-indigo-600 text-sm">{selectedRoll.inventoryStatus}</span>
+                  <span className="text-neutral-400 block font-medium text-[10px] uppercase">Status</span>
+                  <span className="font-semibold text-neutral-800 text-xs">{selectedRoll.inventoryStatus}</span>
                 </div>
               </div>
 
               {/* Order & Buyer Trace */}
-              <div className="border border-slate-200 p-4 rounded-xl">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center space-x-2">
-                  <FileText className="w-4 h-4 text-indigo-500" />
+              <div className="border border-neutral-200/80 p-3.5 rounded-lg">
+                <h4 className="text-xs font-semibold text-neutral-900 mb-2.5 flex items-center space-x-1.5">
+                  <FileText className="w-3.5 h-3.5 text-neutral-500" />
                   <span>Buyer & Order Association</span>
                 </h4>
-                <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <span className="text-slate-400 block">Buyer Company:</span>
-                    <span className="font-bold text-slate-800">{selectedRoll.order?.buyer?.companyName}</span>
+                    <span className="text-neutral-400 block">Buyer Company:</span>
+                    <span className="font-medium text-neutral-800">{selectedRoll.order?.buyer?.companyName}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block">Order Number:</span>
-                    <span className="font-bold text-indigo-600">{selectedRoll.order?.orderNumber}</span>
+                    <span className="text-neutral-400 block">Order Number:</span>
+                    <span className="font-medium text-neutral-900">{selectedRoll.order?.orderNumber}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block">Fabric Product:</span>
-                    <span className="font-bold text-slate-800">{selectedRoll.orderItem?.fabricProduct?.name || 'Cotton Fabric'}</span>
+                    <span className="text-neutral-400 block">Fabric Product:</span>
+                    <span className="font-medium text-neutral-800">{selectedRoll.orderItem?.fabricProduct?.name || 'Cotton Fabric'}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block">Color & Specs:</span>
-                    <span className="font-bold text-slate-800">{selectedRoll.orderItem?.color || 'Bleached White'}</span>
+                    <span className="text-neutral-400 block">Color & Specs:</span>
+                    <span className="font-medium text-neutral-800">{selectedRoll.orderItem?.color || 'Bleached White'}</span>
                   </div>
                 </div>
               </div>
 
               {/* Manufacturing & Machine Trace */}
-              <div className="border border-slate-200 p-4 rounded-xl">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center space-x-2">
-                  <Layers className="w-4 h-4 text-purple-500" />
+              <div className="border border-neutral-200/80 p-3.5 rounded-lg">
+                <h4 className="text-xs font-semibold text-neutral-900 mb-2.5 flex items-center space-x-1.5">
+                  <Layers className="w-3.5 h-3.5 text-neutral-500" />
                   <span>Production Job & Loom Origin</span>
                 </h4>
                 {selectedRoll.productionJob ? (
-                  <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <span className="text-slate-400 block">Job Number:</span>
-                      <span className="font-mono font-bold text-slate-800">{selectedRoll.productionJob.jobNumber}</span>
+                      <span className="text-neutral-400 block">Job Number:</span>
+                      <span className="font-mono font-medium text-neutral-900">{selectedRoll.productionJob.jobNumber}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block">Stage:</span>
-                      <span className="font-bold text-slate-800">{selectedRoll.productionJob.stage}</span>
+                      <span className="text-neutral-400 block">Stage:</span>
+                      <span className="font-medium text-neutral-800">{selectedRoll.productionJob.stage}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block">Machine:</span>
-                      <span className="font-bold text-indigo-600">{selectedRoll.productionJob.machine?.name} ({selectedRoll.productionJob.machine?.code})</span>
+                      <span className="text-neutral-400 block">Machine:</span>
+                      <span className="font-medium text-neutral-800">{selectedRoll.productionJob.machine?.name} ({selectedRoll.productionJob.machine?.code})</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block">Assigned Operator:</span>
-                      <span className="font-bold text-slate-800">{selectedRoll.productionJob.assignedEmployee?.name || 'Plant Operator'}</span>
+                      <span className="text-neutral-400 block">Assigned Operator:</span>
+                      <span className="font-medium text-neutral-800">{selectedRoll.productionJob.assignedEmployee?.name || 'Plant Operator'}</span>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400 italic">Direct production roll batch</p>
+                  <p className="text-xs text-neutral-400 italic">Direct production roll batch</p>
                 )}
               </div>
 
               {/* Quality Inspection History */}
-              <div className="border border-slate-200 p-4 rounded-xl">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center space-x-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              <div className="border border-neutral-200/80 p-3.5 rounded-lg">
+                <h4 className="text-xs font-semibold text-neutral-900 mb-2.5 flex items-center space-x-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
                   <span>Quality Inspection Record</span>
                 </h4>
                 {selectedRoll.inspections && selectedRoll.inspections.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {selectedRoll.inspections.map((insp: any) => (
-                      <div key={insp.id} className="bg-slate-50 p-3 rounded-lg text-xs space-y-1">
+                      <div key={insp.id} className="bg-neutral-50/70 p-2.5 rounded-md text-xs space-y-1">
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-slate-800">Inspection #{insp.inspectionNumber}</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          <span className="font-medium text-neutral-800">Inspection #{insp.inspectionNumber}</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/60">
                             {insp.overallResult}
                           </span>
                         </div>
-                        <p className="text-slate-600">Points Total: {insp.pointsTotal} pts | Grade: {insp.assignedGrade}</p>
-                        {insp.remarks && <p className="text-slate-500 italic">"{insp.remarks}"</p>}
+                        <p className="text-neutral-600">Points Total: {insp.pointsTotal} pts · Grade: {insp.assignedGrade}</p>
+                        {insp.remarks && <p className="text-neutral-500 italic">"{insp.remarks}"</p>}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400 italic">No formal inspection log attached.</p>
+                  <p className="text-xs text-neutral-400 italic">No formal inspection log attached.</p>
                 )}
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-5 flex justify-end">
               <button
                 onClick={() => setSelectedRoll(null)}
-                className="px-5 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs"
+                className="px-4 py-1.5 rounded-md bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs"
               >
                 Close Passport
               </button>
