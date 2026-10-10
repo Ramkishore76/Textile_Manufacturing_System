@@ -73,13 +73,13 @@ export const LoginPage: React.FC = () => {
 
   // Demo Accounts for Quick Testing
   const demoAccounts = [
-    { role: 'Owner / Admin', email: 'admin@everesttextile.com', pass: 'Admin@123' },
-    { role: 'Sales Head', email: 'sales@everesttextile.com', pass: 'Sales@123' },
-    { role: 'Store Manager', email: 'store@everesttextile.com', pass: 'Store@123' },
-    { role: 'Production Mgr', email: 'production@everesttextile.com', pass: 'Prod@123' },
-    { role: 'Quality Inspector', email: 'quality@everesttextile.com', pass: 'Quality@123' },
-    { role: 'Dispatch Staff', email: 'dispatch@everesttextile.com', pass: 'Dispatch@123' },
-    { role: 'HR & Accounts', email: 'accounts@everesttextile.com', pass: 'Accounts@123' },
+    { role: 'Owner / Admin', email: 'admin@agttextile.com', pass: 'Admin@123' },
+    { role: 'Sales Head', email: 'sales@agttextile.com', pass: 'Sales@123' },
+    { role: 'Store Manager', email: 'store@agttextile.com', pass: 'Store@123' },
+    { role: 'Production Mgr', email: 'production@agttextile.com', pass: 'Prod@123' },
+    { role: 'Quality Inspector', email: 'quality@agttextile.com', pass: 'Quality@123' },
+    { role: 'Dispatch Staff', email: 'dispatch@agttextile.com', pass: 'Dispatch@123' },
+    { role: 'HR & Accounts', email: 'accounts@agttextile.com', pass: 'Accounts@123' },
     { role: 'Buyer (Nordic)', email: 'buyer@nordicapparel.com', pass: 'Buyer@123' },
     { role: 'Buyer (CasualLine)', email: 'buyer@casualline.com', pass: 'Buyer@123' },
   ];
@@ -216,7 +216,7 @@ export const LoginPage: React.FC = () => {
           <Factory className="w-6 h-6 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
-          Everest Textile Mills
+          AGT Textile Mills
         </h1>
         <p className="mt-1 text-xs text-zinc-500 font-medium">
           Manufacturing Vault & Role Governance Platform
@@ -298,7 +298,7 @@ export const LoginPage: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="name@everesttextile.com"
+                    placeholder="name@agttextile.com"
                     className="w-full pl-9 pr-3 py-2 bg-white border border-zinc-200 rounded-xl text-sm text-zinc-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition placeholder:text-zinc-400 shadow-2xs"
                   />
                 </div>
@@ -398,7 +398,7 @@ export const LoginPage: React.FC = () => {
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     required
-                    placeholder="ramesh@everesttextile.com"
+                    placeholder="ramesh@agttextile.com"
                     className="w-full pl-9 pr-3 py-2 bg-white border border-zinc-200 rounded-xl text-xs text-zinc-900 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none transition shadow-2xs"
                   />
                 </div>

@@ -251,7 +251,7 @@ export const BuyerDashboardPage: React.FC = () => {
 
           <div className="pt-4 border-t border-zinc-100">
             <div className="bg-zinc-50 border border-zinc-200/80 p-3.5 rounded-xl text-xs space-y-1.5">
-              <span className="font-bold text-zinc-900 block">Everest Mill Dispatch Assurance</span>
+              <span className="font-bold text-zinc-900 block">AGT Mill Dispatch Assurance</span>
               <p className="text-zinc-500 text-[11px] leading-relaxed">
                 All finished rolls undergo 4-point fabric inspection and tamper-proof barcode serialization prior to dispatch release.
               </p>

@@ -255,10 +255,10 @@ export const BuyerInvoicesPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Everest Mill Bank Settlement Details */}
+              {/* AGT Mill Bank Settlement Details */}
               <div className="bg-zinc-50 p-3.5 rounded-xl border border-zinc-200/80 space-y-1 text-[11px]">
                 <span className="font-bold text-zinc-900 block mb-0.5">Bank Settlement Instructions:</span>
-                <p className="text-zinc-600">Beneficiary: <strong>Everest Textile Mills Private Limited</strong></p>
+                <p className="text-zinc-600">Beneficiary: <strong>AGT Textile Mills Private Limited</strong></p>
                 <p className="text-zinc-600">Bank: <strong>HDFC Bank — Tirupur Main Branch</strong></p>
                 <p className="text-zinc-600 font-mono">A/C: <strong>50200088192341</strong> | IFSC: <strong>HDFC0000182</strong></p>
               </div>

@@ -66,7 +66,7 @@ export const BuyerDispatchPage: React.FC = () => {
           </div>
           <h1 className="text-xl font-bold text-zinc-900 tracking-tight">Shipment & Delivery Tracking</h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Track certified roll consignments dispatched from Everest Textile Mills
+            Track certified roll consignments dispatched from AGT Textile Mills
           </p>
         </div>
       </div>

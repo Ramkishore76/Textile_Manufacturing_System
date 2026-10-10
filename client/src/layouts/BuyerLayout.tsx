@@ -60,10 +60,10 @@ export const BuyerLayout: React.FC = () => {
             {/* Brand Logo & Name */}
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                ET
+                AGT
               </div>
               <div className="flex items-center space-x-2.5">
-                <span className="text-sm font-bold tracking-tight text-zinc-900">EVEREST TEXTILE MILLS</span>
+                <span className="text-sm font-bold tracking-tight text-zinc-900">AGT TEXTILE MILLS</span>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70">
                   Buyer Vault
                 </span>
@@ -175,7 +175,7 @@ export const BuyerLayout: React.FC = () => {
       {/* Footer */}
       <footer className="bg-white border-t border-zinc-200/80 py-5 mt-auto">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-2">
-          <p>© 2026 Everest Textile Mills. All rights reserved.</p>
+          <p>© 2026 AGT Textile Mills. All rights reserved.</p>
           <p className="text-zinc-400">IT Vault Platform • External Buyer Governance Portal</p>
         </div>
       </footer>

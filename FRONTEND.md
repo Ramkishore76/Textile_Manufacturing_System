@@ -1,11 +1,11 @@
-# 🎨 Everest Textile Mills — Frontend Architecture & UI Design System
+# 🎨 AGT Textile Mills — Frontend Architecture & UI Design System
 
 [![React](https://img.shields.io/badge/Framework-React%2019-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Bundler-Vite%20v8.3-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS%20v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Lucide](https://img.shields.io/badge/Icons-Lucide%20React-F56565?logo=feather&logoColor=white)](https://lucide.dev)
 
-This document provides complete documentation of the **Frontend Web Application** for Everest Textile Mills, including layout architectures, role-guarded routes, component hierarchies, design tokens, and module workflows.
+This document provides complete documentation of the **Frontend Web Application** for AGT Textile Mills, including layout architectures, role-guarded routes, component hierarchies, design tokens, and module workflows.
 
 ---
 
@@ -115,4 +115,4 @@ dist/assets/index-5eaOeSLB.js   904.17 kB │ gzip: 235.41 kB
 
 ---
 
-*Maintained by the Everest Textile Mills Frontend Engineering Team.*
+*Maintained by the AGT Textile Mills Frontend Engineering Team.*

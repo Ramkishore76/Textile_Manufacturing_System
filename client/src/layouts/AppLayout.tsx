@@ -80,13 +80,13 @@ export const AppLayout: React.FC = () => {
   const visibleNavItems = navItems.filter((item) => hasRoleAccess(user?.role, item.to));
 
   const demoRoles = [
-    { role: 'ADMIN', label: 'Admin / Owner', email: 'admin@everesttextile.com', pass: 'Admin@123' },
-    { role: 'SALES', label: 'Sales Staff', email: 'sales@everesttextile.com', pass: 'Sales@123' },
-    { role: 'STORE', label: 'Store Manager', email: 'store@everesttextile.com', pass: 'Store@123' },
-    { role: 'PRODUCTION', label: 'Production Mgr', email: 'production@everesttextile.com', pass: 'Prod@123' },
-    { role: 'QUALITY', label: 'Quality Inspector', email: 'quality@everesttextile.com', pass: 'Quality@123' },
-    { role: 'DISPATCH', label: 'Dispatch Staff', email: 'dispatch@everesttextile.com', pass: 'Dispatch@123' },
-    { role: 'ACCOUNTS', label: 'HR / Accounts', email: 'accounts@everesttextile.com', pass: 'Accounts@123' },
+    { role: 'ADMIN', label: 'Admin / Owner', email: 'admin@agttextile.com', pass: 'Admin@123' },
+    { role: 'SALES', label: 'Sales Staff', email: 'sales@agttextile.com', pass: 'Sales@123' },
+    { role: 'STORE', label: 'Store Manager', email: 'store@agttextile.com', pass: 'Store@123' },
+    { role: 'PRODUCTION', label: 'Production Mgr', email: 'production@agttextile.com', pass: 'Prod@123' },
+    { role: 'QUALITY', label: 'Quality Inspector', email: 'quality@agttextile.com', pass: 'Quality@123' },
+    { role: 'DISPATCH', label: 'Dispatch Staff', email: 'dispatch@agttextile.com', pass: 'Dispatch@123' },
+    { role: 'ACCOUNTS', label: 'HR / Accounts', email: 'accounts@agttextile.com', pass: 'Accounts@123' },
   ];
 
   const handleQuickSwitchRole = async (demo: (typeof demoRoles)[0]) => {
@@ -114,7 +114,7 @@ export const AppLayout: React.FC = () => {
               <Factory className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h1 className="text-xs font-bold tracking-tight text-zinc-900 uppercase">Everest Mills</h1>
+              <h1 className="text-xs font-bold tracking-tight text-zinc-900 uppercase">AGT Mills</h1>
               <p className="text-[10px] text-zinc-500 font-medium tracking-wide">Manufacturing Vault</p>
             </div>
           </div>

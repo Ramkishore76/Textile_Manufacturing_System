@@ -212,7 +212,7 @@ export const BuyerOrderDetailPage: React.FC = () => {
               <QrCode className="w-4 h-4 text-indigo-600" />
               <span>Certified Fabric Rolls ({order.rolls?.length || 0})</span>
             </h3>
-            <span className="text-xs font-medium text-zinc-400">Inspected by Everest QC</span>
+            <span className="text-xs font-medium text-zinc-400">Inspected by AGT QC</span>
           </div>
 
           {order.rolls && order.rolls.length > 0 ? (

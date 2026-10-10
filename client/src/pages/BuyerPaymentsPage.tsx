@@ -88,7 +88,7 @@ export const BuyerPaymentsPage: React.FC = () => {
             <Receipt className="w-10 h-10 text-zinc-300 mx-auto mb-2" />
             <h3 className="text-sm font-semibold text-zinc-800">No Payment Records Found</h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Payments recorded by Everest Textile accounts desk will appear here with official verification.
+              Payments recorded by AGT Textile accounts desk will appear here with official verification.
             </p>
           </div>
         ) : (
