@@ -46,21 +46,29 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Role checks for internal staff
   if (allowedRoles && !allowedRoles.includes(user.role) && user.role !== 'ADMIN') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center">
-          <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-600">
-            ⚠️
+      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] p-4 font-sans">
+        <div className="max-w-md w-full bg-white rounded-xl border border-neutral-200 p-6 text-center shadow-xs">
+          <div className="w-10 h-10 rounded-md bg-neutral-100 border border-neutral-200 flex items-center justify-center mx-auto mb-3 text-neutral-600 font-bold text-sm">
+            !
           </div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Access Restricted</h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Your role (<span className="font-semibold">{user.role}</span>) does not have permission to access this module.
+          <h2 className="text-base font-semibold text-neutral-900 mb-1">Access Restricted</h2>
+          <p className="text-xs text-neutral-500 mb-5 leading-relaxed">
+            Your role (<span className="font-semibold text-neutral-800">{user.role}</span>) does not have authorization to access this operational module.
           </p>
-          <button
-            onClick={() => window.history.back()}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition"
-          >
-            Go Back
-          </button>
+          <div className="flex items-center justify-center space-x-2">
+            <button
+              onClick={() => window.history.back()}
+              className="px-3.5 py-1.5 bg-white border border-neutral-300 hover:bg-neutral-50 text-neutral-700 rounded-md text-xs font-medium transition"
+            >
+              Previous Page
+            </button>
+            <a
+              href="/app/dashboard"
+              className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-md text-xs font-medium transition inline-block"
+            >
+              Return to Dashboard
+            </a>
+          </div>
         </div>
       </div>
     );

@@ -75,16 +75,86 @@ function App() {
           >
             <Route index element={<Navigate to="/app/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="orders" element={<OrdersPage />} />
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="purchases" element={<PurchasesPage />} />
-            <Route path="production" element={<ProductionPage />} />
-            <Route path="quality" element={<QualityPage />} />
-            <Route path="finished-goods" element={<FinishedGoodsPage />} />
-            <Route path="dispatch" element={<DispatchPage />} />
-            <Route path="accounts" element={<AccountsPage />} />
-            <Route path="attendance" element={<AttendancePage />} />
-            <Route path="wages" element={<WagesPage />} />
+            <Route
+              path="orders"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'SALES', 'STORE', 'PRODUCTION', 'DISPATCH', 'ACCOUNTS']}>
+                  <OrdersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="inventory"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'STORE', 'PRODUCTION']}>
+                  <InventoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="purchases"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'STORE']}>
+                  <PurchasesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="production"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'PRODUCTION', 'QUALITY']}>
+                  <ProductionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="quality"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'QUALITY']}>
+                  <QualityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="finished-goods"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'PRODUCTION', 'QUALITY', 'STORE', 'DISPATCH', 'SALES']}>
+                  <FinishedGoodsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="dispatch"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'DISPATCH']}>
+                  <DispatchPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="accounts"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'ACCOUNTS']}>
+                  <AccountsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="attendance"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'ACCOUNTS']}>
+                  <AttendancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="wages"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'ACCOUNTS']}>
+                  <WagesPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Dedicated External Buyer Portal */}

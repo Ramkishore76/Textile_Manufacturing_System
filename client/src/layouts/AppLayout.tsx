@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
+import { hasRoleAccess, getRoleTitle, getRoleShort } from '../utils/permissions';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -43,10 +44,16 @@ export const AppLayout: React.FC = () => {
     loadNotifications();
   }, [location.pathname]);
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  // Filter notifications to only those accessible to the current user's role
+  const roleFilteredNotifications = notifications.filter((n) => {
+    if (!n.link) return true;
+    return hasRoleAccess(user?.role, n.link);
+  });
+
+  const unreadCount = roleFilteredNotifications.filter((n) => !n.isRead).length;
 
   const markAllAsRead = async () => {
-    for (const n of notifications) {
+    for (const n of roleFilteredNotifications) {
       if (!n.isRead) {
         await api.put(`/notifications/${n.id}/read`, {}).catch(() => {});
       }
@@ -67,6 +74,9 @@ export const AppLayout: React.FC = () => {
     { to: '/app/attendance', label: 'Shift Attendance', icon: Users },
     { to: '/app/wages', label: 'Labour Wages', icon: Wallet },
   ];
+
+  // Strictly filter navigation items by the user's role permissions
+  const visibleNavItems = navItems.filter((item) => hasRoleAccess(user?.role, item.to));
 
   const demoRoles = [
     { role: 'ADMIN', label: 'Admin / Owner', email: 'admin@everesttextile.com', pass: 'Admin@123' },
@@ -109,9 +119,19 @@ export const AppLayout: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+        {/* Role Scoping Banner in Sidebar */}
+        <div className="px-3 py-2 bg-neutral-50/70 border-b border-neutral-200/80">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-neutral-500 font-medium">Active Workspace</span>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-200/70 text-neutral-800">
+              {getRoleShort(user?.role)}
+            </span>
+          </div>
+        </div>
+
+        {/* Navigation Links - Filtered to only authorized role functions */}
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
@@ -137,8 +157,8 @@ export const AppLayout: React.FC = () => {
           <div className="flex items-center justify-between p-2 rounded-lg border border-neutral-200/80 bg-white mb-1">
             <div className="truncate pr-2">
               <p className="text-xs font-semibold text-neutral-900 truncate">{user?.name}</p>
-              <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200">
-                {user?.role}
+              <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200 truncate max-w-full">
+                {getRoleTitle(user?.role)}
               </span>
             </div>
             <button
@@ -227,10 +247,10 @@ export const AppLayout: React.FC = () => {
                     )}
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-2">
-                    {notifications.length === 0 ? (
-                      <p className="text-xs text-neutral-400 text-center py-4">No notifications</p>
+                    {roleFilteredNotifications.length === 0 ? (
+                      <p className="text-xs text-neutral-400 text-center py-4">No notifications for your role</p>
                     ) : (
-                      notifications.slice(0, 10).map((n) => (
+                      roleFilteredNotifications.slice(0, 10).map((n) => (
                         <div
                           key={n.id}
                           className={`p-2.5 rounded-lg border text-xs ${
