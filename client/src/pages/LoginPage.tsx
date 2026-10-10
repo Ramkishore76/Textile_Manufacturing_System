@@ -30,15 +30,15 @@ export const LoginPage: React.FC = () => {
   };
 
   const demoAccounts = [
-    { role: 'Owner / Admin', email: 'admin@everesttextile.com', pass: 'Admin@123', bg: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
-    { role: 'Sales Staff', email: 'sales@everesttextile.com', pass: 'Sales@123', bg: 'bg-blue-50 border-blue-200 text-blue-700' },
-    { role: 'Store Manager', email: 'store@everesttextile.com', pass: 'Store@123', bg: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
-    { role: 'Production Mgr', email: 'production@everesttextile.com', pass: 'Prod@123', bg: 'bg-amber-50 border-amber-200 text-amber-700' },
-    { role: 'Quality Inspector', email: 'quality@everesttextile.com', pass: 'Quality@123', bg: 'bg-purple-50 border-purple-200 text-purple-700' },
-    { role: 'Dispatch Staff', email: 'dispatch@everesttextile.com', pass: 'Dispatch@123', bg: 'bg-cyan-50 border-cyan-200 text-cyan-700' },
-    { role: 'HR & Accounts', email: 'accounts@everesttextile.com', pass: 'Accounts@123', bg: 'bg-rose-50 border-rose-200 text-rose-700' },
-    { role: 'Buyer (Nordic)', email: 'buyer@nordicapparel.com', pass: 'Buyer@123', bg: 'bg-teal-50 border-teal-200 text-teal-700' },
-    { role: 'Buyer (CasualLine)', email: 'buyer@casualline.com', pass: 'Buyer@123', bg: 'bg-slate-100 border-slate-300 text-slate-700' },
+    { role: 'Owner / Admin', email: 'admin@everesttextile.com', pass: 'Admin@123' },
+    { role: 'Sales Staff', email: 'sales@everesttextile.com', pass: 'Sales@123' },
+    { role: 'Store Manager', email: 'store@everesttextile.com', pass: 'Store@123' },
+    { role: 'Production Mgr', email: 'production@everesttextile.com', pass: 'Prod@123' },
+    { role: 'Quality Inspector', email: 'quality@everesttextile.com', pass: 'Quality@123' },
+    { role: 'Dispatch Staff', email: 'dispatch@everesttextile.com', pass: 'Dispatch@123' },
+    { role: 'HR & Accounts', email: 'accounts@everesttextile.com', pass: 'Accounts@123' },
+    { role: 'Buyer (Nordic)', email: 'buyer@nordicapparel.com', pass: 'Buyer@123' },
+    { role: 'Buyer (CasualLine)', email: 'buyer@casualline.com', pass: 'Buyer@123' },
   ];
 
   const handleSelectDemo = (acc: (typeof demoAccounts)[0]) => {
@@ -48,35 +48,33 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-xl shadow-emerald-900/40">
-            <Factory className="w-8 h-8 text-white" />
-          </div>
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <div className="inline-flex w-12 h-12 rounded-lg bg-neutral-900 items-center justify-center text-white mb-3">
+          <Factory className="w-6 h-6 text-white" />
         </div>
-        <h2 className="mt-4 text-center text-2xl font-extrabold text-white tracking-tight">
+        <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">
           Everest Textile Mills
         </h2>
-        <p className="mt-1 text-center text-xs text-slate-400">
+        <p className="mt-1 text-xs text-neutral-500">
           Integrated Textile Manufacturing Management System
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-slate-100">
+      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4">
+        <div className="bg-white py-8 px-6 sm:px-8 rounded-xl border border-neutral-200 shadow-sm">
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center space-x-2">
+              <div className="p-3 rounded-md bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center space-x-2">
                 <span>⚠️</span>
                 <span>{error}</span>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+              <label className="block text-xs font-medium text-neutral-700 mb-1.5">Email Address</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400">
                   <Mail className="w-4 h-4" />
                 </div>
                 <input
@@ -85,15 +83,15 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="name@everesttextile.com"
-                  className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-neutral-300 rounded-md text-sm text-neutral-900 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 outline-none transition placeholder:text-neutral-400"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+              <label className="block text-xs font-medium text-neutral-700 mb-1.5">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
@@ -102,7 +100,7 @@ export const LoginPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-neutral-300 rounded-md text-sm text-neutral-900 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 outline-none transition placeholder:text-neutral-400"
                 />
               </div>
             </div>
@@ -110,7 +108,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition disabled:opacity-50"
+              className="w-full flex justify-center items-center py-2.5 px-4 rounded-md text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 transition disabled:opacity-50"
             >
               {loading ? (
                 <span className="flex items-center space-x-2">
@@ -127,8 +125,8 @@ export const LoginPage: React.FC = () => {
           </form>
 
           {/* Demo Persona Fast-Click Switcher */}
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center mb-3">
+          <div className="mt-6 pt-5 border-t border-neutral-100">
+            <p className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider text-center mb-3">
               One-Click Role Demo Logins
             </p>
             <div className="grid grid-cols-3 gap-1.5">
@@ -137,7 +135,7 @@ export const LoginPage: React.FC = () => {
                   key={acc.role}
                   type="button"
                   onClick={() => handleSelectDemo(acc)}
-                  className={`px-2 py-1.5 rounded-lg border text-[11px] font-semibold truncate transition hover:shadow-sm ${acc.bg}`}
+                  className="px-2 py-1.5 rounded-md border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-300 text-[11px] font-medium text-neutral-700 truncate transition"
                   title={`${acc.role} (${acc.email})`}
                 >
                   {acc.role}

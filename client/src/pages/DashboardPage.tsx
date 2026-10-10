@@ -58,16 +58,16 @@ export const DashboardPage: React.FC = () => {
   }
 
   const machineChartData = [
-    { name: 'Running', count: data?.machines?.running || 0, color: '#10b981' },
-    { name: 'Idle', count: data?.machines?.idle || 0, color: '#64748b' },
-    { name: 'Maintenance', count: data?.machines?.maintenance || 0, color: '#f59e0b' },
-    { name: 'Breakdown', count: data?.machines?.breakdown || 0, color: '#ef4444' },
+    { name: 'Running', count: data?.machines?.running || 0, color: '#2b8a3e' },
+    { name: 'Idle', count: data?.machines?.idle || 0, color: '#6b7280' },
+    { name: 'Maintenance', count: data?.machines?.maintenance || 0, color: '#d97706' },
+    { name: 'Breakdown', count: data?.machines?.breakdown || 0, color: '#dc2626' },
   ];
 
   const qualityChartData = [
-    { name: 'Passed', value: data?.quality?.passedCount || 5, color: '#10b981' },
-    { name: 'Rework Req', value: data?.quality?.reworkCount || 1, color: '#f59e0b' },
-    { name: 'Rejected', value: data?.quality?.rejectedCount || 0, color: '#ef4444' },
+    { name: 'Passed', value: data?.quality?.passedCount || 5, color: '#2b8a3e' },
+    { name: 'Rework Req', value: data?.quality?.reworkCount || 1, color: '#d97706' },
+    { name: 'Rejected', value: data?.quality?.rejectedCount || 0, color: '#dc2626' },
   ];
 
   const financialBarData = [
@@ -81,15 +81,15 @@ export const DashboardPage: React.FC = () => {
       {/* Top Banner / Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Everest Textile Operations Overview</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Real-time live production metrics, inventory balances, and order fulfillment status.
+          <h1 className="text-xl font-bold text-neutral-900 tracking-tight">Factory Operations Overview</h1>
+          <p className="text-xs text-neutral-500 mt-0.5">
+            Real-time manufacturing metrics, inventory balances, and order fulfillment tracking.
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={() => navigate('/app/orders')}
-            className="flex items-center space-x-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition"
+            className="flex items-center space-x-1.5 px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-md text-xs font-medium transition shadow-xs"
           >
             <span>Create New Order</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -102,26 +102,26 @@ export const DashboardPage: React.FC = () => {
         {/* Active Orders */}
         <div
           onClick={() => navigate('/app/orders')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-emerald-500 cursor-pointer transition group"
+          className="bg-white p-5 rounded-xl border border-neutral-200/90 hover:border-neutral-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Active Orders</span>
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-100 transition">
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Active Orders</span>
+            <div className="p-2 bg-neutral-100 text-neutral-700 rounded-md group-hover:bg-neutral-200/70 transition">
               <ShoppingBag className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-slate-900">{data?.orders?.active || 0}</span>
-            <span className="text-xs text-slate-500">/ {data?.orders?.total || 0} total</span>
+            <span className="text-2xl font-bold tracking-tight text-neutral-900">{data?.orders?.active || 0}</span>
+            <span className="text-xs text-neutral-500">/ {data?.orders?.total || 0} total</span>
           </div>
-          <div className="mt-2 flex items-center space-x-3 text-[11px]">
-            {data?.orders?.delayed > 0 && (
-              <span className="text-rose-600 font-semibold flex items-center space-x-1">
+          <div className="mt-2 flex items-center space-x-2 text-[11px]">
+            {data?.orders?.delayed > 0 ? (
+              <span className="text-rose-700 bg-rose-50 border border-rose-200/60 px-1.5 py-0.5 rounded font-medium flex items-center space-x-1">
                 <AlertTriangle className="w-3 h-3" />
                 <span>{data.orders.delayed} Delayed</span>
               </span>
-            )}
-            <span className="text-amber-600 font-medium">
+            ) : null}
+            <span className="text-neutral-600 font-medium">
               {data?.orders?.approachingDeadline || 0} due soon
             </span>
           </div>
@@ -130,25 +130,29 @@ export const DashboardPage: React.FC = () => {
         {/* Yarn Available Stock */}
         <div
           onClick={() => navigate('/app/inventory')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-emerald-500 cursor-pointer transition group"
+          className="bg-white p-5 rounded-xl border border-neutral-200/90 hover:border-neutral-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Available Yarn Stock</span>
-            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg group-hover:bg-emerald-100 transition">
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Available Yarn Stock</span>
+            <div className="p-2 bg-neutral-100 text-neutral-700 rounded-md group-hover:bg-neutral-200/70 transition">
               <Boxes className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-slate-900">
-              {(data?.inventory?.availableStockKg || 0).toLocaleString()} <span className="text-sm font-normal text-slate-500">KG</span>
+            <span className="text-2xl font-bold tracking-tight text-neutral-900">
+              {(data?.inventory?.availableStockKg || 0).toLocaleString()} <span className="text-xs font-normal text-neutral-500">KG</span>
             </span>
           </div>
-          <div className="mt-2 text-[11px] text-slate-500 flex items-center justify-between">
+          <div className="mt-2 text-[11px] text-neutral-600 flex items-center justify-between">
             <span>Reserved: {(data?.inventory?.reservedStockKg || 0).toLocaleString()} KG</span>
             {data?.inventory?.lowStockAlertsCount > 0 ? (
-              <span className="text-amber-600 font-semibold">{data.inventory.lowStockAlertsCount} Low Stock</span>
+              <span className="text-amber-800 bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 rounded font-medium">
+                {data.inventory.lowStockAlertsCount} Low Stock
+              </span>
             ) : (
-              <span className="text-emerald-600 font-medium">Stock Healthy</span>
+              <span className="text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
+                Stock Healthy
+              </span>
             )}
           </div>
         </div>
@@ -156,94 +160,96 @@ export const DashboardPage: React.FC = () => {
         {/* Today's Output */}
         <div
           onClick={() => navigate('/app/production')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-emerald-500 cursor-pointer transition group"
+          className="bg-white p-5 rounded-xl border border-neutral-200/90 hover:border-neutral-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Today's Fabric Output</span>
-            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-100 transition">
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Today's Fabric Output</span>
+            <div className="p-2 bg-neutral-100 text-neutral-700 rounded-md group-hover:bg-neutral-200/70 transition">
               <Cpu className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-slate-900">
-              {(data?.production?.todayProducedMeters || 0).toLocaleString()} <span className="text-sm font-normal text-slate-500">M</span>
+            <span className="text-2xl font-bold tracking-tight text-neutral-900">
+              {(data?.production?.todayProducedMeters || 0).toLocaleString()} <span className="text-xs font-normal text-neutral-500">M</span>
             </span>
           </div>
-          <div className="mt-2 text-[11px] text-slate-500 flex items-center space-x-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>{data?.machines?.running || 0} Machines running right now</span>
+          <div className="mt-2 text-[11px] text-neutral-600 flex items-center space-x-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-600"></span>
+            <span>{data?.machines?.running || 0} active looms running</span>
           </div>
         </div>
 
         {/* Finished Goods & Dispatches */}
         <div
           onClick={() => navigate('/app/dispatch')}
-          className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs hover:border-emerald-500 cursor-pointer transition group"
+          className="bg-white p-5 rounded-xl border border-neutral-200/90 hover:border-neutral-400 cursor-pointer transition group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Finished Goods Ready</span>
-            <div className="p-2 bg-teal-50 text-teal-600 rounded-lg group-hover:bg-teal-100 transition">
+            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">Finished Goods Ready</span>
+            <div className="p-2 bg-neutral-100 text-neutral-700 rounded-md group-hover:bg-neutral-200/70 transition">
               <Layers className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-slate-900">
-              {(data?.finishedGoods?.totalMeters || 0).toLocaleString()} <span className="text-sm font-normal text-slate-500">M</span>
+            <span className="text-2xl font-bold tracking-tight text-neutral-900">
+              {(data?.finishedGoods?.totalMeters || 0).toLocaleString()} <span className="text-xs font-normal text-neutral-500">M</span>
             </span>
-            <span className="text-xs text-slate-500">({data?.finishedGoods?.rollsCount || 0} rolls)</span>
+            <span className="text-xs text-neutral-500">({data?.finishedGoods?.rollsCount || 0} rolls)</span>
           </div>
-          <div className="mt-2 text-[11px] text-teal-700 font-semibold flex items-center space-x-1">
-            <Truck className="w-3.5 h-3.5" />
-            <span>{data?.orders?.pendingDispatch || 0} Orders ready for dispatch</span>
+          <div className="mt-2 text-[11px] text-neutral-700 font-medium flex items-center space-x-1.5">
+            <Truck className="w-3.5 h-3.5 text-neutral-500" />
+            <span>{data?.orders?.pendingDispatch || 0} orders queued for dispatch</span>
           </div>
         </div>
       </div>
 
       {/* Financial Health Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <p className="text-xs text-slate-500 font-medium">Recorded Invoiced Sales</p>
-          <p className="text-xl font-bold text-slate-900 mt-1">₹{(data?.financials?.totalInvoiced || 0).toLocaleString()}</p>
-          <span className="text-[11px] text-emerald-600 font-medium">From commercial invoices</span>
+        <div className="bg-white p-4 rounded-xl border border-neutral-200/90">
+          <p className="text-xs text-neutral-500 font-medium">Recorded Invoiced Sales</p>
+          <p className="text-xl font-bold tracking-tight text-neutral-900 mt-1">₹{(data?.financials?.totalInvoiced || 0).toLocaleString()}</p>
+          <span className="text-[11px] text-neutral-500 font-normal">From commercial invoices</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <p className="text-xs text-slate-500 font-medium">Recorded Manufacturing Cost</p>
-          <p className="text-xl font-bold text-slate-900 mt-1">₹{(data?.financials?.totalRecordedCost || 0).toLocaleString()}</p>
-          <span className="text-[11px] text-slate-500">Material + Power + Labour</span>
+        <div className="bg-white p-4 rounded-xl border border-neutral-200/90">
+          <p className="text-xs text-neutral-500 font-medium">Recorded Manufacturing Cost</p>
+          <p className="text-xl font-bold tracking-tight text-neutral-900 mt-1">₹{(data?.financials?.totalRecordedCost || 0).toLocaleString()}</p>
+          <span className="text-[11px] text-neutral-500 font-normal">Material + Power + Labour</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <p className="text-xs text-slate-500 font-medium">Estimated Gross Profit</p>
-          <p className="text-xl font-bold text-emerald-700 mt-1">₹{(data?.financials?.estimatedGrossProfit || 0).toLocaleString()}</p>
-          <span className="text-[11px] text-emerald-600 font-semibold">Margin: {data?.financials?.profitMargin || 0}%</span>
+        <div className="bg-white p-4 rounded-xl border border-neutral-200/90">
+          <p className="text-xs text-neutral-500 font-medium">Estimated Gross Profit</p>
+          <p className="text-xl font-bold tracking-tight text-neutral-900 mt-1">₹{(data?.financials?.estimatedGrossProfit || 0).toLocaleString()}</p>
+          <span className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.2 rounded font-medium inline-block mt-0.5">
+            Margin: {data?.financials?.profitMargin || 0}%
+          </span>
         </div>
       </div>
 
       {/* Visual Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Financial Revenue vs Cost */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-          <h2 className="text-sm font-bold text-slate-800 mb-4">Financial Overview (Recorded Transactions)</h2>
+        <div className="bg-white p-5 rounded-xl border border-neutral-200/90">
+          <h2 className="text-sm font-semibold text-neutral-900 mb-4 tracking-tight">Financial Overview (Recorded Ledger)</h2>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={financialBarData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} />
-                <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(val) => `₹${val / 1000}k`} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+                <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} />
+                <YAxis stroke="#6b7280" fontSize={12} tickLine={false} tickFormatter={(val) => `₹${val / 1000}k`} />
                 <Tooltip formatter={(value: any) => [`₹${Number(value).toLocaleString()}`, 'Amount']} />
-                <Bar dataKey="amount" fill="#059669" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="amount" fill="#1f2937" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Machine Statuses */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-          <h2 className="text-sm font-bold text-slate-800 mb-4">Live Machine Fleet Status</h2>
+        <div className="bg-white p-5 rounded-xl border border-neutral-200/90">
+          <h2 className="text-sm font-semibold text-neutral-900 mb-4 tracking-tight">Machine Fleet Status</h2>
           <div className="grid grid-cols-4 gap-2 mb-4">
             {machineChartData.map((m) => (
-              <div key={m.name} className="p-2.5 rounded-lg border border-slate-100 bg-slate-50 text-center">
-                <span className="text-[11px] font-medium text-slate-500 block">{m.name}</span>
-                <span className="text-lg font-bold text-slate-900 mt-0.5 block">{m.count}</span>
+              <div key={m.name} className="p-2 rounded-lg border border-neutral-200 bg-neutral-50 text-center">
+                <span className="text-[11px] font-medium text-neutral-500 block">{m.name}</span>
+                <span className="text-base font-bold text-neutral-900 mt-0.5 block">{m.count}</span>
               </div>
             ))}
           </div>
