@@ -244,7 +244,12 @@ export const FinishedGoodsPage: React.FC = () => {
 
       {/* Roll Traceability Modal */}
       {selectedRoll && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedRoll(null);
+          }}
+        >
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 mb-4">
               <div className="flex items-center space-x-2.5">

@@ -633,8 +633,13 @@ export const AccountsPage: React.FC = () => {
 
       {/* Record Payment Modal */}
       {paymentModalOpen && selectedInvoice && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPaymentModalOpen(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 mb-4">
               <div>
                 <h3 className="text-sm font-bold text-zinc-900">Record Buyer Payment</h3>
@@ -739,8 +744,13 @@ export const AccountsPage: React.FC = () => {
 
       {/* Record Expense Modal */}
       {expenseModalOpen && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setExpenseModalOpen(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="text-sm font-bold text-zinc-900">Record Manufacturing Expense</h3>
               <button

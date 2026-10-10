@@ -359,8 +359,13 @@ export const InventoryPage: React.FC = () => {
 
       {/* STOCK ADJUSTMENT MODAL */}
       {showAdjustModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAdjustModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900 flex items-center space-x-2 tracking-tight">
                 <Sliders className="w-4 h-4 text-indigo-600" />
@@ -449,8 +454,13 @@ export const InventoryPage: React.FC = () => {
 
       {/* NEW YARN MODAL */}
       {showNewYarnModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowNewYarnModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900 tracking-tight">Add New Yarn Material</h3>
               <button
@@ -575,8 +585,13 @@ export const InventoryPage: React.FC = () => {
 
       {/* NEW BOM MODAL */}
       {showBomModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowBomModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900 tracking-tight">Define Bill of Materials Rule</h3>
               <button

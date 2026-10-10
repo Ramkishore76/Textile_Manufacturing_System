@@ -210,8 +210,13 @@ export const QualityPage: React.FC = () => {
 
       {/* INSPECTION MODAL */}
       {showInspectModal && selectedRoll && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowInspectModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <div>
                 <h3 className="font-bold text-sm text-zinc-900">Inspect Roll: {selectedRoll.rollId}</h3>
@@ -333,7 +338,7 @@ export const QualityPage: React.FC = () => {
                 ></textarea>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
+              <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-zinc-100">
                 <button
                   type="button"
                   onClick={() => setShowInspectModal(false)}
@@ -355,7 +360,12 @@ export const QualityPage: React.FC = () => {
 
       {/* TRACEABILITY MODAL */}
       {showTraceModal && traceRoll && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowTraceModal(false);
+          }}
+        >
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-zinc-200 max-h-[85vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <div>

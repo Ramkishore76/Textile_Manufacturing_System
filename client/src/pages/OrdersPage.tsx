@@ -327,7 +327,12 @@ export const OrdersPage: React.FC = () => {
 
       {/* CREATE ORDER MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowModal(false);
+          }}
+        >
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 mb-4">
               <h2 className="text-base font-bold text-zinc-900 flex items-center space-x-2 tracking-tight">
@@ -521,18 +526,18 @@ export const OrdersPage: React.FC = () => {
                   ></textarea>
                 </div>
 
-                <div className="pt-2 flex justify-end space-x-2">
+                <div className="pt-3 flex flex-wrap items-center justify-end gap-2 border-t border-zinc-100">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 border border-zinc-200 rounded-xl text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition"
+                    className="px-4 py-2 border border-zinc-200 rounded-xl text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition disabled:opacity-50"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-xs transition disabled:opacity-50"
                   >
                     {submitting ? 'Calculating BOM & Saving...' : 'Save Order & Check Yarn'}
                   </button>
@@ -545,7 +550,12 @@ export const OrdersPage: React.FC = () => {
 
       {/* VIEW ORDER DETAILS MODAL */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedOrder(null);
+          }}
+        >
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 mb-4">
               <div>

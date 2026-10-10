@@ -93,35 +93,41 @@ export const BuyerLayout: React.FC = () => {
                 </button>
 
                 {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white text-zinc-900 border border-zinc-200 rounded-2xl shadow-xl p-3.5 z-50">
-                    <div className="flex items-center justify-between pb-2 border-b border-zinc-100 mb-2">
-                      <span className="text-xs font-bold text-zinc-900">Order Updates ({unreadCount})</span>
-                      {unreadCount > 0 && (
-                        <button onClick={markAllRead} className="text-[11px] font-medium text-indigo-600 hover:underline">
-                          Mark all as read
-                        </button>
-                      )}
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowNotifications(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-80 bg-white text-zinc-900 border border-zinc-200/90 rounded-2xl shadow-xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <div className="flex items-center justify-between pb-2 border-b border-zinc-100 mb-2">
+                        <span className="text-xs font-bold text-zinc-900">Order Updates ({unreadCount})</span>
+                        {unreadCount > 0 && (
+                          <button onClick={markAllRead} className="text-[11px] font-medium text-indigo-600 hover:underline">
+                            Mark all as read
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-64 overflow-y-auto space-y-2">
+                        {notifications.length === 0 ? (
+                          <p className="text-xs text-zinc-400 text-center py-4">No notifications yet</p>
+                        ) : (
+                          notifications.map((n) => (
+                            <div
+                              key={n.id}
+                              className={`p-2.5 rounded-xl border text-xs ${
+                                n.isRead
+                                  ? 'bg-zinc-50 border-zinc-100 text-zinc-500'
+                                  : 'bg-indigo-50/70 border-indigo-200 text-zinc-800'
+                              }`}
+                            >
+                              <p className="font-semibold text-zinc-900">{n.title}</p>
+                              <p className="text-[11px] text-zinc-600 mt-0.5">{n.message}</p>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     </div>
-                    <div className="max-h-64 overflow-y-auto space-y-2">
-                      {notifications.length === 0 ? (
-                        <p className="text-xs text-zinc-400 text-center py-4">No notifications yet</p>
-                      ) : (
-                        notifications.map((n) => (
-                          <div
-                            key={n.id}
-                            className={`p-2.5 rounded-xl border text-xs ${
-                              n.isRead
-                                ? 'bg-zinc-50 border-zinc-100 text-zinc-500'
-                                : 'bg-indigo-50/70 border-indigo-200 text-zinc-800'
-                            }`}
-                          >
-                            <p className="font-semibold text-zinc-900">{n.title}</p>
-                            <p className="text-[11px] text-zinc-600 mt-0.5">{n.message}</p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
+                  </>
                 )}
               </div>
 

@@ -21,6 +21,7 @@ import {
   Factory,
   RefreshCw,
   CheckCircle,
+  X,
 } from 'lucide-react';
 
 export const AppLayout: React.FC = () => {
@@ -194,47 +195,23 @@ export const AppLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
-            {/* Quick Demo Role Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setShowRoleSwitcher(!showRoleSwitcher)}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition shadow-2xs"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
-                <span>Role: <strong className="text-indigo-600">{user?.role}</strong></span>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
-              </button>
-
-              {showRoleSwitcher && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg p-2 z-50">
-                  <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider px-2 py-1">
-                    Select Active Persona
-                  </p>
-                  <div className="space-y-1">
-                    {demoRoles.map((r) => (
-                      <button
-                        key={r.role}
-                        onClick={() => handleQuickSwitchRole(r)}
-                        className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition flex items-center justify-between ${
-                          user?.role === r.role
-                            ? 'bg-neutral-100 text-neutral-950 font-semibold'
-                            : 'text-neutral-700 hover:bg-neutral-50'
-                        }`}
-                      >
-                        <span>{r.label}</span>
-                        {user?.role === r.role && <CheckCircle className="w-3.5 h-3.5 text-neutral-800" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Quick Demo Role Switcher Trigger */}
+            <button
+              onClick={() => setShowRoleSwitcher(true)}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 bg-white text-xs font-medium text-zinc-700 hover:bg-zinc-50 hover:border-indigo-200 transition shadow-2xs"
+              title="Click to switch active role or persona"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Role: <strong className="text-indigo-600">{user?.role}</strong></span>
+              <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+            </button>
 
             {/* Notification Bell */}
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg relative transition"
+                className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl relative transition"
+                title="Notifications"
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
@@ -243,43 +220,49 @@ export const AppLayout: React.FC = () => {
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white border border-neutral-200 rounded-xl shadow-xl p-3 z-50">
-                  <div className="flex items-center justify-between pb-2 border-b border-neutral-100 mb-2">
-                    <span className="text-xs font-bold text-neutral-800">Notifications ({unreadCount})</span>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={markAllAsRead}
-                        className="text-[10px] font-semibold text-neutral-700 hover:underline"
-                      >
-                        Mark all as read
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-72 overflow-y-auto space-y-2">
-                    {roleFilteredNotifications.length === 0 ? (
-                      <p className="text-xs text-neutral-400 text-center py-4">No notifications for your role</p>
-                    ) : (
-                      roleFilteredNotifications.slice(0, 10).map((n) => (
-                        <div
-                          key={n.id}
-                          className={`p-2.5 rounded-lg border text-xs ${
-                            n.isRead
-                              ? 'bg-neutral-50 border-neutral-100 text-neutral-500'
-                              : 'bg-neutral-100/60 border-neutral-200 text-neutral-800 font-medium'
-                          }`}
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowNotifications(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-80 bg-white border border-zinc-200/90 rounded-2xl shadow-xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="flex items-center justify-between pb-2.5 border-b border-zinc-100 mb-2">
+                      <span className="text-xs font-bold text-zinc-800">Notifications ({unreadCount})</span>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-[10px] font-semibold text-indigo-600 hover:underline"
                         >
-                          <div className="flex items-start justify-between">
-                            <p className="font-semibold text-neutral-900">{n.title}</p>
-                            <span className="text-[10px] text-neutral-400">
-                              {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-72 overflow-y-auto space-y-2">
+                      {roleFilteredNotifications.length === 0 ? (
+                        <p className="text-xs text-zinc-400 text-center py-4">No notifications for your role</p>
+                      ) : (
+                        roleFilteredNotifications.slice(0, 10).map((n) => (
+                          <div
+                            key={n.id}
+                            className={`p-2.5 rounded-xl border text-xs ${
+                              n.isRead
+                                ? 'bg-zinc-50 border-zinc-100 text-zinc-500'
+                                : 'bg-indigo-50/60 border-indigo-200 text-zinc-800 font-medium'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <p className="font-semibold text-zinc-900">{n.title}</p>
+                              <span className="text-[10px] text-zinc-400">
+                                {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-zinc-600 mt-0.5">{n.message}</p>
                           </div>
-                          <p className="text-[11px] text-neutral-600 mt-0.5">{n.message}</p>
-                        </div>
-                      ))
-                    )}
+                        ))
+                      )}
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
 
@@ -300,6 +283,91 @@ export const AppLayout: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Role / Persona Switcher Modal Dialog (Centered with Backdrop - Never Overlaps Content Buttons) */}
+      {showRoleSwitcher && (
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowRoleSwitcher(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100 mb-4">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-600 flex items-center justify-center shadow-2xs">
+                  <RefreshCw className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-zinc-900">Switch Active Role & Persona</h3>
+                  <p className="text-[11px] text-zinc-500 font-medium">Test functional permissions and scoped event isolation</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRoleSwitcher(false)}
+                className="text-zinc-400 hover:text-zinc-700 p-1.5 rounded-lg hover:bg-zinc-100 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-600 mb-3">
+              Select any factory role persona below to instantly switch session context and verify functional access:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto pr-1">
+              {demoRoles.map((r) => {
+                const isActive = user?.role === r.role;
+                return (
+                  <button
+                    key={r.role}
+                    type="button"
+                    onClick={() => handleQuickSwitchRole(r)}
+                    className={`text-left p-3 rounded-xl border text-xs transition flex items-center justify-between group ${
+                      isActive
+                        ? 'bg-indigo-50/90 border-indigo-300 text-indigo-950 font-semibold shadow-xs ring-1 ring-indigo-500/20'
+                        : 'bg-zinc-50/70 border-zinc-200/80 text-zinc-700 hover:bg-white hover:border-indigo-200 hover:shadow-2xs'
+                    }`}
+                  >
+                    <div className="truncate pr-2">
+                      <div className="flex items-center space-x-1.5 mb-1">
+                        <span className="font-semibold text-zinc-900">{r.label}</span>
+                        <span
+                          className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                            isActive ? 'bg-indigo-600 text-white' : 'bg-zinc-200/70 text-zinc-600'
+                          }`}
+                        >
+                          {r.role}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-zinc-400 truncate font-mono">{r.email}</p>
+                    </div>
+                    {isActive ? (
+                      <CheckCircle className="w-4 h-4 text-indigo-600 shrink-0" />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full border border-zinc-300 group-hover:border-indigo-400 shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-5 pt-3.5 border-t border-zinc-100 flex items-center justify-between">
+              <span className="text-[11px] text-zinc-400 font-medium">
+                Current: <strong className="text-zinc-700">{user?.name}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowRoleSwitcher(false)}
+                className="px-4 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-xs font-semibold text-zinc-700 transition shadow-2xs"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

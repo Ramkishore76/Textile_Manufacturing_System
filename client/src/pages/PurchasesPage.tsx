@@ -399,8 +399,13 @@ export const PurchasesPage: React.FC = () => {
 
       {/* RECORD GRN MODAL */}
       {showGrnModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowGrnModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900 flex items-center space-x-2">
                 <PackageCheck className="w-4 h-4 text-indigo-600" />
@@ -523,8 +528,13 @@ export const PurchasesPage: React.FC = () => {
 
       {/* CREATE PO MODAL */}
       {showPoModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowPoModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900">Issue Purchase Order</h3>
               <button

@@ -335,8 +335,13 @@ export const ProductionPage: React.FC = () => {
 
       {/* SCHEDULE JOB MODAL */}
       {showJobModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowJobModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900">Schedule Production Job</h3>
               <button
@@ -457,8 +462,13 @@ export const ProductionPage: React.FC = () => {
 
       {/* OPERATOR LOG MODAL */}
       {showLogModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowLogModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900">Record Shift Output & Downtime</h3>
               <button
@@ -550,14 +560,20 @@ export const ProductionPage: React.FC = () => {
 
       {/* GENERATE ROLLS MODAL */}
       {showRollModal && (
-        <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+        <div
+          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowRollModal(false);
+          }}
+        >
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
             <div className="flex justify-between items-center pb-3.5 border-b border-zinc-100 mb-4">
               <h3 className="font-bold text-sm text-zinc-900 flex items-center space-x-2">
                 <Layers className="w-4 h-4 text-indigo-600" />
                 <span>Generate Unique Roll IDs</span>
               </h3>
               <button
+                type="button"
                 onClick={() => setShowRollModal(false)}
                 className="text-zinc-400 hover:text-zinc-700 p-1.5 rounded-lg hover:bg-zinc-100 transition"
               >
@@ -596,7 +612,7 @@ export const ProductionPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
+              <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-zinc-100">
                 <button
                   type="button"
                   onClick={() => setShowRollModal(false)}
