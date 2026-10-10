@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:check": "tsx src/db/dbCheck.ts"
+    "db:check": "tsx src/db/dbCheck.ts",
+    "db:audit": "tsx src/db/schemaAudit.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

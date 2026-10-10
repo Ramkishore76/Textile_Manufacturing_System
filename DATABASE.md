@@ -150,7 +150,16 @@ npm run db:seed
 
 # 4. Run Instant Database Health & Table Diagnostics
 npm run db:check
+
+# 5. Audit Schema Integrity & Foreign Key Indexes
+npm run db:audit
 ```
+
+---
+
+## 🛡️ PostgreSQL Audit Triggers
+
+Automated database-level change capture is implemented in [`server/prisma/audit_triggers.sql`](server/prisma/audit_triggers.sql) to record mutations across critical manufacturing entities (`Order`, `Dispatch`, `Invoice`) directly into the `AuditLog` table.
 
 ---
 
