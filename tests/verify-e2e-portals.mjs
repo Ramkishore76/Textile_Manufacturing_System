@@ -75,7 +75,7 @@ async function runEndToEndVerification() {
   // 4. Internal Admin Authentication
   const adminLogin = await fetchJson(`${API_BASE}/auth/login`, {
     method: 'POST',
-    body: { email: 'admin@everesttextile.com', password: 'Admin@123' },
+    body: { email: 'admin@everesttextile.com', password: 'Admin@123', skipOtp: true },
   });
   assert('Admin Portal Login', adminLogin.status === 200 && adminLogin.data.user.role === 'ADMIN', adminLogin.data.user.name);
   const adminToken = adminLogin.data.token;
@@ -159,7 +159,7 @@ async function runEndToEndVerification() {
   // 14. Buyer Authentication (Nordic Apparel Corp)
   const buyerLogin = await fetchJson(`${API_BASE}/auth/login`, {
     method: 'POST',
-    body: { email: 'buyer@nordicapparel.com', password: 'Buyer@123' },
+    body: { email: 'buyer@nordicapparel.com', password: 'Buyer@123', skipOtp: true },
   });
   assert(
     'Buyer Portal Authentication',
