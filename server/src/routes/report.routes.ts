@@ -341,4 +341,301 @@ router.get(
   }
 );
 
+// GET Plant Owner Monthly & Annual Financial Profit & Expense Analytics
+router.get(
+  '/financial-analytics',
+  authenticateToken,
+  requireRole(['ADMIN', 'ACCOUNTS']),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const yearParam = req.query.year ? parseInt(String(req.query.year), 10) : new Date().getFullYear();
+      const selectedYear = isNaN(yearParam) ? new Date().getFullYear() : yearParam;
+
+      // 1. Fetch Invoices, Expenses, Wages across all records to compute selected year and multi-year comparisons
+      const [allInvoices, allExpenses, allWages, allPayments] = await Promise.all([
+        prisma.invoice.findMany({
+          include: { buyer: { select: { companyName: true } } },
+          orderBy: { issueDate: 'asc' },
+        }),
+        prisma.expenseRecord.findMany({
+          orderBy: { expenseDate: 'asc' },
+        }),
+        prisma.wageRecord.findMany({
+          include: { employee: { select: { name: true, department: true } } },
+          orderBy: [{ periodYear: 'asc' }, { periodMonth: 'asc' }],
+        }),
+        prisma.payment.findMany({
+          orderBy: { paymentDate: 'asc' },
+        }),
+      ]);
+
+      // 2. Discover available years from data
+      const yearSet = new Set<number>();
+      yearSet.add(2024);
+      yearSet.add(2025);
+      yearSet.add(2026);
+      yearSet.add(new Date().getFullYear());
+
+      allInvoices.forEach((i) => yearSet.add(new Date(i.issueDate).getFullYear()));
+      allExpenses.forEach((e) => yearSet.add(new Date(e.expenseDate).getFullYear()));
+      allWages.forEach((w) => yearSet.add(w.periodYear));
+
+      const availableYears = Array.from(yearSet).sort((a, b) => b - a);
+
+      // Category definitions & display metadata
+      const categoryMetadata: Record<string, { label: string; color: string; icon: string }> = {
+        ELECTRICITY_UTILITIES: { label: 'Electricity & Power Grid', color: '#f59e0b', icon: 'Zap' },
+        RAW_MATERIAL_CONSUMED: { label: 'Raw Materials & Yarn', color: '#3b82f6', icon: 'Boxes' },
+        DIRECT_LABOUR: { label: 'Direct Production Labour', color: '#8b5cf6', icon: 'Users' },
+        WAGES_PAYROLL: { label: 'Wages & Shift Payroll', color: '#6366f1', icon: 'Wallet' },
+        MACHINE_OPERATING: { label: 'Machine Fuel & Operating', color: '#ec4899', icon: 'Cpu' },
+        DYEING_PROCESSING: { label: 'Dyeing & Chemical Auxiliaries', color: '#14b8a6', icon: 'FlaskConical' },
+        MAINTENANCE: { label: 'Preventive Loom Maintenance', color: '#f97316', icon: 'Wrench' },
+        OTHER: { label: 'Administrative Overheads', color: '#64748b', icon: 'Building2' },
+      };
+
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      // 3. Aggregate Monthly breakdown for selectedYear
+      const monthlyData = [];
+      let totalAnnualRevenue = 0;
+      let totalAnnualDirectExpenses = 0;
+      let totalAnnualWages = 0;
+      let totalAnnualPaidRevenue = 0;
+      let totalAnnualOutstanding = 0;
+      let totalAnnualTaxCollected = 0;
+
+      const annualCategoryTotals: Record<string, number> = {
+        ELECTRICITY_UTILITIES: 0,
+        RAW_MATERIAL_CONSUMED: 0,
+        DIRECT_LABOUR: 0,
+        WAGES_PAYROLL: 0,
+        MACHINE_OPERATING: 0,
+        DYEING_PROCESSING: 0,
+        MAINTENANCE: 0,
+        OTHER: 0,
+      };
+
+      for (let m = 0; m < 12; m++) {
+        const monthNum = m + 1;
+        const monthName = monthNames[m];
+
+        // Filter invoices for this month & year
+        const monthInvoices = allInvoices.filter((inv) => {
+          const d = new Date(inv.issueDate);
+          return d.getFullYear() === selectedYear && d.getMonth() === m;
+        });
+
+        // Filter expenses for this month & year
+        const monthExpenses = allExpenses.filter((exp) => {
+          const d = new Date(exp.expenseDate);
+          return d.getFullYear() === selectedYear && d.getMonth() === m;
+        });
+
+        // Filter wages for this month & year
+        const monthWages = allWages.filter((w) => {
+          return w.periodYear === selectedYear && w.periodMonth === monthNum;
+        });
+
+        // Filter payments
+        const monthPayments = allPayments.filter((p) => {
+          const d = new Date(p.paymentDate);
+          return d.getFullYear() === selectedYear && d.getMonth() === m;
+        });
+
+        const revSubtotal = monthInvoices.reduce((s, i) => s + (i.subtotal || i.totalAmount), 0);
+        const revTotal = monthInvoices.reduce((s, i) => s + i.totalAmount, 0);
+        const taxCollected = monthInvoices.reduce((s, i) => s + i.taxAmount, 0);
+        const paidRevenue = monthInvoices.reduce((s, i) => s + i.paidAmount, 0);
+        const balanceReceivable = monthInvoices.reduce((s, i) => s + i.balanceAmount, 0);
+
+        const directExpTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
+        const wagesTotal = monthWages.reduce((s, w) => s + w.netWage, 0);
+        const totalExp = directExpTotal + wagesTotal;
+
+        const netProfit = revSubtotal - totalExp;
+        const profitMargin = revSubtotal > 0 ? Number(((netProfit / revSubtotal) * 100).toFixed(1)) : 0;
+
+        // Tally category totals for this month
+        const categoryBreakdown: Record<string, number> = {
+          ELECTRICITY_UTILITIES: 0,
+          RAW_MATERIAL_CONSUMED: 0,
+          DIRECT_LABOUR: 0,
+          WAGES_PAYROLL: wagesTotal,
+          MACHINE_OPERATING: 0,
+          DYEING_PROCESSING: 0,
+          MAINTENANCE: 0,
+          OTHER: 0,
+        };
+
+        for (const exp of monthExpenses) {
+          const cat = exp.category in categoryBreakdown ? exp.category : 'OTHER';
+          categoryBreakdown[cat] += exp.amount;
+          annualCategoryTotals[cat] += exp.amount;
+        }
+        annualCategoryTotals.WAGES_PAYROLL += wagesTotal;
+
+        totalAnnualRevenue += revSubtotal;
+        totalAnnualDirectExpenses += directExpTotal;
+        totalAnnualWages += wagesTotal;
+        totalAnnualPaidRevenue += paidRevenue;
+        totalAnnualOutstanding += balanceReceivable;
+        totalAnnualTaxCollected += taxCollected;
+
+        monthlyData.push({
+          month: monthNum,
+          monthName,
+          year: selectedYear,
+          revenue: revSubtotal,
+          grossInvoiced: revTotal,
+          taxCollected,
+          paidRevenue,
+          outstandingReceivable: balanceReceivable,
+          directExpenses: directExpTotal,
+          wages: wagesTotal,
+          totalExpenses: totalExp,
+          netProfit,
+          profitMargin,
+          invoiceCount: monthInvoices.length,
+          expenseCount: monthExpenses.length,
+          categoryBreakdown,
+          status: netProfit > 0 ? 'PROFITABLE' : netProfit === 0 ? 'BREAKEVEN' : 'LOSS',
+          recentExpenses: monthExpenses.slice(0, 5).map((e) => ({
+            id: e.id,
+            expenseNumber: e.expenseNumber,
+            category: e.category,
+            categoryLabel: categoryMetadata[e.category]?.label || e.category,
+            amount: e.amount,
+            description: e.description,
+            date: e.expenseDate,
+          })),
+        });
+      }
+
+      const totalAnnualExpenses = totalAnnualDirectExpenses + totalAnnualWages;
+      const netAnnualProfit = totalAnnualRevenue - totalAnnualExpenses;
+      const annualProfitMargin =
+        totalAnnualRevenue > 0 ? Number(((netAnnualProfit / totalAnnualRevenue) * 100).toFixed(1)) : 0;
+
+      // Category distribution list with percentages
+      const categoryDistribution = Object.entries(annualCategoryTotals)
+        .map(([key, amount]) => ({
+          category: key,
+          label: categoryMetadata[key]?.label || key,
+          amount,
+          color: categoryMetadata[key]?.color || '#94a3b8',
+          percentage: totalAnnualExpenses > 0 ? Number(((amount / totalAnnualExpenses) * 100).toFixed(1)) : 0,
+        }))
+        .filter((c) => c.amount > 0)
+        .sort((a, b) => b.amount - a.amount);
+
+      // Multi-year Annual comparison
+      const annualComparison = availableYears
+        .map((yr) => {
+          const yrInvoices = allInvoices.filter((i) => new Date(i.issueDate).getFullYear() === yr);
+          const yrExpenses = allExpenses.filter((e) => new Date(e.expenseDate).getFullYear() === yr);
+          const yrWages = allWages.filter((w) => w.periodYear === yr);
+
+          const rev = yrInvoices.reduce((s, i) => s + (i.subtotal || i.totalAmount), 0);
+          const directExp = yrExpenses.reduce((s, e) => s + e.amount, 0);
+          const wages = yrWages.reduce((s, w) => s + w.netWage, 0);
+          const totExp = directExp + wages;
+          const profit = rev - totExp;
+          const margin = rev > 0 ? Number(((profit / rev) * 100).toFixed(1)) : 0;
+
+          return {
+            year: yr,
+            revenue: rev,
+            directExpenses: directExp,
+            wages,
+            totalExpenses: totExp,
+            netProfit: profit,
+            profitMargin: margin,
+            invoicesCount: yrInvoices.length,
+            expensesCount: yrExpenses.length,
+          };
+        })
+        .sort((a, b) => a.year - b.year);
+
+      // YoY Calculations
+      const annualComparisonWithGrowth = annualComparison.map((item, idx) => {
+        if (idx === 0) {
+          return { ...item, yoyRevenueGrowth: 0, yoyProfitGrowth: 0 };
+        }
+        const prev = annualComparison[idx - 1];
+        const revGrowth =
+          prev.revenue > 0 ? Number((((item.revenue - prev.revenue) / prev.revenue) * 100).toFixed(1)) : 0;
+        const profitGrowth =
+          prev.netProfit !== 0
+            ? Number((((item.netProfit - prev.netProfit) / Math.abs(prev.netProfit)) * 100).toFixed(1))
+            : 0;
+        return {
+          ...item,
+          yoyRevenueGrowth: revGrowth,
+          yoyProfitGrowth: profitGrowth,
+        };
+      });
+
+      // Best and worst months
+      const monthsWithData = monthlyData.filter((m) => m.revenue > 0 || m.totalExpenses > 0);
+      const bestMonth =
+        monthsWithData.length > 0
+          ? [...monthsWithData].sort((a, b) => b.netProfit - a.netProfit)[0]
+          : monthlyData[0];
+      const highestExpenseMonth =
+        monthsWithData.length > 0
+          ? [...monthsWithData].sort((a, b) => b.totalExpenses - a.totalExpenses)[0]
+          : monthlyData[0];
+
+      // Plant Owner Strategic KPIs
+      const activeMonthsCount = monthsWithData.length || 1;
+      const kpis = {
+        averageMonthlyRevenue: Math.round(totalAnnualRevenue / (activeMonthsCount || 1)),
+        averageMonthlyExpense: Math.round(totalAnnualExpenses / (activeMonthsCount || 1)),
+        averageMonthlyProfit: Math.round(netAnnualProfit / (activeMonthsCount || 1)),
+        bestMonth: {
+          name: bestMonth.monthName,
+          month: bestMonth.month,
+          profit: bestMonth.netProfit,
+          revenue: bestMonth.revenue,
+        },
+        highestExpenseMonth: {
+          name: highestExpenseMonth.monthName,
+          month: highestExpenseMonth.month,
+          expense: highestExpenseMonth.totalExpenses,
+        },
+        costToRevenueRatio:
+          totalAnnualRevenue > 0 ? Number(((totalAnnualExpenses / totalAnnualRevenue) * 100).toFixed(1)) : 0,
+        topExpenseDriver: categoryDistribution[0] || { label: 'None', amount: 0, percentage: 0 },
+      };
+
+      res.json({
+        selectedYear,
+        availableYears,
+        summary: {
+          totalAnnualRevenue,
+          totalAnnualDirectExpenses,
+          totalAnnualWages,
+          totalAnnualExpenses,
+          netAnnualProfit,
+          annualProfitMargin,
+          totalAnnualPaidRevenue,
+          totalAnnualOutstanding,
+          totalAnnualTaxCollected,
+          invoicesCount: allInvoices.filter((i) => new Date(i.issueDate).getFullYear() === selectedYear).length,
+          expensesCount: allExpenses.filter((e) => new Date(e.expenseDate).getFullYear() === selectedYear).length,
+        },
+        monthlyData,
+        annualComparison: annualComparisonWithGrowth,
+        categoryDistribution,
+        kpis,
+      });
+    } catch (err: any) {
+      console.error('Financial analytics error:', err);
+      res.status(500).json({ error: 'Failed to compute financial analytics', details: err.message });
+    }
+  }
+);
+
 export default router;
+

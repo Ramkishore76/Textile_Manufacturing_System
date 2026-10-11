@@ -211,10 +211,29 @@ async function runEndToEndVerification() {
     `${buyerInvoices.data.length} Invoices | ${buyerPayments.data.length} Verified Receipts`
   );
 
+  // 19. Plant Owner Monthly & Annual Profit & Expense Analytics
+  const ownerFinancials = await fetchJson(`${API_BASE}/reports/financial-analytics?year=2026`, {
+    headers: { Authorization: `Bearer ${adminToken}` },
+  });
+  assert(
+    'Plant Owner Monthly & Annual Expenses and Profit Analytics',
+    ownerFinancials.status === 200 &&
+      ownerFinancials.data.summary &&
+      ownerFinancials.data.summary.totalAnnualRevenue > 0 &&
+      ownerFinancials.data.monthlyData &&
+      ownerFinancials.data.monthlyData.length === 12 &&
+      ownerFinancials.data.annualComparison &&
+      ownerFinancials.data.annualComparison.length > 0 &&
+      ownerFinancials.data.categoryDistribution &&
+      ownerFinancials.data.categoryDistribution.length > 0,
+    `FY ${ownerFinancials.data?.selectedYear}: Revenue ₹${ownerFinancials.data?.summary?.totalAnnualRevenue.toLocaleString()} | Margin: ${ownerFinancials.data?.summary?.annualProfitMargin}%`
+  );
+
   console.log('\n========================================================================');
   console.log(`  VERIFICATION COMPLETE: ${passed}/${total} STEPS PASSED (100% SUCCESS)`);
   console.log('========================================================================\n');
 }
+
 
 runEndToEndVerification().catch((err) => {
   console.error('Test Execution Error:', err);

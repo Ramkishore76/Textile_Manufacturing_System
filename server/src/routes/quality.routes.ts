@@ -149,11 +149,12 @@ router.post(
         // 2. Handle Outcome
         if (result === 'PASSED') {
           // If passed, find or assign location
-          let locId = targetLocationId || roll.locationId;
+          let locId: string | null = targetLocationId || roll.locationId;
           if (!locId) {
             const defaultLoc = await tx.finishedGoodsLocation.findFirst();
-            locId = defaultLoc?.id;
+            locId = defaultLoc ? defaultLoc.id : null;
           }
+
 
           // Move to Finished Goods Stock
           await tx.roll.update({
