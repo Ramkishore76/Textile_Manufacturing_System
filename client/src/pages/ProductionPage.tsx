@@ -135,8 +135,10 @@ export const ProductionPage: React.FC = () => {
     e.preventDefault();
     try {
       await api.post(`/production/jobs/${activeJobId}/log`, {
+        quantityProduced: Number(logQty),
         producedQuantity: Number(logQty),
         wastageQuantity: Number(logWastage),
+        downtimeDurationMinutes: Number(logDowntime),
         downtimeMinutes: Number(logDowntime),
         downtimeReason: logDowntimeReason || undefined,
         notes: logNotes || undefined,

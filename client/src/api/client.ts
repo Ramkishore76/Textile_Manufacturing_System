@@ -39,7 +39,12 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
         window.location.href = '/login';
       }
     }
-    throw new ApiError(data.error || 'An unexpected error occurred', response.status, data.details);
+    const message =
+      data.error ||
+      data.message ||
+      (typeof data === 'string' ? data : null) ||
+      `Server responded with ${response.status} ${response.statusText}`;
+    throw new ApiError(message, response.status, data.details);
   }
 
   return data as T;
