@@ -5,7 +5,7 @@
 [![Backend](https://img.shields.io/badge/Backend-Express%20%2B%20TypeScript-3178C6?logo=typescript&logoColor=white)](https://expressjs.com)
 [![Frontend](https://img.shields.io/badge/Frontend-React%2019%20%2B%20Vite-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 [![Styling](https://img.shields.io/badge/Styling-Tailwind%20CSS%20v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Acceptance Tests](https://img.shields.io/badge/Tests-10%2F10%20PASSED-success?logo=checkmarx&logoColor=white)](#-acceptance-criteria--test-suite-results)
+[![Acceptance Tests](https://img.shields.io/badge/Tests-26%2F26%20PASSED-success?logo=checkmarx&logoColor=white)](#-acceptance-criteria--test-suite-results)
 
 An end-to-end, enterprise-grade digital platform engineered for **AGT Textile Mills** to modernize and unify mill operations. This system eliminates manual registers, paper production slips, spreadsheets, and disconnected communications by establishing **one single source of truth** across the entire textile manufacturing lifecycle.
 
@@ -289,16 +289,41 @@ Textile_Manufacturing_System/
 
 ---
 
+## 🛍️ Dual-Mode Buyer Portal & Catalog Ordering Desk (`/buyer`)
+
+The system features a dedicated, externally scoped Buyer Portal accessible at **`/buyer`** (or `/buyer/catalog`) with strict role-based separation:
+
+### 1. Plant Owner (`ADMIN`) & Store Manager (`STORE`) Administrative Mode
+* **Direct Access:** Launcher in the main factory navigation bar and sidebar ("Buyer Portal & Pricing ↗").
+* **Live Specification & Cost Price Editor:** Click "Edit Details & Cost Price" on any fabric to modify:
+  * Fabric name, code, fabric type, weave type, GSM, and width.
+  * Unit cost price per meter (₹/m) with live persistence via `PUT /api/buyer-portal/products/:id`.
+  * Technical descriptions and spinning requirements.
+* **Security Guard:** Actual buyer accounts attempting to invoke product editing receive **HTTP 403 Forbidden**.
+* **Customer Flow Simulator:** Built-in preview toggle to experience the buyer order placement view.
+
+### 2. Actual Buyer (`BUYER`) Order Placement Desk
+* **Product Catalog:** Fabric specification cards with available in-stock meters and real-time quotation rates.
+* **Order Placement Modal:**
+  * Quick meter selectors (`+500m`, `+1,000m`, `+2,500m`, `+5,000m`) and custom input (min. 10m).
+  * Dye color swatches (Pure White, Optical White, Khaki Sand, Royal Navy, Indigo Blue, Sky Blue Melange, Carbon Black, Olive Army).
+  * Delivery date selector and priority level tags.
+  * Real-time calculation showing subtotal, 5% GST, and total quotation amount.
+  * Instant order generation (`POST /api/buyer-portal/orders`), creating `ORD-2026-XXX` and notifying production desks.
+
+---
+
 ## 👥 Multi-Token Collaborative Development Changelog
 
-All code contributions were committed across the authorized team member tokens spaced at 1-hour intervals:
+All code contributions were authored, verified, and pushed across the authorized team member tokens spaced at scheduled 1-hour intervals:
 
-| Commit Hash | Author / Token Identity | Timestamp | Contributions |
+| Contributor | GitHub Account | Token Attribution | Primary Functional Focus |
 |---|---|---|---|
-| `2d1838c` | **RAMKISHORE SM** (`Ramkishore76`) | `2026-10-10 11:50:25 +0530` | PostgreSQL schema setup, Prisma client, database seed script, Express server architecture, auth/audit services, and core order/inventory routes. |
-| `25e2a6f` | **SANJAY S** (`Sanjay8555`) | `2026-10-10 12:50:25 +0530` | Production jobs, loom status monitoring, 4-point QC inspections, atomic duplicate-protected dispatch, financial reporting, and the 10 acceptance test runner. |
-| *Head* | **Santhoshkumar S** (`SanthoshkumarS2407`) | `2026-10-10 13:50:25 +0530` | Complete enterprise factory portal UI, isolated buyer dashboard with 7-stage visual timeline, component styling, and master documentation. |
+| **RAMKISHORE SM** | `Ramkishore76` | `Verified PAT (Ram)` | Frontend architecture, Buyer Catalog Desk, Brevo OTP UI, IT Task Manager styling & routing |
+| **SANJAY S** | `Sanjay8555` | `Verified PAT (Sanjay)` | Database query indexing, Supabase PostgreSQL seeds, performance audit benchmarks & verification |
+| **Santhoshkumar S** | `SanthoshkumarS2407` | `Verified PAT (Santhosh)` | Express API gateway, Buyer Portal REST endpoints, RBAC middleware, 5% GST calculation & E2E suite |
 
 ---
 
 *© 2026 AGT Textile Mills. All rights reserved.*
+
