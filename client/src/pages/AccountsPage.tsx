@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import {
   FileText,
@@ -19,13 +20,20 @@ import {
   Boxes,
   Building2,
   Printer,
-  Eye
+  Eye,
+  Sparkles,
 } from 'lucide-react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { printInvoicePdf } from '../utils/invoicePdf';
+import { OwnerFinancialAnalytics } from '../components/OwnerFinancialAnalytics';
 
 export const AccountsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'invoices' | 'payments' | 'expenses' | 'profitability'>('invoices');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = (searchParams.get('tab') as any) || 'invoices';
+  const [activeTab, setActiveTab] = useState<'invoices' | 'payments' | 'expenses' | 'profitability' | 'analytics'>(
+    ['invoices', 'payments', 'expenses', 'profitability', 'analytics'].includes(initialTab) ? initialTab : 'invoices'
+  );
+
   const [invoices, setInvoices] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -243,14 +251,45 @@ export const AccountsPage: React.FC = () => {
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 mt-0.5">Net of materials, power & labour</p>
+            <button
+              onClick={() => {
+                setActiveTab('analytics');
+                setSearchParams({ tab: 'analytics' });
+              }}
+              className="mt-2 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition"
+            >
+              <span>Owner Profit & Expenses</span>
+              <TrendingUp className="w-3 h-3" />
+            </button>
           </div>
         </div>
       )}
 
       {/* Tabs Navigation */}
-      <div className="inline-flex items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200/70">
+      <div className="flex flex-wrap items-center gap-1.5 p-1 bg-zinc-100/80 rounded-xl border border-zinc-200/70">
         <button
-          onClick={() => setActiveTab('invoices')}
+          onClick={() => {
+            setActiveTab('analytics');
+            setSearchParams({ tab: 'analytics' });
+          }}
+          className={`px-3.5 py-1.5 text-xs rounded-lg transition-all flex items-center space-x-1.5 ${
+            activeTab === 'analytics'
+              ? 'bg-indigo-600 text-white font-bold shadow-xs'
+              : 'text-indigo-700 hover:text-indigo-900 bg-indigo-50/70 font-semibold'
+          }`}
+        >
+          <TrendingUp className="w-3.5 h-3.5" />
+          <span>Plant Owner Profit & Expenses</span>
+          <span className="px-1.5 py-0.2 rounded text-[9px] bg-white/20 font-bold ml-1 uppercase">
+            Exclusive
+          </span>
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('invoices');
+            setSearchParams({ tab: 'invoices' });
+          }}
           className={`px-3.5 py-1.5 text-xs rounded-lg transition-all ${
             activeTab === 'invoices'
               ? 'bg-white text-zinc-900 font-semibold shadow-xs'
@@ -261,7 +300,10 @@ export const AccountsPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('payments')}
+          onClick={() => {
+            setActiveTab('payments');
+            setSearchParams({ tab: 'payments' });
+          }}
           className={`px-3.5 py-1.5 text-xs rounded-lg transition-all ${
             activeTab === 'payments'
               ? 'bg-white text-zinc-900 font-semibold shadow-xs'
@@ -272,7 +314,10 @@ export const AccountsPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('expenses')}
+          onClick={() => {
+            setActiveTab('expenses');
+            setSearchParams({ tab: 'expenses' });
+          }}
           className={`px-3.5 py-1.5 text-xs rounded-lg transition-all ${
             activeTab === 'expenses'
               ? 'bg-white text-zinc-900 font-semibold shadow-xs'
@@ -283,7 +328,10 @@ export const AccountsPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('profitability')}
+          onClick={() => {
+            setActiveTab('profitability');
+            setSearchParams({ tab: 'profitability' });
+          }}
           className={`px-3.5 py-1.5 text-xs rounded-lg transition-all ${
             activeTab === 'profitability'
               ? 'bg-white text-zinc-900 font-semibold shadow-xs'
@@ -293,6 +341,7 @@ export const AccountsPage: React.FC = () => {
           Order Cost & Profit Explorer
         </button>
       </div>
+
 
       {/* TAB 1: INVOICES */}
       {activeTab === 'invoices' && (
@@ -677,7 +726,11 @@ export const AccountsPage: React.FC = () => {
         </div>
       )}
 
+      {/* TAB 5: PLANT OWNER PROFIT & EXPENSE ANALYTICS */}
+      {activeTab === 'analytics' && <OwnerFinancialAnalytics />}
+
       {/* Record Payment Modal */}
+
       {paymentModalOpen && selectedInvoice && (
         <div
           className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"

@@ -787,32 +787,53 @@ export const DashboardPage: React.FC = () => {
 
       {/* Confidential Financial Health Row - strictly guarded to ADMIN & ACCOUNTS */}
       {(role === 'ADMIN' || role === 'ACCOUNTS') && data?.financials && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
-            <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Recorded Invoiced Sales</p>
-            <p className="text-2xl font-extrabold tracking-tight text-zinc-900 mt-1">
-              ₹{(data.financials.totalInvoiced || 0).toLocaleString()}
-            </p>
-            <span className="text-[11px] text-zinc-500 font-normal">From commercial tax invoices</span>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-bold text-zinc-800 uppercase tracking-wider">
+                Plant Owner Financial Governance
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                Live Audit
+              </span>
+            </div>
+            <button
+              onClick={() => navigate('/app/accounts?tab=analytics')}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-xl text-xs font-semibold shadow-2xs transition cursor-pointer"
+            >
+              <TrendingUp className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Monthly & Annual Profit Explorer</span>
+              <ArrowRight className="w-3.5 h-3.5 text-indigo-600" />
+            </button>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
-            <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Recorded Manufacturing Cost</p>
-            <p className="text-2xl font-extrabold tracking-tight text-zinc-900 mt-1">
-              ₹{(data.financials.totalRecordedCost || 0).toLocaleString()}
-            </p>
-            <span className="text-[11px] text-zinc-500 font-normal">Material + Utilities + Labour</span>
-          </div>
-          <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
-            <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Estimated Gross Profit</p>
-            <p className="text-2xl font-extrabold tracking-tight text-zinc-900 mt-1">
-              ₹{(data.financials.estimatedGrossProfit || 0).toLocaleString()}
-            </p>
-            <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full font-semibold inline-block mt-1">
-              Margin: {data.financials.profitMargin || 0}%
-            </span>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
+              <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Recorded Invoiced Sales</p>
+              <p className="text-2xl font-extrabold tracking-tight text-zinc-900 mt-1">
+                ₹{(data.financials.totalInvoiced || 0).toLocaleString()}
+              </p>
+              <span className="text-[11px] text-zinc-500 font-normal">From commercial tax invoices</span>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
+              <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Recorded Manufacturing Cost</p>
+              <p className="text-2xl font-extrabold tracking-tight text-zinc-900 mt-1">
+                ₹{(data.financials.totalRecordedCost || 0).toLocaleString()}
+              </p>
+              <span className="text-[11px] text-zinc-500 font-normal">Material + Utilities + Labour</span>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border border-zinc-200/80 shadow-xs">
+              <p className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Estimated Gross Profit</p>
+              <p className="text-2xl font-extrabold tracking-tight text-zinc-900 mt-1">
+                ₹{(data.financials.estimatedGrossProfit || 0).toLocaleString()}
+              </p>
+              <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full font-semibold inline-block mt-1">
+                Margin: {data.financials.profitMargin || 0}%
+              </span>
+            </div>
           </div>
         </div>
       )}
+
 
       {/* Role Visual Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -895,10 +916,15 @@ export const DashboardPage: React.FC = () => {
                 <h2 className="text-sm font-bold text-zinc-900 tracking-tight">Financial Overview (Recorded Ledger)</h2>
                 <p className="text-[11px] text-zinc-500">Revenue, manufacturing cost and gross margins</p>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60">
-                Financial Audit
-              </span>
+              <button
+                onClick={() => navigate('/app/accounts?tab=analytics')}
+                className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 flex items-center space-x-1 transition cursor-pointer"
+              >
+                <span>Monthly & Annual Profit Ledger</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
+
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={financialBarData}>
