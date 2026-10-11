@@ -11,6 +11,7 @@ import {
   X,
   Search,
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const InventoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'YARNS' | 'TRANSACTIONS' | 'BOM'>('YARNS');
@@ -19,6 +20,7 @@ export const InventoryPage: React.FC = () => {
   const [boms, setBoms] = useState<any[]>([]);
   const [fabrics, setFabrics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   // New Yarn Modal
   const [showNewYarnModal, setShowNewYarnModal] = useState(false);
@@ -90,9 +92,10 @@ export const InventoryPage: React.FC = () => {
         storageLocation: storageLoc,
       });
       setShowNewYarnModal(false);
+      toast.success('Yarn material created successfully!');
       await loadData();
     } catch (err: any) {
-      alert('Error creating yarn material: ' + err.message);
+      toast.error('Error creating yarn material: ' + err.message);
     }
   };
 
@@ -107,9 +110,10 @@ export const InventoryPage: React.FC = () => {
       });
       setShowAdjustModal(false);
       setAdjustmentReason('');
+      toast.success('Stock inventory adjusted successfully!');
       await loadData();
     } catch (err: any) {
-      alert('Adjustment error: ' + err.message);
+      toast.error('Adjustment error: ' + err.message);
     }
   };
 
@@ -123,9 +127,10 @@ export const InventoryPage: React.FC = () => {
         wastagePercentage: Number(bomWastage),
       });
       setShowBomModal(false);
+      toast.success('Bill of Materials (BOM) saved successfully!');
       await loadData();
     } catch (err: any) {
-      alert('BOM save error: ' + err.message);
+      toast.error('BOM save error: ' + err.message);
     }
   };
 

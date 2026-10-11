@@ -10,11 +10,13 @@ import {
   X,
   FileText,
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const QualityPage: React.FC = () => {
   const [pendingRolls, setPendingRolls] = useState<any[]>([]);
   const [defectsSummary, setDefectsSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   // Inspect Modal
   const [showInspectModal, setShowInspectModal] = useState(false);
@@ -66,7 +68,7 @@ export const QualityPage: React.FC = () => {
       setTraceRoll(data);
       setShowTraceModal(true);
     } catch (err: any) {
-      alert('Error fetching roll traceability: ' + err.message);
+      toast.error('Error fetching roll traceability: ' + err.message);
     }
   };
 
@@ -84,10 +86,10 @@ export const QualityPage: React.FC = () => {
       });
 
       setShowInspectModal(false);
-      alert(`Inspection saved: Roll ${selectedRoll.rollId} marked as ${inspectionResult}!`);
+      toast.success(`Inspection saved: Roll ${selectedRoll.rollId} marked as ${inspectionResult}!`);
       await loadData();
     } catch (err: any) {
-      alert('Error saving inspection: ' + err.message);
+      toast.error('Error saving inspection: ' + err.message);
     }
   };
 

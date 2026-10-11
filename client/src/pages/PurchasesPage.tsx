@@ -10,6 +10,7 @@ import {
   X,
   AlertCircle,
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const PurchasesPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'REQUESTS' | 'POS' | 'GRN' | 'SUPPLIERS'>('REQUESTS');
@@ -19,6 +20,7 @@ export const PurchasesPage: React.FC = () => {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [yarns, setYarns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   // New PO Modal
   const [showPoModal, setShowPoModal] = useState(false);
@@ -92,9 +94,10 @@ export const PurchasesPage: React.FC = () => {
         purchaseRequestId: poRequestId,
       });
       setShowPoModal(false);
+      toast.success('Purchase Order created successfully!');
       await loadData();
     } catch (err: any) {
-      alert('Error creating Purchase Order: ' + err.message);
+      toast.error('Error creating Purchase Order: ' + err.message);
     }
   };
 
@@ -113,9 +116,10 @@ export const PurchasesPage: React.FC = () => {
       });
       setShowGrnModal(false);
       setGrnRemarks('');
+      toast.success('Goods Receipt Note (GRN) recorded successfully!');
       await loadData();
     } catch (err: any) {
-      alert('Error recording goods receipt: ' + err.message);
+      toast.error('Error recording goods receipt: ' + err.message);
     }
   };
 

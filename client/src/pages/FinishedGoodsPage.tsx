@@ -17,6 +17,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
 
 export const FinishedGoodsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export const FinishedGoodsPage: React.FC = () => {
   const [gradeFilter, setGradeFilter] = useState('ALL');
   const [selectedRoll, setSelectedRoll] = useState<any | null>(null);
   const [rollDetailsLoading, setRollDetailsLoading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     loadFinishedStock();
@@ -49,7 +51,7 @@ export const FinishedGoodsPage: React.FC = () => {
       const data = await api.get<any>(`/rolls/${rollId}`);
       setSelectedRoll(data);
     } catch (err: any) {
-      alert('Failed to load roll traceability: ' + err.message);
+      toast.error('Failed to load roll traceability: ' + err.message);
     } finally {
       setRollDetailsLoading(false);
     }

@@ -12,12 +12,14 @@ import {
   Building2,
   Briefcase
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const AttendancePage: React.FC = () => {
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [employees, setEmployees] = useState<any[]>([]);
   const [attendanceMap, setAttendanceMap] = useState<Record<string, any>>({});
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
@@ -96,9 +98,9 @@ export const AttendancePage: React.FC = () => {
         ...prev,
         [empId]: { ...prev[empId], saved: true },
       }));
-      setSaveSuccess(`Attendance saved for ${empId}`);
+      toast.success('Shift attendance record saved successfully');
     } catch (err: any) {
-      alert('Failed to save attendance: ' + err.message);
+      toast.error('Failed to save attendance: ' + err.message);
     } finally {
       setSavingId(null);
     }
@@ -117,9 +119,10 @@ export const AttendancePage: React.FC = () => {
           overtimeHours: data.overtimeHours || 0,
         });
       }
+      toast.success('Bulk attendance marked for all shift workers!');
       loadAttendanceData();
     } catch (err: any) {
-      alert('Error bulk saving: ' + err.message);
+      toast.error('Error bulk saving attendance: ' + err.message);
     } finally {
       setLoading(false);
     }

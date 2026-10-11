@@ -16,12 +16,14 @@ import {
   Calendar,
   Layers,
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [buyers, setBuyers] = useState<any[]>([]);
   const [fabrics, setFabrics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   // Filter
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,9 +109,10 @@ export const OrdersPage: React.FC = () => {
 
       const result: any = await api.post('/orders', payload);
       setModalFeedback(result);
+      toast.success(`Order ${result?.order?.orderNumber || ''} created successfully!`);
       await loadData();
     } catch (err: any) {
-      alert('Error creating order: ' + err.message);
+      toast.error('Error creating order: ' + err.message);
     } finally {
       setSubmitting(false);
     }
@@ -118,14 +121,14 @@ export const OrdersPage: React.FC = () => {
   const handleManualReserve = async (orderId: string) => {
     try {
       const res: any = await api.post(`/orders/${orderId}/reserve-yarn`, {});
-      alert(res.message);
+      toast.info(res.message || 'Yarn allocation updated');
       await loadData();
       if (selectedOrder) {
         const updated = await api.get(`/orders/${orderId}`);
         setSelectedOrder(updated);
       }
     } catch (err: any) {
-      alert('Reservation error: ' + err.message);
+      toast.error('Reservation error: ' + err.message);
     }
   };
 

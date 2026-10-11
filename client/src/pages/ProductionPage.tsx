@@ -11,7 +11,9 @@ import {
   Wrench,
   X,
   FileSpreadsheet,
+  CheckCircle2,
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const ProductionPage: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -20,6 +22,8 @@ export const ProductionPage: React.FC = () => {
   const [shifts, setShifts] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [banner, setBanner] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const toast = useToast();
 
   // New Job Modal
   const [showJobModal, setShowJobModal] = useState(false);
@@ -107,27 +111,36 @@ export const ProductionPage: React.FC = () => {
         plannedQuantity: Number(plannedQty),
       });
       setShowJobModal(false);
+      toast.success('Production job scheduled successfully!');
+      setBanner({ message: 'Production job scheduled successfully!', type: 'success' });
       await loadData();
     } catch (err: any) {
-      alert('Error scheduling job: ' + err.message);
+      toast.error('Error scheduling job: ' + err.message);
+      setBanner({ message: 'Error scheduling job: ' + err.message, type: 'error' });
     }
   };
 
   const handleStartJob = async (jobId: string) => {
     try {
       await api.post(`/production/jobs/${jobId}/start`, {});
+      toast.success('Job started! Machine status updated to RUNNING.');
+      setBanner({ message: 'Job started! Machine status updated to RUNNING.', type: 'success' });
       await loadData();
     } catch (err: any) {
-      alert('Error starting job: ' + err.message);
+      toast.error('Error starting job: ' + err.message);
+      setBanner({ message: 'Error starting job: ' + err.message, type: 'error' });
     }
   };
 
   const handleCompleteJob = async (jobId: string) => {
     try {
       await api.post(`/production/jobs/${jobId}/complete`, {});
+      toast.success('Job finished! Status set to COMPLETED.');
+      setBanner({ message: 'Job finished! Status set to COMPLETED. You can now generate fabric rolls.', type: 'success' });
       await loadData();
     } catch (err: any) {
-      alert('Error completing job: ' + err.message);
+      toast.error('Error completing job: ' + err.message);
+      setBanner({ message: 'Error completing job: ' + err.message, type: 'error' });
     }
   };
 
@@ -146,9 +159,12 @@ export const ProductionPage: React.FC = () => {
       setShowLogModal(false);
       setLogDowntimeReason('');
       setLogNotes('');
+      toast.success('Shift output log saved successfully!');
+      setBanner({ message: 'Shift output log saved successfully!', type: 'success' });
       await loadData();
     } catch (err: any) {
-      alert('Error recording log: ' + err.message);
+      toast.error('Error recording log: ' + err.message);
+      setBanner({ message: 'Error recording log: ' + err.message, type: 'error' });
     }
   };
 
@@ -163,10 +179,12 @@ export const ProductionPage: React.FC = () => {
         rolls: rollsArray,
       });
       setShowRollModal(false);
-      alert(`Successfully generated ${rollCount} unique roll IDs for quality inspection!`);
+      toast.success(`Successfully generated ${rollCount} unique roll IDs for quality inspection!`);
+      setBanner({ message: `Successfully generated ${rollCount} unique roll IDs for quality inspection!`, type: 'success' });
       await loadData();
     } catch (err: any) {
-      alert('Error generating rolls: ' + err.message);
+      toast.error('Error generating rolls: ' + err.message);
+      setBanner({ message: 'Error generating rolls: ' + err.message, type: 'error' });
     }
   };
 
@@ -188,6 +206,33 @@ export const ProductionPage: React.FC = () => {
           <span>Schedule Production Job</span>
         </button>
       </div>
+
+      {/* In-page Notification Banner */}
+      {banner && (
+        <div
+          className={`p-3.5 rounded-xl border flex items-center justify-between text-xs animate-in fade-in transition-all ${
+            banner.type === 'success'
+              ? 'bg-emerald-50/90 border-emerald-200/80 text-emerald-900'
+              : 'bg-rose-50/90 border-rose-200/80 text-rose-900'
+          }`}
+        >
+          <div className="flex items-center space-x-2.5">
+            {banner.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+            )}
+            <span className="font-semibold">{banner.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setBanner(null)}
+            className="text-zinc-400 hover:text-zinc-700 p-1 rounded-md transition"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Machine Fleet Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">

@@ -15,6 +15,7 @@ import {
   Calendar,
   X
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const WagesPage: React.FC = () => {
   const currentDate = new Date();
@@ -24,6 +25,7 @@ export const WagesPage: React.FC = () => {
   const [wages, setWages] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const toast = useToast();
 
   // Calculate Wage Modal
   const [calcModalOpen, setCalcModalOpen] = useState(false);
@@ -88,9 +90,10 @@ export const WagesPage: React.FC = () => {
   const handleUpdateStatus = async (wageId: string, status: 'APPROVED' | 'PAID') => {
     try {
       await api.put(`/wages/${wageId}/status`, { status });
+      toast.success(`Wage payroll status marked as ${status}!`);
       loadWagesData();
     } catch (err: any) {
-      alert('Status update failed: ' + err.message);
+      toast.error('Status update failed: ' + err.message);
     }
   };
 

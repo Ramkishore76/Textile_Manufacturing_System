@@ -23,11 +23,13 @@ import {
   CheckCircle,
   X,
 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const AppLayout: React.FC = () => {
   const { user, logout, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
 
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -97,9 +99,10 @@ export const AppLayout: React.FC = () => {
       });
       login(res.token, res.user);
       setShowRoleSwitcher(false);
+      toast.success(`Switched to ${demo.label} (${demo.role})`);
       navigate(res.redirectUrl);
     } catch (err: any) {
-      alert('Error switching role: ' + err.message);
+      toast.error('Error switching role: ' + err.message);
     }
   };
 
