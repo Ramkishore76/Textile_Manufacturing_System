@@ -17,8 +17,12 @@ import {
   Layers,
   Cpu,
   Boxes,
-  Building2
+  Building2,
+  Printer,
+  Eye
 } from 'lucide-react';
+import { InvoiceModal } from '../components/InvoiceModal';
+import { printInvoicePdf } from '../utils/invoicePdf';
 
 export const AccountsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'invoices' | 'payments' | 'expenses' | 'profitability'>('invoices');
@@ -37,6 +41,7 @@ export const AccountsPage: React.FC = () => {
   // Record Payment Modal State
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<any | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>('BANK_TRANSFER');
   const [transactionRef, setTransactionRef] = useState<string>('');
@@ -354,14 +359,31 @@ export const AccountsPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      {inv.balanceAmount > 0 && (
+                      <div className="flex items-center justify-end space-x-1.5">
                         <button
-                          onClick={() => openPaymentModal(inv)}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition"
+                          onClick={() => printInvoicePdf(inv)}
+                          className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200/80 transition"
+                          title="Print Tax Invoice / Save as PDF"
                         >
-                          Record Payment
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>PDF Bill</span>
                         </button>
-                      )}
+                        <button
+                          onClick={() => setPreviewInvoice(inv)}
+                          className="p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition"
+                          title="Preview Tax Invoice"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-zinc-600" />
+                        </button>
+                        {inv.balanceAmount > 0 && (
+                          <button
+                            onClick={() => openPaymentModal(inv)}
+                            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition"
+                          >
+                            Record Payment
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -386,6 +408,7 @@ export const AccountsPage: React.FC = () => {
                   <th className="py-3 px-4">Method</th>
                   <th className="py-3 px-4">Txn Reference #</th>
                   <th className="py-3 px-4">Notes</th>
+                  <th className="py-3 px-4 text-right">Invoice PDF Bill</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 text-zinc-700">
@@ -416,6 +439,29 @@ export const AccountsPage: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 text-zinc-500 italic">
                       {p.notes || '—'}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      {p.invoice ? (
+                        <div className="flex items-center justify-end space-x-1.5">
+                          <button
+                            onClick={() => printInvoicePdf(p.invoice)}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200/80 transition"
+                            title="Print Tax Invoice PDF"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>PDF Bill</span>
+                          </button>
+                          <button
+                            onClick={() => setPreviewInvoice(p.invoice)}
+                            className="p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition"
+                            title="Preview Invoice"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-zinc-600" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-zinc-400 italic text-[10px]">No invoice</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -866,6 +912,14 @@ export const AccountsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Invoice PDF & Breakdown Modal */}
+      <InvoiceModal
+        invoice={previewInvoice}
+        invoiceId={previewInvoice?.id}
+        isOpen={!!previewInvoice}
+        onClose={() => setPreviewInvoice(null)}
+      />
     </div>
   );
 };

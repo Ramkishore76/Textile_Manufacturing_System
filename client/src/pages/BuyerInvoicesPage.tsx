@@ -11,8 +11,12 @@ import {
   AlertCircle,
   Eye,
   X,
-  CreditCard
+  CreditCard,
+  Printer,
+  Download
 } from 'lucide-react';
+import { InvoiceModal } from '../components/InvoiceModal';
+import { printInvoicePdf } from '../utils/invoicePdf';
 
 export const BuyerInvoicesPage: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -182,13 +186,24 @@ export const BuyerInvoicesPage: React.FC = () => {
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedInvoice(inv)}
-                        className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-600 text-zinc-700 font-semibold text-xs border border-zinc-200/70 transition"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-zinc-500" />
-                        <span>Breakdown</span>
-                      </button>
+                      <div className="flex items-center justify-end space-x-1.5">
+                        <button
+                          onClick={() => printInvoicePdf(inv)}
+                          className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200/80 transition"
+                          title="Print or Save as PDF"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>PDF Bill</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedInvoice(inv)}
+                          className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs border border-zinc-200/70 transition"
+                          title="View full tax invoice breakdown"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-zinc-500" />
+                          <span>View</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -198,83 +213,13 @@ export const BuyerInvoicesPage: React.FC = () => {
         )}
       </div>
 
-      {/* Invoice Breakdown Modal */}
-      {selectedInvoice && (
-        <div
-          className="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setSelectedInvoice(null);
-          }}
-        >
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-zinc-200 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
-              <div className="flex items-center space-x-2">
-                <FileCheck2 className="w-4 h-4 text-indigo-600" />
-                <h3 className="text-sm font-bold text-zinc-900 tracking-tight">Commercial Tax Invoice</h3>
-              </div>
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="p-1.5 text-zinc-400 hover:text-zinc-700 rounded-lg hover:bg-zinc-100 transition"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-4 text-xs">
-              <div className="flex justify-between items-center bg-zinc-50 p-3.5 rounded-xl border border-zinc-200/80">
-                <div>
-                  <span className="text-zinc-400 block text-[10px] uppercase font-semibold">Invoice Ref</span>
-                  <span className="font-mono font-bold text-zinc-900 text-xs">{selectedInvoice.invoiceNumber}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-zinc-400 block text-[10px] uppercase font-semibold">Order Ref</span>
-                  <span className="font-semibold text-zinc-900">{selectedInvoice.order?.orderNumber}</span>
-                </div>
-              </div>
-
-              <div className="space-y-2 border-t border-zinc-100 pt-3">
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Subtotal Amount:</span>
-                  <span className="font-mono font-medium text-zinc-900">₹{selectedInvoice.subtotal?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">GST (5% SGST + CGST):</span>
-                  <span className="font-mono font-medium text-zinc-900">₹{selectedInvoice.taxAmount?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-sm font-bold border-t border-zinc-200 pt-2 text-zinc-900">
-                  <span>Grand Total:</span>
-                  <span className="font-mono">₹{selectedInvoice.totalAmount?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-zinc-700 font-medium">
-                  <span>Amount Paid:</span>
-                  <span className="font-mono">₹{selectedInvoice.paidAmount?.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-zinc-900 font-bold bg-zinc-50 border border-zinc-200/80 p-3 rounded-xl">
-                  <span>Remaining Due:</span>
-                  <span className="font-mono text-amber-700">₹{selectedInvoice.balanceAmount?.toLocaleString()}</span>
-                </div>
-              </div>
-
-              {/* AGT Mill Bank Settlement Details */}
-              <div className="bg-zinc-50 p-3.5 rounded-xl border border-zinc-200/80 space-y-1 text-[11px]">
-                <span className="font-bold text-zinc-900 block mb-0.5">Bank Settlement Instructions:</span>
-                <p className="text-zinc-600">Beneficiary: <strong>AGT Textile Mills Private Limited</strong></p>
-                <p className="text-zinc-600">Bank: <strong>HDFC Bank — Tirupur Main Branch</strong></p>
-                <p className="text-zinc-600 font-mono">A/C: <strong>50200088192341</strong> | IFSC: <strong>HDFC0000182</strong></p>
-              </div>
-            </div>
-
-            <div className="mt-5 flex justify-end">
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-xs transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Full GST INV-01 Tax Invoice Preview Modal */}
+      <InvoiceModal
+        invoice={selectedInvoice}
+        invoiceId={selectedInvoice?.id}
+        isOpen={!!selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+      />
     </div>
   );
 };

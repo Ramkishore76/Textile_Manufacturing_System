@@ -14,8 +14,12 @@ import {
   Calendar,
   Sparkles,
   QrCode,
-  ExternalLink
+  ExternalLink,
+  Printer,
+  Eye
 } from 'lucide-react';
+import { InvoiceModal } from '../components/InvoiceModal';
+import { printInvoicePdf } from '../utils/invoicePdf';
 
 export const BuyerOrderDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +27,7 @@ export const BuyerOrderDetailPage: React.FC = () => {
 
   const [orderData, setOrderData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -322,6 +327,24 @@ export const BuyerOrderDetailPage: React.FC = () => {
                       ₹{inv.paidAmount?.toLocaleString()} / <span className="text-zinc-600">₹{inv.balanceAmount?.toLocaleString()}</span>
                     </span>
                   </div>
+                  <div className="pt-2 border-t border-zinc-200/80 flex items-center justify-end space-x-2">
+                    <button
+                      onClick={() => printInvoicePdf(inv)}
+                      className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200/80 transition"
+                      title="Print Tax Invoice PDF"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      <span>PDF Bill</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedInvoice(inv)}
+                      className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs border border-zinc-200/70 transition"
+                      title="View Bill Breakdown"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>View</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -332,6 +355,14 @@ export const BuyerOrderDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Invoice PDF & Breakdown Modal */}
+      <InvoiceModal
+        invoice={selectedInvoice}
+        invoiceId={selectedInvoice?.id}
+        isOpen={!!selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+      />
     </div>
   );
 };

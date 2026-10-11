@@ -9,13 +9,18 @@ import {
   Receipt,
   FileCheck2,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Printer,
+  Eye
 } from 'lucide-react';
+import { InvoiceModal } from '../components/InvoiceModal';
+import { printInvoicePdf } from '../utils/invoicePdf';
 
 export const BuyerPaymentsPage: React.FC = () => {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
 
   useEffect(() => {
     loadPayments();
@@ -102,7 +107,8 @@ export const BuyerPaymentsPage: React.FC = () => {
                   <th className="py-3 px-4">Amount Paid</th>
                   <th className="py-3 px-4">Payment Method</th>
                   <th className="py-3 px-4">Bank Transaction Ref #</th>
-                  <th className="py-3 px-4 text-right">Verification Status</th>
+                  <th className="py-3 px-4">Verification</th>
+                  <th className="py-3 px-4 text-right">Invoice PDF Bill</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 text-zinc-700">
@@ -116,8 +122,18 @@ export const BuyerPaymentsPage: React.FC = () => {
                       {new Date(p.paymentDate).toLocaleDateString()}
                     </td>
 
-                    <td className="py-3.5 px-4 font-semibold text-zinc-900">
-                      {p.invoice?.invoiceNumber}
+                    <td className="py-3.5 px-4">
+                      {p.invoice ? (
+                        <button
+                          onClick={() => setSelectedInvoice(p.invoice)}
+                          className="font-semibold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center space-x-1"
+                        >
+                          <FileCheck2 className="w-3.5 h-3.5" />
+                          <span>{p.invoice.invoiceNumber}</span>
+                        </button>
+                      ) : (
+                        <span className="text-zinc-400 italic">Unlinked</span>
+                      )}
                     </td>
 
                     <td className="py-3.5 px-4 font-mono font-bold text-zinc-900 text-xs">
@@ -134,11 +150,35 @@ export const BuyerPaymentsPage: React.FC = () => {
                       {p.transactionReference}
                     </td>
 
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-3.5 px-4">
                       <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
                         <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Verified & Credited</span>
+                        <span>Verified</span>
                       </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right">
+                      {p.invoice ? (
+                        <div className="flex items-center justify-end space-x-1.5">
+                          <button
+                            onClick={() => printInvoicePdf(p.invoice)}
+                            className="inline-flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs border border-indigo-200/80 transition"
+                            title="Print or Save Invoice PDF"
+                          >
+                            <Printer className="w-3.5 h-3.5" />
+                            <span>PDF Bill</span>
+                          </button>
+                          <button
+                            onClick={() => setSelectedInvoice(p.invoice)}
+                            className="inline-flex items-center space-x-1 px-2 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold text-xs border border-zinc-200/70 transition"
+                            title="Preview Invoice"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-zinc-500" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-zinc-400 italic text-[10px]">No invoice</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -147,6 +187,15 @@ export const BuyerPaymentsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Invoice PDF & Breakdown Modal */}
+      <InvoiceModal
+        invoice={selectedInvoice}
+        invoiceId={selectedInvoice?.id}
+        isOpen={!!selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+      />
     </div>
   );
 };
+

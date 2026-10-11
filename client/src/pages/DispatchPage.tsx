@@ -14,8 +14,12 @@ import {
   Package,
   ArrowRight,
   ShieldAlert,
-  Info
+  Info,
+  Printer,
+  Eye
 } from 'lucide-react';
+import { InvoiceModal } from '../components/InvoiceModal';
+import { printInvoicePdf } from '../utils/invoicePdf';
 
 export const DispatchPage: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -34,6 +38,8 @@ export const DispatchPage: React.FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [lastInvoice, setLastInvoice] = useState<any | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<any | null>(null);
 
   useEffect(() => {
     loadData();
@@ -118,6 +124,11 @@ export const DispatchPage: React.FC = () => {
         generateInvoice,
       });
 
+      if (res.invoice) {
+        setLastInvoice(res.invoice);
+      } else {
+        setLastInvoice(null);
+      }
       setSuccessMessage(
         `Shipment ${res.dispatch.dispatchNumber} successfully created with ${res.dispatch.totalRolls} rolls (${res.dispatch.totalMeters}m)! ${
           res.invoice ? `Invoice ${res.invoice.invoiceNumber} generated.` : ''
@@ -165,9 +176,20 @@ export const DispatchPage: React.FC = () => {
 
       {/* Notifications */}
       {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200/70 text-emerald-800 text-xs flex items-center space-x-2.5 animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <span className="font-medium">{successMessage}</span>
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200/70 text-emerald-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+          <div className="flex items-center space-x-2.5">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <span className="font-medium">{successMessage}</span>
+          </div>
+          {lastInvoice && (
+            <button
+              onClick={() => printInvoicePdf(lastInvoice)}
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-xs transition"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Tax Invoice PDF</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -457,9 +479,25 @@ export const DispatchPage: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4">
                       {disp.invoices && disp.invoices.length > 0 ? (
-                        <div className="flex items-center space-x-1.5 text-zinc-900 font-mono font-semibold text-[11px]">
-                          <FileCheck2 className="w-3.5 h-3.5 text-indigo-600" />
-                          <span>{disp.invoices[0].invoiceNumber}</span>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-mono font-semibold text-zinc-900 text-[11px]">
+                            {disp.invoices[0].invoiceNumber}
+                          </span>
+                          <button
+                            onClick={() => printInvoicePdf(disp.invoices[0])}
+                            className="inline-flex items-center space-x-1 px-2 py-1 rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-[10px] border border-indigo-200/80 transition"
+                            title="Print Tax Invoice PDF"
+                          >
+                            <Printer className="w-3 h-3" />
+                            <span>PDF</span>
+                          </button>
+                          <button
+                            onClick={() => setPreviewInvoice(disp.invoices[0])}
+                            className="p-1 rounded-md bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition"
+                            title="Preview Invoice"
+                          >
+                            <Eye className="w-3 h-3 text-zinc-500" />
+                          </button>
                         </div>
                       ) : (
                         <span className="text-zinc-400 italic text-[10px]">No invoice</span>
@@ -472,6 +510,14 @@ export const DispatchPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Invoice PDF & Breakdown Modal */}
+      <InvoiceModal
+        invoice={previewInvoice}
+        invoiceId={previewInvoice?.id}
+        isOpen={!!previewInvoice}
+        onClose={() => setPreviewInvoice(null)}
+      />
     </div>
   );
 };
