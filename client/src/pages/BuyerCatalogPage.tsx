@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -19,8 +19,6 @@ import {
   DollarSign,
   ShieldCheck,
   Tag,
-  PackageCheck,
-  Info,
 } from 'lucide-react';
 
 interface FabricProduct {
@@ -80,11 +78,7 @@ export const BuyerCatalogPage: React.FC = () => {
   // Preview Mode Toggle for Staff
   const [staffPreviewBuyerMode, setStaffPreviewBuyerMode] = useState<boolean>(false);
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.get<FabricProduct[]>('/buyer-portal/products');
@@ -94,7 +88,11 @@ export const BuyerCatalogPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   const openEditModal = (p: FabricProduct) => {
     setEditingProduct(p);

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import {
-  Factory,
   ArrowRight,
   Lock,
   Mail,
@@ -513,7 +512,7 @@ export const LoginPage: React.FC = () => {
                   <KeyRound className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-zinc-900 tracking-tight">
-                  Verify Your Email
+                  Verify Your Email{userName ? `, ${userName}` : ''}
                 </h3>
                 <p className="text-xs text-zinc-500 mt-1">
                   We sent a 6-digit security code via Brevo to

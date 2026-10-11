@@ -1,27 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import {
-  FileText,
-  CreditCard,
   TrendingUp,
-  Receipt,
   Plus,
-  Search,
-  Filter,
-  CheckCircle2,
-  AlertTriangle,
-  Calendar,
   X,
-  DollarSign,
-  PieChart,
-  Layers,
   Cpu,
   Boxes,
-  Building2,
   Printer,
   Eye,
-  Sparkles,
 } from 'lucide-react';
 import { InvoiceModal } from '../components/InvoiceModal';
 import { printInvoicePdf } from '../utils/invoicePdf';
@@ -39,7 +26,7 @@ export const AccountsPage: React.FC = () => {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [financials, setFinancials] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   // Profitability per order state
   const [selectedOrderId, setSelectedOrderId] = useState<string>('');
@@ -67,11 +54,20 @@ export const AccountsPage: React.FC = () => {
   const [expenseSubmitting, setExpenseSubmitting] = useState(false);
   const [expenseError, setExpenseError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadAllData();
+  const loadOrderCost = useCallback(async (orderId: string) => {
+    if (!orderId) return;
+    setOrderCostLoading(true);
+    try {
+      const report = await api.get<any>(`/reports/order-cost/${orderId}`);
+      setOrderCostReport(report);
+    } catch (err: any) {
+      console.error('Failed to load order cost:', err);
+    } finally {
+      setOrderCostLoading(false);
+    }
   }, []);
 
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     setLoading(true);
     try {
       const [invRes, payRes, expRes, ordRes, finRes] = await Promise.all([
@@ -96,20 +92,11 @@ export const AccountsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadOrderCost, selectedOrderId]);
 
-  const loadOrderCost = async (orderId: string) => {
-    if (!orderId) return;
-    setOrderCostLoading(true);
-    try {
-      const report = await api.get<any>(`/reports/order-cost/${orderId}`);
-      setOrderCostReport(report);
-    } catch (err: any) {
-      console.error('Failed to load order cost:', err);
-    } finally {
-      setOrderCostLoading(false);
-    }
-  };
+  useEffect(() => {
+    loadAllData();
+  }, [loadAllData]);
 
   const openPaymentModal = (invoice: any) => {
     setSelectedInvoice(invoice);
