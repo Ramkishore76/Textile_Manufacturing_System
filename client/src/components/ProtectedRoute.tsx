@@ -34,12 +34,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If page requires Buyer role, block internal staff
+  // If page requires Buyer role, allow BUYER, ADMIN (Plant Owner), and STORE (Store Manager)
   if (requireBuyer) {
-    if (user.role !== 'BUYER') {
+    if (!['BUYER', 'ADMIN', 'STORE'].includes(user.role)) {
       return <Navigate to="/app/dashboard" replace />;
     }
   }
+
 
   // If internal page, block Buyer role
   if (!requireBuyer && user.role === 'BUYER') {

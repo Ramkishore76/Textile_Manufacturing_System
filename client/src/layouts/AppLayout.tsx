@@ -76,10 +76,14 @@ export const AppLayout: React.FC = () => {
     { to: '/app/accounts', label: 'Invoices & Cost Reports', icon: FileText },
     { to: '/app/attendance', label: 'Shift Attendance', icon: Users },
     { to: '/app/wages', label: 'Labour Wages', icon: Wallet },
+    ...(user?.role === 'ADMIN' || user?.role === 'STORE'
+      ? [{ to: '/buyer/catalog', label: 'Buyer Portal & Pricing', icon: ShoppingBag, isSpecial: true }]
+      : []),
   ];
 
   // Strictly filter navigation items by the user's role permissions
   const visibleNavItems = navItems.filter((item) => hasRoleAccess(user?.role, item.to));
+
 
   const demoRoles = [
     { role: 'ADMIN', label: 'Admin / Owner', email: 'admin@agttextile.com', pass: 'Admin@123' },
@@ -137,13 +141,16 @@ export const AppLayout: React.FC = () => {
         <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
+            const isSpecial = (item as any).isSpecial;
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   `flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs transition ${
-                    isActive
+                    isSpecial
+                      ? 'bg-amber-50/80 border border-amber-200 text-amber-900 font-semibold hover:bg-amber-100/80 shadow-2xs'
+                      : isActive
                       ? 'bg-indigo-50/90 text-indigo-700 font-semibold border border-indigo-200/70 shadow-xs'
                       : 'text-zinc-600 hover:bg-zinc-100/70 hover:text-zinc-900 font-medium'
                   }`
@@ -151,8 +158,13 @@ export const AppLayout: React.FC = () => {
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-indigo-600' : 'text-zinc-400'}`} />
-                    <span>{item.label}</span>
+                    <Icon className={`w-4 h-4 shrink-0 ${isSpecial ? 'text-amber-600' : isActive ? 'text-indigo-600' : 'text-zinc-400'}`} />
+                    <span className="flex-1">{item.label}</span>
+                    {isSpecial && (
+                      <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-amber-200/80 text-amber-900">
+                        EDIT ↗
+                      </span>
+                    )}
                   </>
                 )}
               </NavLink>
@@ -198,12 +210,25 @@ export const AppLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-3">
+            {/* Direct Link to Buyer Portal for Owner and Store Manager */}
+            {(user?.role === 'ADMIN' || user?.role === 'STORE') && (
+              <button
+                onClick={() => navigate('/buyer/catalog')}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-amber-300 bg-amber-50 text-xs font-bold text-amber-900 hover:bg-amber-100 transition shadow-2xs cursor-pointer"
+                title="Open Buyer Portal to edit fabric details and cost prices"
+              >
+                <ShoppingBag className="w-3.5 h-3.5 text-amber-700" />
+                <span>Buyer Portal & Pricing ↗</span>
+              </button>
+            )}
+
             {/* Quick Demo Role Switcher Trigger */}
             <button
               onClick={() => setShowRoleSwitcher(true)}
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 bg-white text-xs font-medium text-zinc-700 hover:bg-zinc-50 hover:border-indigo-200 transition shadow-2xs"
               title="Click to switch active role or persona"
             >
+
               <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
               <span>Role: <strong className="text-indigo-600">{user?.role}</strong></span>
               <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />

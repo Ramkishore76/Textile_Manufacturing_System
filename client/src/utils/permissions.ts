@@ -87,7 +87,10 @@ export const ROLE_CONFIGS: Record<string, RoleConfig> = {
       '/app/purchases',
       '/app/finished-goods',
       '/app/orders',
+      '/buyer/dashboard',
+      '/buyer/catalog',
     ],
+
     primaryAction: {
       label: 'Manage Yarn Inventory',
       to: '/app/inventory',

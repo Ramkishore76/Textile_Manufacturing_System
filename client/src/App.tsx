@@ -21,12 +21,14 @@ import { AttendancePage } from './pages/AttendancePage';
 import { WagesPage } from './pages/WagesPage';
 
 // Buyer Portal Pages
+import { BuyerCatalogPage } from './pages/BuyerCatalogPage';
 import { BuyerDashboardPage } from './pages/BuyerDashboardPage';
 import { BuyerOrdersPage } from './pages/BuyerOrdersPage';
 import { BuyerOrderDetailPage } from './pages/BuyerOrderDetailPage';
 import { BuyerDispatchPage } from './pages/BuyerDispatchPage';
 import { BuyerInvoicesPage } from './pages/BuyerInvoicesPage';
 import { BuyerPaymentsPage } from './pages/BuyerPaymentsPage';
+
 
 // Root redirect handler
 const RootRedirect: React.FC = () => {
@@ -171,13 +173,15 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/buyer/dashboard" replace />} />
+            <Route index element={<Navigate to="/buyer/catalog" replace />} />
+            <Route path="catalog" element={<BuyerCatalogPage />} />
             <Route path="dashboard" element={<BuyerDashboardPage />} />
             <Route path="orders" element={<BuyerOrdersPage />} />
             <Route path="orders/:id" element={<BuyerOrderDetailPage />} />
             <Route path="dispatch" element={<BuyerDispatchPage />} />
             <Route path="invoices" element={<BuyerInvoicesPage />} />
             <Route path="payments" element={<BuyerPaymentsPage />} />
+
           </Route>
 
           {/* Catch-all Fallback */}

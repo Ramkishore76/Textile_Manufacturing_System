@@ -12,7 +12,9 @@ import {
   LogOut,
   Building2,
   ArrowRight,
+  ShoppingBag,
 } from 'lucide-react';
+
 
 export const BuyerLayout: React.FC = () => {
   const { user, logout } = useAuth();
@@ -43,9 +45,16 @@ export const BuyerLayout: React.FC = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
+  const isStaff = user?.role === 'ADMIN' || user?.role === 'STORE';
+
   const navLinks = [
+    {
+      to: '/buyer/catalog',
+      label: isStaff ? 'Fabric Catalog & Pricing' : 'Order Fabrics (Catalog)',
+      icon: ShoppingBag,
+    },
     { to: '/buyer/dashboard', label: 'Overview', icon: Package },
-    { to: '/buyer/orders', label: 'My Orders', icon: Clock },
+    { to: '/buyer/orders', label: isStaff ? 'Customer Orders' : 'My Orders', icon: Clock },
     { to: '/buyer/dispatch', label: 'Shipment Tracking', icon: Truck },
     { to: '/buyer/invoices', label: 'Commercial Invoices', icon: FileCheck2 },
     { to: '/buyer/payments', label: 'Payment Receipts', icon: CreditCard },
@@ -53,6 +62,26 @@ export const BuyerLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col font-sans text-zinc-900">
+      {/* Plant Owner & Store Manager Authorized Administrative Banner */}
+      {isStaff && (
+        <div className="bg-gradient-to-r from-amber-600 via-indigo-900 to-indigo-950 text-white px-4 py-2 text-xs flex flex-wrap items-center justify-between gap-2 shadow-xs">
+          <div className="flex items-center space-x-2">
+            <span className="px-2 py-0.5 rounded-full bg-black/25 font-bold text-[10px] tracking-wide uppercase">
+              {user?.role === 'ADMIN' ? '👑 Plant Owner' : '📦 Store Manager'}
+            </span>
+            <span className="font-semibold text-zinc-100">
+              Exclusive Management Access: You can edit fabric specifications, descriptions, and cost pricing.
+            </span>
+          </div>
+          <button
+            onClick={() => navigate('/app/dashboard')}
+            className="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[11px] font-bold transition cursor-pointer"
+          >
+            Return to Factory ERP (/app) →
+          </button>
+        </div>
+      )}
+
       {/* Top Header - IT Task Manager Style */}
       <header className="bg-white border-b border-zinc-200/80 sticky top-0 z-50 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,19 +94,29 @@ export const BuyerLayout: React.FC = () => {
               <div className="flex items-center space-x-2.5">
                 <span className="text-sm font-bold tracking-tight text-zinc-900">AGT TEXTILE MILLS</span>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70">
-                  Buyer Vault
+                  {isStaff ? 'Buyer Portal (Admin Mode)' : 'Buyer Vault'}
                 </span>
               </div>
             </div>
 
             {/* Buyer Account Card & Actions */}
             <div className="flex items-center space-x-3">
-              <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200">
-                <Building2 className="w-3.5 h-3.5 text-zinc-500" />
-                <span className="text-xs font-semibold text-zinc-700">
-                  {user?.buyerCompany || 'Authenticated Buyer'}
-                </span>
-              </div>
+              {isStaff ? (
+                <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                  <Building2 className="w-3.5 h-3.5 text-amber-700" />
+                  <span className="text-xs font-bold">
+                    {user?.role === 'ADMIN' ? 'Plant Owner (Admin)' : 'Store Manager'}
+                  </span>
+                </div>
+              ) : (
+                <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200">
+                  <Building2 className="w-3.5 h-3.5 text-zinc-500" />
+                  <span className="text-xs font-semibold text-zinc-700">
+                    {user?.buyerCompany || 'Authenticated Buyer'}
+                  </span>
+                </div>
+              )}
+
 
               {/* Notification Bell */}
               <div className="relative">
