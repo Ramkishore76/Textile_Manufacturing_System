@@ -24,7 +24,9 @@ export const authenticateToken = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    const token =
+      (authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null) ||
+      (typeof req.query.token === 'string' ? req.query.token : null);
 
     if (!token) {
       res.status(401).json({ error: 'Authentication required. No token provided.' });
