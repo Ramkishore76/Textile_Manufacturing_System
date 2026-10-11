@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev:server": "cd server && pnpm dev",
-    "dev:client": "cd client && pnpm dev",
-    "build:server": "cd server && pnpm build",
-    "build:client": "cd client && pnpm build",
-    "test": "cd tests && node run-all-tests.mjs"
+    "dev": "npm run dev:server",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd server && npm run build && cd ../client && npm run build",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "test": "node tests/verify-e2e-portals.mjs",
+    "test:suite": "node tests/run-all-tests.mjs",
+    "test:all": "node tests/run-all-tests.mjs && node tests/verify-e2e-portals.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
