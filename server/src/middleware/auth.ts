@@ -107,3 +107,35 @@ export const requireBuyer = async (
 
   next();
 };
+
+export const requireBuyerOrStaff = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Authentication required.' });
+    return;
+  }
+
+  // Allow BUYER, ADMIN (Plant Owner), and STORE (Store Manager)
+  if (['BUYER', 'ADMIN', 'STORE'].includes(req.user.role)) {
+    // If ADMIN or STORE, but no buyerId, assign the first active buyer or allow query param ?buyerId=...
+    if (['ADMIN', 'STORE'].includes(req.user.role) && !req.user.buyerId) {
+      const targetBuyerId = req.query.buyerId as string;
+      if (targetBuyerId) {
+        req.user.buyerId = targetBuyerId;
+      } else {
+        const firstBuyer = await prisma.buyer.findFirst();
+        req.user.buyerId = firstBuyer ? firstBuyer.id : null;
+      }
+    }
+    next();
+    return;
+  }
+
+  res.status(403).json({
+    error: `Access denied. Role '${req.user.role}' is not authorized to access the Buyer Portal.`,
+  });
+};
+

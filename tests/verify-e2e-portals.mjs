@@ -229,6 +229,111 @@ async function runEndToEndVerification() {
     `FY ${ownerFinancials.data?.selectedYear}: Revenue ₹${ownerFinancials.data?.summary?.totalAnnualRevenue.toLocaleString()} | Margin: ${ownerFinancials.data?.summary?.annualProfitMargin}%`
   );
 
+  // 20. Store Manager Authentication & Access Verification
+  const storeLogin = await fetchJson(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    body: { email: 'store@agttextile.com', password: 'Store@123', skipOtp: true },
+  });
+  assert(
+    'Store Manager Authentication',
+    storeLogin.status === 200 && storeLogin.data.user.role === 'STORE',
+    `${storeLogin.data?.user?.name} (${storeLogin.data?.user?.role})`
+  );
+  const storeToken = storeLogin.data.token;
+
+  // 21. Buyer Portal Products Catalog Query
+  const catalogRes = await fetchJson(`${API_BASE}/buyer-portal/products`, {
+    headers: { Authorization: `Bearer ${buyerToken}` },
+  });
+  assert(
+    'Buyer Portal Fabric Catalog Listing',
+    catalogRes.status === 200 && Array.isArray(catalogRes.data) && catalogRes.data.length > 0,
+    `${catalogRes.data.length} Fabrics with live pricing`
+  );
+  const targetFabric = catalogRes.data[0];
+
+  // 22. Plant Owner & Store Manager Exclusive Cost Price and Details Edit
+  const originalPrice = Number(targetFabric.unitPricePerMeter);
+  const updatedPriceOwner = originalPrice + 15;
+  const ownerEditRes = await fetchJson(`${API_BASE}/buyer-portal/products/${targetFabric.id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${adminToken}` },
+    body: {
+      name: targetFabric.name,
+      fabricType: targetFabric.fabricType,
+      gsm: targetFabric.gsm,
+      widthInches: targetFabric.widthInches,
+      weaveType: targetFabric.weaveType,
+      unitPricePerMeter: updatedPriceOwner,
+      description: 'Premium export grade woven fabric verified by Plant Owner',
+      requiresSpinning: targetFabric.requiresSpinning,
+    },
+  });
+  assert(
+    'Plant Owner Cost Price & Spec Edit in Buyer Portal',
+    ownerEditRes.status === 200 && Number(ownerEditRes.data.unitPricePerMeter) === updatedPriceOwner,
+    `Price updated to ₹${updatedPriceOwner}/m by Plant Owner`
+  );
+
+  const updatedPriceStore = updatedPriceOwner + 5;
+  const storeEditRes = await fetchJson(`${API_BASE}/buyer-portal/products/${targetFabric.id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${storeToken}` },
+    body: {
+      unitPricePerMeter: updatedPriceStore,
+      description: 'Catalog pricing updated by Store Manager',
+    },
+  });
+  assert(
+    'Store Manager Cost Price Edit in Buyer Portal',
+    storeEditRes.status === 200 && Number(storeEditRes.data.unitPricePerMeter) === updatedPriceStore,
+    `Price updated to ₹${updatedPriceStore}/m by Store Manager`
+  );
+
+  // 23. Unauthorized Buyer Price Edit Block (Strict Security Boundary)
+  const buyerTamperRes = await fetchJson(`${API_BASE}/buyer-portal/products/${targetFabric.id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${buyerToken}` },
+    body: {
+      unitPricePerMeter: 1, // Buyer attempting to set price to ₹1
+    },
+  });
+  assert(
+    'Actual Buyer Price Edit Blocked (HTTP 403 Forbidden)',
+    buyerTamperRes.status === 403,
+    'Store Manager and Plant Owner alone have edit access'
+  );
+
+  // 24. Actual Buyer Order Placement Flow
+  const targetDeliveryDate = new Date();
+  targetDeliveryDate.setDate(targetDeliveryDate.getDate() + 25);
+  const newOrderRes = await fetchJson(`${API_BASE}/buyer-portal/orders`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${buyerToken}` },
+    body: {
+      items: [
+        {
+          fabricProductId: targetFabric.id,
+          quantityMeters: 1500,
+          colorOrShade: 'Royal Navy Blue',
+          deliveryDate: targetDeliveryDate.toISOString().split('T')[0],
+          notes: 'Tested from automated E2E verification suite',
+        },
+      ],
+      deliveryDate: targetDeliveryDate.toISOString().split('T')[0],
+      priority: 'HIGH',
+      notes: 'Urgent bulk contract order',
+    },
+  });
+  assert(
+    'Actual Buyer B2B Order Placement Desk',
+    newOrderRes.status === 201 &&
+      newOrderRes.data?.orderNumber &&
+      newOrderRes.data?.totalMeters === 1500 &&
+      newOrderRes.data?.taxAmount > 0,
+    `Order #${newOrderRes.data?.orderNumber} | 1,500m | Total ₹${newOrderRes.data?.totalAmount?.toLocaleString()} incl. 5% GST`
+  );
+
   console.log('\n========================================================================');
   console.log(`  VERIFICATION COMPLETE: ${passed}/${total} STEPS PASSED (100% SUCCESS)`);
   console.log('========================================================================\n');
