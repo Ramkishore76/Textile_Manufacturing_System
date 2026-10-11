@@ -41,24 +41,24 @@ An end-to-end, enterprise-grade digital platform engineered for **AGT Textile Mi
 
 ```mermaid
 graph TD
-    subgraph Shared Backend & Central Database
+    subgraph Shared ["Shared Backend & Central Database"]
         DB[(Supabase PostgreSQL)]
-        API[Express.js / TypeScript Core API Engine]
+        API["Express.js / TypeScript Core API Engine"]
         DB <--> API
     end
 
-    subgraph Internal Factory Portal [/app/*]
-        Admin[Owner / Plant Admin]
-        Sales[Sales Desk]
-        Store[Store & Raw Material Mgr]
-        Prod[Production Supervisors]
-        QC[Quality Inspectors]
-        Disp[Logistics & Dispatch]
-        Acc[Accounts & HR Desk]
+    subgraph Internal ["Internal Factory Portal (/app/*)"]
+        Admin["Owner / Plant Admin"]
+        Sales["Sales Desk"]
+        Store["Store & Raw Material Mgr"]
+        Prod["Production Supervisors"]
+        QC["Quality Inspectors"]
+        Disp["Logistics & Dispatch"]
+        Acc["Accounts & HR Desk"]
     end
 
-    subgraph External Buyer Portal [/buyer/*]
-        Buyer[Authenticated Global Buyers]
+    subgraph External ["External Buyer Portal (/buyer/*)"]
+        Buyer["Authenticated Global Buyers"]
     end
 
     Admin -->|Full Factory Oversight & Profitability| API
